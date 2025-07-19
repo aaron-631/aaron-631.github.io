@@ -181,13 +181,9 @@
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
         .skill-tab-panel.active {
-            display: block; /* Changed from grid to block */
+            display: block;
             opacity: 1;
             transform: translateY(0);
-        }
-        .skill-grid {
-             display: grid;
-             justify-items: center;
         }
 
         /* --- Terminal Styling --- */
@@ -252,6 +248,17 @@
         #scrollToTopBtn:hover, #stickyResumeBtn:hover {
             background-color: var(--accent-hover);
             transform: scale(1.1);
+        }
+
+        /* --- [FIX] Skill Icon & Label Visibility --- */
+        .skill-grid svg {
+            fill: currentColor;
+        }
+        .skill-grid .has-tooltip > div:first-child {
+            color: var(--accent);
+        }
+        .skill-grid .has-tooltip > span {
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -482,9 +489,7 @@
                         { name: 'Git', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Git</title><path d="M22.5 11.25a1.5 1.5 0 0 0-1.5 1.5v8.25a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75V3.75a.75.75 0 0 1 .75-.75h8.25a1.5 1.5 0 0 0 0-3H3.75A3.75 3.75 0 0 0 0 3.75v16.5A3.75 3.75 0 0 0 3.75 24h16.5A3.75 3.75 0 0 0 24 20.25V12.75a1.5 1.5 0 0 0-1.5-1.5zM15 1.5a3 3 0 1 0-3 3 3 3 0 0 0 3-3zm0-1.5a1.5 1.5 0 1 1-1.5 1.5 1.5 1.5 0 0 1 1.5-1.5zm6 6a3 3 0 1 0-3 3 3 3 0 0 0 3-3zm0-1.5a1.5 1.5 0 1 1-1.5 1.5 1.5 1.5 0 0 1 1.5-1.5zM9 10.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 4.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>', tooltip: 'Version control & code collaboration' },
                         { name: 'Linux PrivEsc', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Linux</title><path d="M6.273 14.34a10.65 10.65 0 0 1-1.22-3.415 10.53 10.53 0 0 1 .367-3.692A10.53 10.53 0 0 1 8.8 3.37a10.53 10.53 0 0 1 6.4 0 10.53 10.53 0 0 1 3.37 3.863 10.53 10.53 0 0 1 .366 3.692 10.65 10.65 0 0 1-1.22 3.415c-.93 1.66-2.49 2.924-4.54 3.515-.34.1-.68.18-.98.24-.3.06-.6.1-.9.12v2.77h-1.8v-2.77c-.3-.02-.6-.06-.9-.12-.3-.06-.64-.14-.98-.24-2.05-.59-3.61-1.855-4.54-3.515zM12 1.5C6.2 1.5 1.5 6.2 1.5 12S6.2 22.5 12 22.5 22.5 17.8 22.5 12 17.8 1.5 12 1.5zm-2.25 10.05c0 .62.505 1.125 1.125 1.125h2.25c.62 0 1.125-.505 1.125-1.125V9.45c0-.62-.505-1.125-1.125-1.125h-2.25c-.62 0-1.125.505-1.125 1.125v2.1z"/></svg>', tooltip: 'Linux privilege escalation techniques' },
                         { name: 'TCP/IP', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>TCP/IP</title><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1 14H9v-2h2v2zm0-4H9V8h2v4zm4 4h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>', tooltip: 'Core internet protocol suite' },
-                        { name: 'OWASP Top 10', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>OWASP</title><path d="M12 0l-12 5.143v8.571l12 10.286 12-10.286v-8.571l-12-5.143zm0 2.229l9.714 4.114-9.714 4.114-9.714-4.114 9.714-4.114zm-9.857 6.286h19.714v6.857l-9.857 8.4-9.857-8.4v-6.857z"/></svg>', tooltip: 'Web application security risks' },
-                        { name: 'REST APIs', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>API</title><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-6V8h6v4z"/></svg>', tooltip: 'API design and security' },
-                        { name: 'DevSecOps', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>DevSecOps</title><path d="M12 2l-10 5v10l10 5 10-5V7l-10-5zm-8 6.5l8 4 8-4-8-4-8 4zm0 2.8l8 4v7.4l-8-4V11.3z"/></svg>', tooltip: 'Integrating security into DevOps' }
+                        { name: 'OWASP Top 10', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>OWASP</title><path d="M12 0l-12 5.143v8.571l12 10.286 12-10.286v-8.571l-12-5.143zm0 2.229l9.714 4.114-9.714 4.114-9.714-4.114 9.714-4.114zm-9.857 6.286h19.714v6.857l-9.857 8.4-9.857-8.4v-6.857z"/></svg>', tooltip: 'Web application security risks' }
                     ]
                 }
             },
@@ -614,14 +619,14 @@
 
                 let itemsHtml = content.skills.categories[category].map(skill => `
                     <div class="has-tooltip flex flex-col items-center text-center p-4 rounded-lg hover:bg-white/5 dark:hover:bg-black/20 transition-colors duration-200">
-                        <div class="w-10 h-10 mb-3 text-[var(--accent)] flex items-center justify-center">${skill.icon}</div>
-                        <span class="text-sm text-secondary font-medium">${skill.name}</span>
+                        <div class="w-10 h-10 mb-3 flex items-center justify-center">${skill.icon}</div>
+                        <span class="text-sm font-medium">${skill.name}</span>
                         <div class="tooltip">${skill.tooltip}</div>
                     </div>`).join('');
 
                 skillPanels += `
                     <div id="${category.replace(/\s+/g, '-')}" class="skill-tab-panel ${isFirstCategory ? 'active' : ''} card p-6 mt-6 rounded-lg">
-                        <div class="skill-grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div class="skill-grid flex flex-wrap justify-center gap-4">
                             ${itemsHtml}
                         </div>
                     </div>`;
