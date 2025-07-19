@@ -247,7 +247,8 @@
                 </div>
             </div>
         </div>
-        <div id="mobile-menu" class="md:hidden hidden p-4 space-y-2"></div>
+        <!-- Mobile menu, populates dynamically -->
+        <div id="mobile-menu" class="md:hidden hidden p-4 space-y-2 border-t border-[var(--border-color)]"></div>
     </nav>
 
     <main>
@@ -342,22 +343,37 @@
         });
 
 
-        // --- Mobile Menu ---
+        // --- [FIXED] Mobile Menu ---
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        const navLinksContainer = document.querySelector('nav .hidden.md\\:flex');
-        if (navLinksContainer) {
-            const navLinks = navLinksContainer.cloneNode(true);
-            const resumeButton = navLinks.querySelector('a[download]');
-            if(resumeButton) resumeButton.parentElement.removeChild(resumeButton);
-            mobileMenu.innerHTML = '';
-            mobileMenu.appendChild(navLinks);
+        const desktopNavLinks = document.querySelectorAll('nav .hidden.md\\:flex a'); // Select links from desktop nav
+
+        // Populate the mobile menu
+        if (desktopNavLinks.length > 0) {
+            mobileMenu.innerHTML = ''; // Clear any previous content
+            desktopNavLinks.forEach(link => {
+                // Exclude the "Resume" download button from the mobile menu
+                if (!link.hasAttribute('download')) {
+                    const mobileLink = link.cloneNode(true);
+                    // Add styling for better mobile appearance and touch targets
+                    mobileLink.classList.add('py-2', 'w-full', 'text-center', 'block');
+                    mobileMenu.appendChild(mobileLink);
+                }
+            });
         }
         
-        mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        // Event listener to toggle the menu's visibility
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
         });
+
+        // Add event listeners to each new mobile link to close the menu on click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
 
         // --- Scroll Animations & Active Nav Link ---
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
@@ -508,7 +524,7 @@
                 <p class="mt-6 max-w-2xl mx-auto text-lg text-secondary">${heroData.headline}</p>
                 <p class="mt-6 max-w-3xl mx-auto text-md text-secondary/80">${heroData.bio}</p>
 
-                <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 max-w-3xl mx-auto text-left">
+                <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 max-w-3xl mx-auto">
                     ${heroData.highlights.map(h => `
                         <div class="flex items-center space-x-3">
                             <div class="text-[var(--accent)]">${h.icon}</div>
@@ -618,27 +634,27 @@
             sectionsHtml += `<section id="journey" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.journey.title}</h2><p class="mt-4 max-w-2xl mx-auto text-lg text-secondary">${content.journey.subtitle}</p></div><div class="relative max-w-2xl mx-auto">${journeyHtml}</div></div></section>`;
 
             // --- CERTIFICATIONS SECTION ---
-let certsHtml = content.certifications.items.map(cert => `
-    <div class="card p-6 rounded-lg flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-5">
-        <div class="flex-shrink-0 text-[var(--accent)]">
-            ${cert.icon}
-        </div>
-        <div>
-            <p class="text-lg font-bold">${cert.name}</p>
-            <p class="text-md text-secondary">${cert.issuer}</p>
-        </div>
-    </div>`).join('');
-let upcomingCertsHtml = content.certifications.upcoming.map(cert => `
-    <div class="card p-4 rounded-lg flex items-center space-x-4 border-dashed">
-        <div class="flex-shrink-0"><svg class="w-8 h-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-        <div>
-            <p class="font-bold">${cert.name}</p>
-            <p class="text-sm text-secondary">${cert.issuer}</p>
-        </div>
-    </div>
-`).join('');
-// THE LINE BELOW IS THE ONLY ONE THAT'S CHANGED
-sectionsHtml += `<section id="certifications" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.certifications.title}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 gap-8">${certsHtml}</div><div class="mt-16"><h3 class="text-2xl font-bold text-center mb-8">Upcoming Certifications</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">${upcomingCertsHtml}</div></div></div></section>`;
+            let certsHtml = content.certifications.items.map(cert => `
+                <div class="card p-6 rounded-lg flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-5">
+                    <div class="flex-shrink-0 text-[var(--accent)]">
+                        ${cert.icon}
+                    </div>
+                    <div>
+                        <p class="text-lg font-bold">${cert.name}</p>
+                        <p class="text-md text-secondary">${cert.issuer}</p>
+                    </div>
+                </div>`).join('');
+            let upcomingCertsHtml = content.certifications.upcoming.map(cert => `
+                <div class="card p-4 rounded-lg flex items-center space-x-4 border-dashed">
+                    <div class="flex-shrink-0"><svg class="w-8 h-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                    <div>
+                        <p class="font-bold">${cert.name}</p>
+                        <p class="text-sm text-secondary">${cert.issuer}</p>
+                    </div>
+                </div>
+            `).join('');
+            sectionsHtml += `<section id="certifications" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.certifications.title}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 gap-8">${certsHtml}</div><div class="mt-16"><h3 class="text-2xl font-bold text-center mb-8">Upcoming Certifications</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">${upcomingCertsHtml}</div></div></div></section>`;
+            
             // --- PROJECTS SECTION ---
             let projectsHtml = content.projects.items.map(p => `
                 <div class="card p-6 rounded-lg flex flex-col group">
@@ -650,7 +666,7 @@ sectionsHtml += `<section id="certifications" class="py-20 md:py-28 section-bg f
                     <p class="text-secondary mt-2 flex-grow">${p.description}</p>
                     <a href="#" class="inline-block mt-6 text-sm font-semibold text-[var(--accent)] opacity-50 cursor-not-allowed">Coming Soon &rarr;</a>
                 </div>`).join('');
-            sectionsHtml += `<section id="projects" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.projects.title}</h2></div><div class="grid gap-8 md:grid-cols-2">${projectsHtml}</div></div></section>`;
+            sectionsHtml += `<section id="projects" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.projects.title}</h2></div><div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">${projectsHtml}</div></div></section>`;
             
             // --- TERMINAL SECTION ---
             sectionsHtml += `
@@ -884,5 +900,3 @@ sectionsHtml += `<section id="certifications" class="py-20 md:py-28 section-bg f
     </script>
 </body>
 </html>
-
-
