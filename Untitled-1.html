@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AARON CHAKRABORTY | Offensive Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* --- Base & Theme Variables --- */
+        :root {
+            /* Light Theme */
+            --bg-light: #f5f5f5;
+            --text-light: #171717;
+            --text-secondary-light: #a1a1aa;
+            --card-light: #ffffff;
+            --border-light: #e5e5e5;
+            --accent-light: #0891b2;
+            --accent-hover-light: #0e7490;
+            --hero-overlay-light: rgba(245, 245, 245, 0);
+            --particles-color-light: #888888;
+            --terminal-bg-light: #ffffff;
+            --terminal-header-light: #e5e5e5;
+            --terminal-text-light: #171717;
+
+            /* Dark Theme */
+            --bg-dark: #0a0a0a;
+            --text-dark: #e5e5e5;
+            --text-secondary-dark: #a3a3a3;
+            --card-dark: #171717;
+            --border-dark: #262626;
+            --accent-dark: #22d3ee;
+            --accent-hover-dark: #06b6d4;
+            --hero-overlay-dark: rgba(10, 10, 10, 0);
+            --particles-color-dark: #666666;
+            --terminal-bg-dark: #171717;
+            --terminal-header-dark: #262626;
+            --terminal-text-dark: #e5e5e5;
+        }
+        html.dark {
+            --bg: var(--bg-dark);
+            --text: var(--text-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --card-bg: var(--card-dark);
+            --border-color: var(--border-dark);
+            --accent: var(--accent-dark);
+            --accent-hover: var(--accent-hover-dark);
+            --hero-overlay: var(--hero-overlay-dark);
+            --particles-color: var(--particles-color-dark);
+            --terminal-bg: var(--terminal-bg-dark);
+            --terminal-header: var(--terminal-header-dark);
+            --terminal-text: var(--terminal-text-dark);
+        }
+        html:not(.dark) {
+            --bg: var(--bg-light);
+            --text: var(--text-light);
+            --text-secondary: var(--text-secondary-light);
+            --card-bg: var(--card-light);
+            --border-color: var(--border-light);
+            --accent: var(--accent-light);
+            --accent-hover: var(--accent-hover-light);
+            --hero-overlay: var(--hero-overlay-light);
+            --particles-color: var(--particles-color-light);
+            --terminal-bg: var(--terminal-bg-light);
+            --terminal-header: var(--terminal-header-light);
+            --terminal-text: var(--terminal-text-light);
+        }
+
+        /* --- General Styling --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- Hero Section --- */
+        #hero {
+            position: relative;
+            background-color: var(--bg);
+        }
+        
+        /* --- Section & Card Styling --- */
+        .section-bg { background-color: var(--bg); }
+        .text-secondary { color: var(--text-secondary); }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent);
+        }
+        
+        /* --- Navigation & Buttons --- */
+        .nav-link-active { color: var(--accent); font-weight: 600; }
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        /* --- Tooltip Styling --- */
+        .has-tooltip {
+            position: relative;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            background-color: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+            transition: opacity 0.2s, visibility 0.2s;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- Scroll-triggered Animations --- */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* --- Terminal Styling --- */
+        .terminal {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            color: var(--terminal-text);
+        }
+        .terminal-header {
+            background-color: var(--terminal-header);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .terminal-input-area {
+            display: flex;
+        }
+        .terminal-prompt {
+            color: var(--accent);
+            white-space: nowrap;
+        }
+        .terminal-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: inherit;
+            font-family: inherit;
+            width: 100%;
+            padding-left: 0.5rem;
+        }
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: var(--accent);
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { background-color: transparent; }
+            50% { background-color: var(--accent); }
+        }
+        
+        /* --- Utility & Component Styles --- */
+        #scrollToTopBtn, #stickyResumeBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #stickyResumeBtn { left: 20px; right: auto; display: flex; }
+        @media (min-width: 768px) { #stickyResumeBtn { display: none; } }
+        #scrollToTopBtn:hover, #stickyResumeBtn:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="dark">
+
+    <!-- Navigation Bar -->
+    <nav id="navbar" class="sticky top-0 z-50 bg-opacity-80 backdrop-blur-lg transition-all duration-300 dark:bg-gray-900/80 bg-white/80 border-b border-[var(--border-color)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#hero" class="text-xl font-bold text-[var(--accent)]">A.C.</a>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#about" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-[var(--accent)]">About</a>
+                    <a href="#skills" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-[var(--accent)]">Skills</a>
+                    <a href="#experience" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-[var(--accent)]">Experience</a>
+                    <a href="#journey" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-[var(--accent)]">Journey</a>
+                    <a href="#projects" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-[var(--accent)]">Projects</a>
+                    <a href="#contact" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-[var(--accent)]">Contact</a>
+                    <a href="Aaron's Resume.pdf" download="Aaron_Chakraborty_Resume.pdf" class="hidden md:inline-block btn-primary font-bold py-2 px-4 rounded-md text-sm">Resume</a>
+                </div>
+                <div class="flex items-center">
+                    <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                    <button id="mobile-menu-button" class="md:hidden ml-3 p-2 rounded-md hover:text-[var(--accent)] focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden p-4 space-y-2"></div>
+    </nav>
+
+    <main>
+        <section id="hero" class="min-h-screen flex items-center justify-center relative">
+            <div id="particles-js" class="absolute top-0 left-0 w-full h-full z-0"></div>
+            <div id="hero-content" class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <!-- Content will be injected by JavaScript -->
+            </div>
+            
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+                <a href="#about" class="text-secondary hover:text-[var(--accent)] transition-colors" aria-label="Scroll to next section">
+                    <svg class="w-10 h-10 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"></path></svg>
+                </a>
+            </div>
+        </section>
+        <!-- Sections will be injected by JS below -->
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact" class="section-bg border-t border-[var(--border-color)]"></footer>
+    
+    <!-- UI Buttons -->
+    <button id="scrollToTopBtn" title="Go to top"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
+    <a href="Aaron's Resume.pdf" download="Aaron_Chakraborty_Resume.pdf" id="stickyResumeBtn" class="md:hidden" title="Download Resume"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></a>
+    
+    <!-- Particles.js script -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Theme Management ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function getThemeColors() {
+            const styles = getComputedStyle(document.documentElement);
+            return {
+                particlesColor: styles.getPropertyValue('--particles-color').trim(),
+                accentColor: styles.getPropertyValue('--accent').trim()
+            };
+        }
+
+        function initParticles(colors) {
+            // Destroy existing instance if it exists to prevent multiple canvases
+            if (window.pJSDom && window.pJSDom.length > 0) {
+                window.pJSDom[0].pJS.fn.vendors.destroypJS();
+                window.pJSDom = [];
+            }
+            particlesJS('particles-js', {
+                "particles": { 
+                    "number": { "value": 80, "density": { "enable": true, "value_area": 800 } }, 
+                    "color": { "value": colors.particlesColor }, 
+                    "shape": { "type": "circle" }, 
+                    "opacity": { "value": 0.7, "random": true }, 
+                    "size": { "value": 2, "random": true }, 
+                    "line_linked": { "enable": true, "distance": 150, "color": colors.particlesColor, "opacity": 0.5, "width": 1 }, 
+                    "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out" } 
+                },
+                "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": false }, "resize": true }, "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 0.7 } } } },
+                "retina_detect": true
+            });
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+            // Defer particle initialization to ensure styles are applied and prevent race condition
+            setTimeout(() => {
+                initParticles(getThemeColors());
+            }, 10);
+            return `Theme set to ${theme}.`;
+        }
+
+        // Set initial theme on load
+        const currentTheme = localStorage.getItem('color-theme') || (prefersDark.matches ? 'dark' : 'light');
+        applyTheme(currentTheme);
+
+        // Add event listener for theme toggle button
+        themeToggleBtn.addEventListener('click', () => {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('color-theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+
+        // --- Mobile Menu ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinksContainer = document.querySelector('nav .hidden.md\\:flex');
+        if (navLinksContainer) {
+            const navLinks = navLinksContainer.cloneNode(true);
+            const resumeButton = navLinks.querySelector('a[download]');
+            if(resumeButton) resumeButton.parentElement.removeChild(resumeButton);
+            mobileMenu.innerHTML = '';
+            mobileMenu.appendChild(navLinks);
+        }
+        
+        mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // --- Scroll Animations & Active Nav Link ---
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const id = entry.target.getAttribute('id');
+                const navLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('nav-link-active'));
+                    if(navLink) navLink.classList.add('nav-link-active');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        window.onscroll = () => {
+            scrollToTopBtn.style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? "flex" : "none";
+        };
+        scrollToTopBtn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
+
+        // --- Dynamic Content Data ---
+        const content = {
+            hero: {
+                name: "AARON CHAKRABORTY",
+                quote: "I don’t wait for the possible — I make it out of the impossible.",
+                headline: "I simulate real-world attacks, secure digital infrastructure, and deliver actionable security insights.",
+                subheadline: "Penetration Tester | Ethical Hacker | B.Tech Student at KIIT",
+                bio: "Hands-on experience in penetration testing, network traffic analysis, and security assessments using tools like Nmap, Burp Suite, and Wireshark. Proven track record in CTFs, vulnerability reporting, and secure coding practices. Passionate about building safer digital systems.",
+                highlights: [
+                    { icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>', text: "20+ Vulnerability Assessments" },
+                    { icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>', text: "Top 500 in Hacktify Battle" },
+                    { icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>', text: "5+ National CTFs Competed" },
+                    { icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg>', text: "SSB (TES 51) AIR 83" }
+                ],
+                socials: [
+                    { name: "LinkedIn", url: "https://www.linkedin.com/in/aaron-chakraborty-309197287", icon: '<svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>' },
+                    { name: "GitHub", url: "https://github.com/aaron-631", icon: '<svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>' },
+                    { name: "Email", url: "mailto:aaronchakraborty631@gmail.com", icon: '<svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>' },
+                    { name: "TryHackMe", url: "https://tryhackme.com/p/aaronchakraborty", icon: '<svg class="h-7 w-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><title>TryHackMe</title><path d="M10.705 0C7.54 0 4.902 2.285 4.349 5.291a4.525 4.525 0 0 0 -4.107 4.5 4.525 4.525 0 0 0 4.52 4.52h6.761a0.625 0.625 0 1 0 0 -1.25H4.761a3.273 3.273 0 0 1 -3.27 -3.27A3.273 3.273 0 0 1 6.59 7.08a0.625 0.625 0 0 0 0.7 -1.035 4.488 4.488 0 0 0 -1.68 -0.69 5.223 5.223 0 0 1 5.096 -4.104 5.221 5.221 0 0 1 5.174 4.57 4.489 4.489 0 0 0 -0.488 0.305 0.625 0.625 0 1 0 0.731 1.013 3.245 3.245 0 0 1 1.912 -0.616 3.278 3.278 0 0 1 3.203 2.61 0.625 0.625 0 0 0 1.225 -0.251 4.533 4.533 0 0 0 -4.428 -3.61 4.54 4.54 0 0 0 -0.958 0.105C16.556 2.328 13.9 0 10.705 0zm5.192 10.64a0.925 0.925 0 0 0 -0.462 0.108 0.913 0.913 0 0 0 -0.313 0.29 1.27 1.27 0 0 0 -0.175 0.427 2.39 2.39 0 0 0 -0.054 0.514c0 0.181 0.018 0.353 0.054 0.517 0.036 0.164 0.095 0.307 0.175 0.43a0.899 0.899 0 0 0 0.313 0.297c0.127 0.073 0.281 0.11 0.462 0.11 0.18 0 0.334 -0.037 0.46 -0.11a0.897 0.897 0 0 0 0.309 -0.296c0.08 -0.124 0.137 -0.267 0.173 -0.431 0.036 -0.164 0.054 -0.336 0.054 -0.517 0 -0.18 -0.018 -0.352 -0.054 -0.514a1.271 1.271 0 0 0 -0.173 -0.426 0.901 0.901 0 0 0 -0.309 -0.291 0.917 0.917 0 0 0 -0.46 -0.108zm6.486 0a0.925 0.925 0 0 0 -0.462 0.108 0.913 0.913 0 0 0 -0.313 0.29 1.27 1.27 0 0 0 -0.175 0.427 2.39 2.39 0 0 0 -0.053 0.514c0 0.181 0.017 0.353 0.053 0.517 0.036 0.164 0.095 0.307 0.175 0.43a0.899 0.899 0 0 0 0.313 0.297c0.127 0.073 0.281 0.11 0.462 0.11 0.18 0 0.334 -0.037 0.46 -0.11a0.897 0.897 0 0 0 0.31 -0.296c0.078 -0.124 0.136 -0.267 0.172 -0.431 0.036 -0.164 0.054 -0.336 0.054 -0.517 0 -0.18 -0.018 -0.352 -0.054 -0.514a1.271 1.271 0 0 0 -0.173 -0.426 0.901 0.901 0 0 0 -0.308 -0.291 0.916 0.916 0 0 0 -0.461 -0.108zm-8.537 0.068 -0.84 0.618 0.313 0.43 0.476 -0.368v1.877h0.603v-2.557zm6.486 0 -0.841 0.618 0.314 0.43 0.477 -0.368v1.877h0.603v-2.557zm-4.435 0.445c0.08 0 0.143 0.028 0.193 0.084 0.05 0.057 0.087 0.127 0.114 0.21 0.026 0.083 0.044 0.173 0.054 0.269a2.541 2.541 0 0 1 0 0.533c-0.01 0.097 -0.028 0.187 -0.054 0.27a0.584 0.584 0 0 1 -0.114 0.21 0.243 0.243 0 0 1 -0.193 0.085 0.248 0.248 0 0 1 -0.195 -0.086 0.584 0.584 0 0 1 -0.118 -0.209 1.245 1.245 0 0 1 -0.056 -0.27 2.645 2.645 0 0 1 0 -0.533c0.01 -0.096 0.029 -0.186 0.056 -0.27a0.583 0.583 0 0 1 0.118 -0.209 0.25 0.25 0 0 1 0.195 -0.084zm6.486 0c0.08 0 0.144 0.028 0.193 0.084 0.05 0.057 0.087 0.127 0.114 0.21 0.027 0.083 0.044 0.173 0.054 0.269a2.541 2.541 0 0 1 0 0.533c-0.01 0.097 -0.027 0.187 -0.054 0.27a0.584 0.584 0 0 1 -0.114 0.21 0.243 0.243 0 0 1 -0.193 0.085 0.249 0.249 0 0 1 -0.195 -0.086 0.581 0.581 0 0 1 -0.117 -0.209 1.245 1.245 0 0 1 -0.056 -0.27 2.642 2.642 0 0 1 0 -0.533c0.01 -0.096 0.028 -0.186 0.056 -0.27a0.58 0.58 0 0 1 0.117 -0.209 0.25 0.25 0 0 1 0.195 -0.084zm-2.191 3.51a0.93 0.93 0 0 0 -0.463 0.109 0.908 0.908 0 0 0 -0.312 0.291c-0.08 0.122 -0.139 0.263 -0.175 0.426a2.383 2.383 0 0 0 -0.054 0.514c0 0.18 0.018 0.353 0.054 0.516 0.036 0.164 0.094 0.308 0.175 0.432a0.91 0.91 0 0 0 0.312 0.296 0.92 0.92 0 0 0 0.463 0.11c0.18 0 0.333 -0.037 0.46 -0.11a0.892 0.892 0 0 0 0.308 -0.296 1.32 1.32 0 0 0 0.174 -0.432c0.036 -0.163 0.054 -0.335 0.054 -0.516 0 -0.18 -0.018 -0.352 -0.054 -0.514a1.274 1.274 0 0 0 -0.174 -0.426 0.89 0.89 0 0 0 -0.309 -0.291 0.918 0.918 0 0 0 -0.46 -0.108zm-6.402 0.07 -0.841 0.617 0.314 0.43 0.476 -0.369v1.878h0.604v-2.557zm2.125 0 -0.841 0.617 0.314 0.43 0.477 -0.369v1.878h0.603v-2.557zm2.116 0 -0.84 0.617 0.313 0.43 0.477 -0.369v1.878h0.603v-2.557zm2.16 0.443c0.08 0 0.144 0.028 0.194 0.085a0.605 0.605 0 0 1 0.114 0.21c0.026 0.083 0.044 0.172 0.053 0.269a2.639 2.639 0 0 1 0 0.532 1.28 1.28 0 0 1 -0.053 0.27 0.585 0.585 0 0 1 -0.114 0.21 0.244 0.244 0 0 1 -0.193 0.085 0.25 0.25 0 0 1 -0.196 -0.085 0.589 0.589 0 0 1 -0.117 -0.21 1.245 1.245 0 0 1 -0.056 -0.27 2.597 2.597 0 0 1 0 -0.532c0.01 -0.097 0.028 -0.186 0.056 -0.27a0.589 0.589 0 0 1 0.117 -0.209 0.249 0.249 0 0 1 0.196 -0.085zm-6.729 3.073a0.676 0.676 0 0 0 -0.335 0.078 0.661 0.661 0 0 0 -0.227 0.211 0.91 0.91 0 0 0 -0.127 0.31c-0.027 0.118 -0.04 0.242 -0.04 0.373s0.013 0.256 0.04 0.375a0.93 0.93 0 0 0 0.127 0.313 0.65 0.65 0 0 0 0.227 0.215c0.092 0.053 0.204 0.08 0.335 0.08a0.655 0.655 0 0 0 0.334 -0.08 0.65 0.65 0 0 0 0.225 -0.215c0.057 -0.09 0.1 -0.194 0.125 -0.313a1.75 1.75 0 0 0 0.04 -0.375c0 -0.13 -0.014 -0.255 -0.04 -0.373a0.931 0.931 0 0 0 -0.125 -0.31 0.658 0.658 0 0 0 -0.225 -0.21 0.667 0.667 0 0 0 -0.334 -0.08zm3.086 0a0.675 0.675 0 0 0 -0.336 0.078 0.661 0.661 0 0 0 -0.226 0.211 0.907 0.907 0 0 0 -0.127 0.31 1.69 1.69 0 0 0 -0.04 0.373c0 0.131 0.013 0.256 0.04 0.375a0.928 0.928 0 0 0 0.127 0.313c0.058 0.09 0.134 0.162 0.226 0.215 0.093 0.053 0.205 0.08 0.336 0.08a0.655 0.655 0 0 0 0.334 -0.08 0.65 0.65 0 0 0 0.224 -0.215c0.058 -0.09 0.1 -0.194 0.126 -0.313a1.752 1.752 0 0 0 0 -0.748 0.94 0.94 0 0 0 -0.126 -0.31 0.657 0.657 0 0 0 -0.224 -0.21 0.667 0.667 0 0 0 -0.334 -0.08zm5.108 0a0.675 0.675 0 0 0 -0.336 0.078 0.661 0.661 0 0 0 -0.226 0.211 0.91 0.91 0 0 0 -0.127 0.31c-0.027 0.118 -0.04 0.242 -0.04 0.373s0.013 0.256 0.04 0.375a0.931 0.931 0 0 0 0.127 0.313c0.058 0.09 0.134 0.162 0.226 0.215 0.093 0.053 0.205 0.08 0.336 0.08 0.13 0 0.243 -0.027 0.334 -0.08a0.65 0.65 0 0 0 0.224 -0.215c0.058 -0.09 0.1 -0.194 0.126 -0.313a1.75 1.75 0 0 0 0.04 -0.375c0 -0.13 -0.014 -0.255 -0.04 -0.373a0.943 0.943 0 0 0 -0.126 -0.31 0.657 0.657 0 0 0 -0.224 -0.21 0.668 0.668 0 0 0 -0.334 -0.08zm-6.658 0.05 -0.61 0.448 0.227 0.311 0.346 -0.266v1.362h0.438v-1.856zm3.068 0 -0.61 0.448 0.227 0.311 0.346 -0.266v1.362h0.438v-1.856zm5.108 0 -0.611 0.448 0.228 0.311 0.346 -0.266v1.362h0.438v-1.856zm-9.712 0.322c0.058 0 0.105 0.02 0.14 0.062a0.421 0.421 0 0 1 0.083 0.151 0.96 0.96 0 0 1 0.04 0.196 1.932 1.932 0 0 1 0 0.386 0.954 0.954 0 0 1 -0.04 0.197 0.421 0.421 0 0 1 -0.083 0.152 0.176 0.176 0 0 1 -0.14 0.061 0.18 0.18 0 0 1 -0.141 -0.06 0.427 0.427 0 0 1 -0.085 -0.153 0.887 0.887 0 0 1 -0.041 -0.197 1.96 1.96 0 0 1 0 -0.386 0.893 0.893 0 0 1 0.04 -0.196 0.42 0.42 0 0 1 0.086 -0.151 0.181 0.181 0 0 1 0.141 -0.062zm3.086 0c0.058 0 0.104 0.02 0.14 0.062a0.421 0.421 0 0 1 0.082 0.151 0.94 0.94 0 0 1 0.04 0.196 1.906 1.906 0 0 1 0 0.386 0.93 0.93 0 0 1 -0.04 0.197 0.421 0.421 0 0 1 -0.082 0.152 0.176 0.176 0 0 1 -0.14 0.061 0.18 0.18 0 0 1 -0.141 -0.06 0.42 0.42 0 0 1 -0.086 -0.153 0.846 0.846 0 0 1 -0.04 -0.197 1.965 1.965 0 0 1 -0.011 -0.195c0 -0.057 0.004 -0.121 0.01 -0.191a0.849 0.849 0 0 1 0.041 -0.196 0.42 0.42 0 0 1 0.086 -0.151 0.182 0.182 0 0 1 0.141 -0.062zm5.108 0c0.058 0 0.104 0.02 0.14 0.062a0.421 0.421 0 0 1 0.082 0.151 0.92 0.92 0 0 1 0.04 0.196 1.963 1.963 0 0 1 0 0.386 0.943 0.943 0 0 1 -0.04 0.197 0.421 0.421 0 0 1 -0.082 0.152 0.177 0.177 0 0 1 -0.14 0.061 0.18 0.18 0 0 1 -0.142 -0.06 0.437 0.437 0 0 1 -0.085 -0.153 0.95 0.95 0 0 1 -0.04 -0.197 1.965 1.965 0 0 1 -0.011 -0.195c0 -0.057 0.004 -0.121 0.01 -0.191a0.959 0.959 0 0 1 0.04 -0.196 0.47 0.47 0 0 1 0.086 -0.151 0.181 0.181 0 0 1 0.142 -0.062zm-1.684 1.814a0.675 0.675 0 0 0 -0.336 0.079 0.66 0.66 0 0 0 -0.227 0.21 0.91 0.91 0 0 0 -0.127 0.31 1.731 1.731 0 0 0 0 0.748 0.939 0.939 0 0 0 0.127 0.314c0.059 0.09 0.134 0.162 0.227 0.215 0.093 0.053 0.205 0.08 0.336 0.08a0.66 0.66 0 0 0 0.334 -0.08 0.648 0.648 0 0 0 0.224 -0.215c0.058 -0.09 0.1 -0.195 0.126 -0.314a1.737 1.737 0 0 0 -0.001 -0.747 0.928 0.928 0 0 0 -0.125 -0.31 0.65 0.65 0 0 0 -0.224 -0.211 0.668 0.668 0 0 0 -0.334 -0.079zm3.063 0a0.676 0.676 0 0 0 -0.336 0.079 0.664 0.664 0 0 0 -0.227 0.21 0.906 0.906 0 0 0 -0.127 0.31 1.74 1.74 0 0 0 0 0.748 0.936 0.936 0 0 0 0.127 0.314 0.66 0.66 0 0 0 0.227 0.215c0.092 0.053 0.204 0.08 0.336 0.08a0.654 0.654 0 0 0 0.334 -0.08 0.648 0.648 0 0 0 0.223 -0.215c0.058 -0.09 0.1 -0.195 0.126 -0.314a1.74 1.74 0 0 0 0 -0.747 0.928 0.928 0 0 0 -0.126 -0.31 0.65 0.65 0 0 0 -0.223 -0.211 0.666 0.666 0 0 0 -0.334 -0.079zm-1.545 0.05 -0.611 0.448 0.228 0.312 0.346 -0.267v1.363h0.438v-1.856zm-1.518 0.323c0.057 0 0.104 0.02 0.14 0.061a0.42 0.42 0 0 1 0.082 0.152 0.91 0.91 0 0 1 0.04 0.195 1.966 1.966 0 0 1 0 0.387 0.951 0.951 0 0 1 -0.04 0.197 0.421 0.421 0 0 1 -0.082 0.152 0.177 0.177 0 0 1 -0.14 0.06 0.18 0.18 0 0 1 -0.142 -0.06 0.428 0.428 0 0 1 -0.085 -0.152 0.914 0.914 0 0 1 -0.04 -0.197 1.96 1.96 0 0 1 -0.011 -0.195c0 -0.058 0.003 -0.122 0.01 -0.192a0.923 0.923 0 0 1 0.041 -0.195c0.02 -0.06 0.048 -0.11 0.085 -0.152a0.181 0.181 0 0 1 0.142 -0.061zm3.063 0c0.057 0 0.104 0.02 0.14 0.061a0.42 0.42 0 0 1 0.082 0.152 0.94 0.94 0 0 1 0.04 0.195 1.91 1.91 0 0 1 0 0.387 0.93 0.93 0 0 1 -0.04 0.197 0.422 0.422 0 0 1 -0.083 0.152 0.175 0.175 0 0 1 -0.14 0.06 0.18 0.18 0 0 1 -0.141 -0.06 0.423 0.423 0 0 1 -0.085 -0.152 0.907 0.907 0 0 1 -0.04 -0.197 1.95 1.95 0 0 1 0 -0.387 0.915 0.915 0 0 1 0.04 -0.195c0.02 -0.06 0.048 -0.11 0.085 -0.152a0.182 0.182 0 0 1 0.142 -0.061zm-9.713 0.185a0.465 0.465 0 0 0 -0.232 0.055 0.456 0.456 0 0 0 -0.157 0.146 0.627 0.627 0 0 0 -0.089 0.215 1.168 1.168 0 0 0 -0.027 0.259c0 0.09 0.009 0.177 0.027 0.26a0.648 0.648 0 0 0 0.089 0.216c0.04 0.063 0.093 0.112 0.157 0.149a0.459 0.459 0 0 0 0.232 0.056c0.09 0 0.168 -0.02 0.231 -0.056a0.45 0.45 0 0 0 0.156 -0.149 0.67 0.67 0 0 0 0.087 -0.217 1.218 1.218 0 0 0 0 -0.518 0.647 0.647 0 0 0 -0.087 -0.215 0.448 0.448 0 0 0 -0.156 -0.146 0.458 0.458 0 0 0 -0.23 -0.055zm1.052 0.035 -0.423 0.31 0.158 0.217 0.24 -0.185v0.944h0.303v-1.286zm-1.052 0.224c0.04 0 0.073 0.014 0.097 0.042a0.284 0.284 0 0 1 0.057 0.105 0.69 0.69 0 0 1 0.028 0.136c0.004 0.049 0.007 0.092 0.007 0.133 0 0.04 -0.003 0.086 -0.007 0.135a0.684 0.684 0 0 1 -0.028 0.136 0.285 0.285 0 0 1 -0.057 0.105 0.123 0.123 0 0 1 -0.097 0.043 0.125 0.125 0 0 1 -0.098 -0.043 0.298 0.298 0 0 1 -0.059 -0.105 0.612 0.612 0 0 1 -0.028 -0.136 1.39 1.39 0 0 1 0 -0.268 0.62 0.62 0 0 1 0.028 -0.136 0.297 0.297 0 0 1 0.06 -0.105 0.125 0.125 0 0 1 0.097 -0.042zm3.775 1.394a0.463 0.463 0 0 0 -0.232 0.054 0.452 0.452 0 0 0 -0.157 0.146 0.621 0.621 0 0 0 -0.088 0.214 1.19 1.19 0 0 0 0 0.519 0.641 0.641 0 0 0 0.088 0.217 0.46 0.46 0 0 0 0.157 0.15 0.458 0.458 0 0 0 0.232 0.054 0.454 0.454 0 0 0 0.232 -0.055 0.45 0.45 0 0 0 0.155 -0.149 0.664 0.664 0 0 0 0.087 -0.217 1.189 1.189 0 0 0 0 -0.519 0.642 0.642 0 0 0 -0.087 -0.214 0.446 0.446 0 0 0 -0.155 -0.146 0.459 0.459 0 0 0 -0.232 -0.054zm1.052 0.034 -0.423 0.31 0.158 0.216 0.24 -0.185v0.945h0.303V22.68zm-1.052 0.223c0.04 0 0.073 0.014 0.098 0.043a0.3 0.3 0 0 1 0.057 0.105 0.643 0.643 0 0 1 0.027 0.135 1.31 1.31 0 0 1 0 0.268 0.654 0.654 0 0 1 -0.027 0.137 0.307 0.307 0 0 1 -0.057 0.105 0.124 0.124 0 0 1 -0.098 0.042 0.125 0.125 0 0 1 -0.098 -0.042 0.293 0.293 0 0 1 -0.059 -0.105 0.618 0.618 0 0 1 -0.028 -0.137 1.364 1.364 0 0 1 0 -0.268 0.612 0.612 0 0 1 0.028 -0.135 0.287 0.287 0 0 1 0.06 -0.105 0.123 0.123 0 0 1 0.097 -0.043z" /></svg>' }
+                ]
+            },
+            about: {
+                title: "About Me",
+                subtitle: "My journey into the world of bits, bytes, and breaches.",
+                paragraphs: [
+                    "I'm a Computer Science student with a profound passion for cybersecurity. My journey began with curiosity and has evolved into a dedicated pursuit of knowledge in ethical hacking, penetration testing, and network security. Through internships, I've had the privilege of applying my skills in real-world scenarios, conducting vulnerability assessments and contributing to robust security protocols.",
+                    "Beyond the technical realm, my experience as a candidate for the Indian Army's Service Selection Board (achieving AIR 83) has instilled in me a strong sense of discipline and purpose. I thrive in challenging environments and am committed to using my unique blend of technical expertise and personal qualities to create a safer digital future.",
+                    "My core soft skills include <strong class='text-[var(--accent)] font-semibold'>leadership</strong>, <strong class='text-[var(--accent)] font-semibold'>strategic problem-solving</strong>, and <strong class='text-[var(--accent)] font-semibold'>adaptability</strong>, allowing me to effectively navigate complex security challenges and collaborate within a team."
+                ]
+            },
+            skills: {
+                title: "Skills & Toolkit",
+                categories: {
+                    "Reconnaissance": [ 
+                        { name: 'Nmap', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Nmap</title><path d="M12 0A12 12 0 1 0 24 12 12 12 0 0 0 12 0zM9.25 4.042h5.5v15.916h-5.5zm-3.21 3.21h2.18v2.18h-2.18zm9.62 0h2.18v2.18h-2.18zm-9.62 3.85h2.18v2.18h-2.18zm9.62 0h2.18v2.18h-2.18zm-9.62 3.85h2.18v2.18h-2.18zm9.62 0h2.18v2.18h-2.18z"/></svg>', tooltip: 'Network discovery & security auditing' }, 
+                        { name: 'Nikto', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Nikto</title><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v4h-2zm0 6h2v2h-2z"/></svg>', tooltip: 'Web server vulnerability scanner'},
+                        { name: 'Amass', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>OWASP</title><path d="M12 0l-12 5.143v8.571l12 10.286 12-10.286v-8.571l-12-5.143zm0 2.229l9.714 4.114-9.714 4.114-9.714-4.114 9.714-4.114zm-9.857 6.286h19.714v6.857l-9.857 8.4-9.857-8.4v-6.857z"/></svg>', tooltip: 'In-depth attack surface mapping' }
+                    ],
+                    "Exploitation": [ 
+                        { name: 'Burp Suite', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Burp Suite</title><path d="M16.035 3.92L24 8.159l-7.965 4.238-7.965-4.238L16.035 3.92zm.006-3.92l-12.03 6.398 3.995 2.125 8.036-4.27L16.04 0zm0 24l12.03-6.398-3.995-2.125-8.036 4.27L16.041 24zM3.97 8.159l7.965 4.238-7.965 4.238L0 12.397 3.97 8.159z"/></svg>', tooltip: 'Web application security testing' }, 
+                        { name: 'Metasploit', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Metasploit</title><path d="M12 0L2 3.429v7.714L12 24l10-12.857V3.429L12 0zm-1.714 6.857h3.429V12h-3.429V6.857zM6 12h3.429v3.429H6V12zm8.571 0H18v3.429h-3.429V12z"/></svg>', tooltip: 'Exploitation & vulnerability validation' }, 
+                        { name: 'SQLMap', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>SQLMap</title><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9V9h2v4zm0-6H9V5h2v2zm4 6h-2V9h2v4zm0-6h-2V5h2v2zm4 6h-2V9h2v4z"/></svg>', tooltip: 'Automates SQL injection detection' } 
+                    ],
+                    "Scripting & Development": [ 
+                        { name: 'Python', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Python</title><path d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zM12 4.62c.69 0 1.25.56 1.25 1.25v1.87c0 .69-.56 1.25-1.25 1.25H9.37c-.69 0-1.25-.56-1.25-1.25V5.87c0-.69.56-1.25 1.25-1.25h2.63zm0 14.76c-.69 0-1.25-.56-1.25-1.25v-1.87c0 .69.56 1.25 1.25 1.25h2.63c.69 0 1.25.56 1.25 1.25v1.87c0 .69-.56 1.25-1.25 1.25H12z"/></svg>', tooltip: 'Versatile scripting for automation' }, 
+                        { name: 'Bash', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GNU Bash</title><path d="M0 0v24h24V0H0zm22.46 22.46H1.52V1.52h20.94v20.94zM7.2 6.33l3.12 3.13-3.12 3.12.9.9 3.12-3.12 3.12 3.12.9-.9-3.12-3.12 3.12-3.13-.9-.9-3.12 3.12-3.12-3.12-.9.9z"/></svg>', tooltip: 'Command-line scripting for Linux' }, 
+                        { name: 'Rust', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Rust</title><path d="M24 12.33a4.01 4.01 0 0 1-1.23 2.95l-1.07 1.07-2.14-2.14 1.07-1.07a1.88 1.88 0 1 0-2.66-2.66l-1.07 1.07-2.14-2.14 1.07-1.07a4.01 4.01 0 0 1 5.66 0 4.01 4.01 0 0 1 1.23 2.95zM3.48 20.52a4.01 4.01 0 0 1 0-5.66l1.07-1.07 2.14 2.14-1.07 1.07a1.88 1.88 0 1 0 2.66 2.66l1.07-1.07 2.14 2.14-1.07 1.07a4.01 4.01 0 0 1-5.66 0zm17.04-1.23a4.01 4.01 0 0 1-2.95 1.23 4.01 4.01 0 0 1-2.95-1.23l-1.07-1.07 2.14-2.14 1.07 1.07a1.88 1.88 0 1 0 2.66-2.66l-1.07-1.07 2.14-2.14 1.07 1.07a4.01 4.01 0 0 1 0 5.66zm-1.23-17.04a4.01 4.01 0 0 1 1.23 2.95 4.01 4.01 0 0 1-1.23 2.95l-1.07 1.07-2.14-2.14 1.07-1.07a1.88 1.88 0 1 0-2.66-2.66l-1.07 1.07-2.14-2.14 1.07-1.07a4.01 4.01 0 0 1 5.66 0z"/></svg>', tooltip: 'Secure, concurrent systems programming' } 
+                    ],
+                    "Analysis & Monitoring": [ 
+                        { name: 'Wireshark', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Wireshark</title><path d="M12.43 2.9C6.03 2.9 2.9 6.02 2.9 12.43c0 6.4 3.12 9.53 9.53 9.53 6.4 0 9.53-3.13 9.53-9.53 0-6.41-3.13-9.53-9.53-9.53zm0 1.52c5.44 0 8 2.56 8 8s-2.56 8-8 8-8-2.56-8-8 2.56-8 8-8zM12 7.72a4.28 4.28 0 0 0-4.28 4.28h1.52a2.76 2.76 0 1 1 2.76-2.76v-1.52z"/></svg>', tooltip: 'Network protocol traffic analysis' }, 
+                        { name: 'Sysmon', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sysmon</title><path d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h3l-1 2v1h10v-1l-1-2h3c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/></svg>', tooltip: 'Monitors & logs system activity'},
+                        { name: 'Ghidra', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Ghidra</title><path d="M12 0l-2.4 4.8L4.8 7.2l2.4 4.8L12 24l4.8-12 2.4-4.8-4.8-2.4L12 0zm0 8.4l-1.2 2.4-2.4 1.2 2.4 1.2L12 15.6l1.2-2.4 2.4-1.2-2.4-1.2L12 8.4z"/></svg>', tooltip: 'Software reverse engineering suite' }
+                    ],
+                    "Other Skills": [
+                        { name: 'Git', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Git</title><path d="M22.5 11.25a1.5 1.5 0 0 0-1.5 1.5v8.25a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75V3.75a.75.75 0 0 1 .75-.75h8.25a1.5 1.5 0 0 0 0-3H3.75A3.75 3.75 0 0 0 0 3.75v16.5A3.75 3.75 0 0 0 3.75 24h16.5A3.75 3.75 0 0 0 24 20.25V12.75a1.5 1.5 0 0 0-1.5-1.5zM15 1.5a3 3 0 1 0-3 3 3 3 0 0 0 3-3zm0-1.5a1.5 1.5 0 1 1-1.5 1.5 1.5 1.5 0 0 1 1.5-1.5zm6 6a3 3 0 1 0-3 3 3 3 0 0 0 3-3zm0-1.5a1.5 1.5 0 1 1-1.5 1.5 1.5 1.5 0 0 1 1.5-1.5zM9 10.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 4.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>', tooltip: 'Version control & code collaboration' },
+                        { name: 'Linux PrivEsc', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Linux</title><path d="M6.273 14.34a10.65 10.65 0 0 1-1.22-3.415 10.53 10.53 0 0 1 .367-3.692A10.53 10.53 0 0 1 8.8 3.37a10.53 10.53 0 0 1 6.4 0 10.53 10.53 0 0 1 3.37 3.863 10.53 10.53 0 0 1 .366 3.692 10.65 10.65 0 0 1-1.22 3.415c-.93 1.66-2.49 2.924-4.54 3.515-.34.1-.68.18-.98.24-.3.06-.6.1-.9.12v2.77h-1.8v-2.77c-.3-.02-.6-.06-.9-.12-.3-.06-.64-.14-.98-.24-2.05-.59-3.61-1.855-4.54-3.515zM12 1.5C6.2 1.5 1.5 6.2 1.5 12S6.2 22.5 12 22.5 22.5 17.8 22.5 12 17.8 1.5 12 1.5zm-2.25 10.05c0 .62.505 1.125 1.125 1.125h2.25c.62 0 1.125-.505 1.125-1.125V9.45c0-.62-.505-1.125-1.125-1.125h-2.25c-.62 0-1.125.505-1.125 1.125v2.1z"/></svg>', tooltip: 'Linux privilege escalation techniques' },
+                        { name: 'TCP/IP', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>TCP/IP</title><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1 14H9v-2h2v2zm0-4H9V8h2v4zm4 4h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>', tooltip: 'Core internet protocol suite' },
+                        { name: 'OWASP Top 10', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>OWASP</title><path d="M12 0l-12 5.143v8.571l12 10.286 12-10.286v-8.571l-12-5.143zm0 2.229l9.714 4.114-9.714 4.114-9.714-4.114 9.714-4.114zm-9.857 6.286h19.714v6.857l-9.857 8.4-9.857-8.4v-6.857z"/></svg>', tooltip: 'Web application security risks' },
+                        { name: 'REST APIs', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>API</title><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-6V8h6v4z"/></svg>', tooltip: 'API design and security' },
+                        { name: 'DevSecOps', icon: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>DevSecOps</title><path d="M12 2l-10 5v10l10 5 10-5V7l-10-5zm-8 6.5l8 4 8-4-8-4-8 4zm0 2.8l8 4v7.4l-8-4V11.3z"/></svg>', tooltip: 'Integrating security into DevOps' }
+                    ]
+                }
+            },
+            experience: {
+                title: "Professional Experience",
+                
+                items: [
+                    { role: "Cyber Security Member", company: "IoT Lab, KIIT", duration: "Sep 2024 - Present", description: "Competed in 5+ CTF competitions, conducted 10+ web security assessments using Burp Suite, and organized 2+ CTF events.", logoUrl: "images.jpeg" }, // <-- Use the local filename for the IoT logo
+                    { role: "Security Testing Intern", company: "Panacea Infosec Pvt Ltd", duration: "May 2024 - Jul 2024", description: "Conducted over 20 vulnerability assessments and penetration tests. Collaborated with a team of 5+ professionals on threat analysis.", logoUrl: "ANI-20230905103453.avif" }, // <-- Use the local filename for the Panacea logo
+]
+            },
+            journey: {
+                title: "My Journey",
+                subtitle: "A timeline of my key milestones and achievements.",
+                events: [
+                    { date: "2021", title: "High School (ICSE)", description: "Completed high school with 98.25% from City Montessori School.", icon: "education" },
+                    { date: "2023", title: "Senior Secondary (ISC)", description: "Completed senior secondary school with 94.25% from City Montessori School.", icon: "education" },
+                    { date: "2023 - 2027", title: "B.Tech in Computer Science", description: "Pursuing my undergraduate degree at Kalinga Institute of Industrial Technology (KIIT).", icon: "education" },
+                    { date: "Feb 2024", title: "SSB (TES 51) - AIR 83", description: "Achieved All India Rank 83 in the Service Selection Board merit list.", icon: "achievement" },
+                    { date: "May 2024", title: "Internship @ Panacea Infosec", description: "Started my security testing internship, gaining hands-on experience.", icon: "work" },
+                    { date: "Sep 2024", title: "IoT Lab Member @ KIIT", description: "Joined the IoT Lab to work on cybersecurity for IoT devices.", icon: "work" },
+                    { date: "Mar 2025", title: "Hacktify Battle - Top 500", description: "Ranked in the top 500 globally among 4000+ teams.", icon: "achievement" }
+                ]
+            },
+            certifications: {
+                title: "Certifications & Achievements",
+                items: [
+                    { name: "Service Selection Board (TES 51 Merit List)", issuer: "Indian Army - AIR 83", icon: '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="#FF9933"/><path d="M2 7L12 12L22 7" stroke="#FFFFFF" stroke-width="1.5"/><path d="M12 22V12" stroke="#FFFFFF" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#000080"/><path d="M12 9.5L12 14.5" stroke="#FFFFFF" stroke-width="1.5"/><path d="M9.5 12L14.5 12" stroke="#FFFFFF" stroke-width="1.5"/></svg>' },
+                    { name: "Hacktify Battle Global Rank", issuer: "TryHackMe - Top 500", icon: '<img src="1_1xQIcXZHHUFPXCi2sCkjfA.png" class="w-12 h-12 filter dark:invert">' },
+                    { name: "Database Management Systems", issuer: "NPTEL", icon: '<svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 11.25v2.5M12 8.25v.01M9.75 14.25h4.5" /></svg>' },
+                    { name: "Ethical Hacking Techniques", issuer: "Industry Certified", icon: '<svg class="w-12 h-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' },
+                ],
+                upcoming: [
+                   { name: "eJPT", issuer: "eLearnSecurity Junior Penetration Tester" },
+                ]
+            },
+            projects: {
+                title: "Projects & Writeups",
+                items: [
+                    { title: "Network Scanner", description: "A versatile tool to scan networks, identifying active devices and open ports.", tags: ["Tool", "Python"], icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>' },
+                    { title: "Strong Password Generator", description: "Generates highly secure passwords using cryptographic libraries.", tags: ["Tool", "Security"], icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' },
+                    { title: "Keylogger Proof-of-Concept", description: "A PoC keylogger to demonstrate a common attack vector and raise security awareness.", tags: ["PoC", "Python"], icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>' },
+                    { title: "CTF Writeups", description: "Detailed writeups on THM rooms like Skynet & Vulnversity, and various Hack The Box challenges.", tags: ["Writeup", "CTF"], icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>' }
+                ]
+            },
+            terminal: {
+                title: "Interactive Terminal",
+                subtitle: "Try typing 'help' to see the list of available commands."
+            },
+            footer: {
+                title: "Get In Touch",
+                subtitle: "I'm always open to discussing new opportunities.",
+            }
+        };
+
+        // --- Master Content Rendering Function ---
+        function renderContent() {
+            const heroContent = document.getElementById('hero-content');
+            const main = document.querySelector('main');
+            const footer = document.getElementById('contact');
+
+            // --- HERO SECTION INJECTION ---
+            const heroData = content.hero;
+            heroContent.innerHTML = `
+                <p class="text-md md:text-lg italic text-secondary mb-6">"${heroData.quote}"</p>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight uppercase">${heroData.name}</h1>
+                <p class="mt-4 text-lg md:text-xl font-semibold text-[var(--accent)]">${heroData.subheadline}</p>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-secondary">${heroData.headline}</p>
+                <p class="mt-6 max-w-3xl mx-auto text-md text-secondary/80">${heroData.bio}</p>
+
+                <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 max-w-3xl mx-auto text-left">
+                    ${heroData.highlights.map(h => `
+                        <div class="flex items-center space-x-3">
+                            <div class="text-[var(--accent)]">${h.icon}</div>
+                            <span class="text-sm font-medium text-secondary">${h.text}</span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="mt-10 flex justify-center items-center flex-wrap gap-4">
+                    <a href="Aaron's Resume.pdf" download="Aaron_Chakraborty_Resume.pdf" class="btn-primary font-bold py-3 px-6 rounded-md text-base">Download Resume</a>
+                    <div class="flex items-center space-x-5">
+                        ${heroData.socials.map(s => `
+                            <a href="${s.url}" target="_blank" title="${s.name}" class="text-secondary hover:text-[var(--accent)] transition-colors">
+                                <span class="sr-only">${s.name}</span>
+                                ${s.icon}
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            observer.observe(document.getElementById('hero'));
+
+
+            let sectionsHtml = ''; 
+
+            // --- ABOUT ME SECTION ---
+            sectionsHtml += `
+                <section id="about" class="py-20 md:py-32 section-bg fade-in-section">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.about.title}</h2>
+                            <p class="mt-4 max-w-2xl mx-auto text-lg text-secondary">${content.about.subtitle}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-16 items-center">
+                            <div class="md:col-span-2 flex justify-center px-6">
+                               <img src="IMG_0771.jpg" alt="Aaron Chakraborty" class="rounded-lg shadow-lg w-full max-w-xs object-cover" style="aspect-ratio: 3/4;">
+                            </div>
+                            <div class="md:col-span-3">
+                                <div class="space-y-6 text-lg text-secondary/90 text-left md:text-left">
+                                    ${content.about.paragraphs.map(p => `<p>${p}</p>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>`;
+            
+            // --- SKILLS SECTION ---
+            let skillsHtml = '';
+            for (const category in content.skills.categories) {
+                let itemsHtml = content.skills.categories[category].map(skill => `
+                    <div class="has-tooltip flex flex-col items-center text-center p-4 rounded-lg hover:bg-white/5 dark:hover:bg-black/20 transition-colors duration-200">
+                        <div class="w-10 h-10 mb-3 text-[var(--accent)] fill-current">
+                            ${skill.icon}
+                        </div>
+                        <span class="text-sm text-secondary font-medium">${skill.name}</span>
+                        <div class="tooltip">${skill.tooltip}</div>
+                    </div>`).join('');
+                
+                skillsHtml += `
+                    <div class="card p-6 rounded-lg flex flex-col">
+                        <h3 class="text-xl font-semibold mb-6 text-center border-b border-[var(--border-color)] pb-4">${category}</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-grow content-start pt-2">
+                            ${itemsHtml}
+                        </div>
+                    </div>`;
+            }
+            sectionsHtml += `<section id="skills" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.skills.title}</h2><div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">${skillsHtml}</div></div></section>`;
+
+
+            // --- EXPERIENCE SECTION ---
+            let experienceHtml = content.experience.items.map(item => `
+                <div class="relative pl-8 sm:pl-12 group">
+                    <div class="absolute left-0 top-0 h-full w-0.5 bg-[var(--border-color)] group-last:hidden"></div>
+                    <div class="absolute left-0 top-2 w-4 h-4 rounded-full bg-[var(--accent)] border-4 border-[var(--bg)] -translate-x-[7px]"></div>
+                    <div class="card p-6 rounded-lg ml-8">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-semibold text-[var(--accent)]">${item.duration}</p>
+                                <h3 class="text-xl font-bold mt-1">${item.role}</h3>
+                                <p class="text-md font-medium text-secondary mt-1">${item.company}</p>
+                            </div>
+                            ${item.logoUrl ? `<img src="${item.logoUrl}" alt="${item.company} Logo" class="w-16 h-16 rounded-md flex-shrink-0 ml-4 object-contain bg-white p-1">` : ''}
+                        </div>
+                        <p class="text-secondary/80 mt-3">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            sectionsHtml += `<section id="experience" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.experience.title}</h2></div><div class="relative max-w-3xl mx-auto space-y-12">${experienceHtml}</div></div></section>`;
+            
+            // --- JOURNEY/TIMELINE SECTION ---
+            const journeyIcons = {
+                education: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>',
+                work: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
+                achievement: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg>'
+            };
+            let journeyHtml = content.journey.events.map(event => `
+                <div class="relative pl-8 sm:pl-12 group">
+                    <div class="absolute left-0 top-0 h-full w-0.5 bg-[var(--border-color)] group-last:h-2"></div>
+                    <div class="absolute left-0 top-2 w-8 h-8 rounded-full bg-[var(--accent)] border-4 border-[var(--bg)] -translate-x-1/2 flex items-center justify-center text-white">${journeyIcons[event.icon]}</div>
+                    <div class="pl-10 pb-12">
+                        <p class="text-sm font-semibold text-[var(--accent)]">${event.date}</p>
+                        <h3 class="text-xl font-bold mt-1">${event.title}</h3>
+                        <p class="text-secondary/80 mt-3">${event.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            sectionsHtml += `<section id="journey" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.journey.title}</h2><p class="mt-4 max-w-2xl mx-auto text-lg text-secondary">${content.journey.subtitle}</p></div><div class="relative max-w-2xl mx-auto">${journeyHtml}</div></div></section>`;
+
+            // --- CERTIFICATIONS SECTION ---
+let certsHtml = content.certifications.items.map(cert => `
+    <div class="card p-6 rounded-lg flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-5">
+        <div class="flex-shrink-0 text-[var(--accent)]">
+            ${cert.icon}
+        </div>
+        <div>
+            <p class="text-lg font-bold">${cert.name}</p>
+            <p class="text-md text-secondary">${cert.issuer}</p>
+        </div>
+    </div>`).join('');
+let upcomingCertsHtml = content.certifications.upcoming.map(cert => `
+    <div class="card p-4 rounded-lg flex items-center space-x-4 border-dashed">
+        <div class="flex-shrink-0"><svg class="w-8 h-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+        <div>
+            <p class="font-bold">${cert.name}</p>
+            <p class="text-sm text-secondary">${cert.issuer}</p>
+        </div>
+    </div>
+`).join('');
+// THE LINE BELOW IS THE ONLY ONE THAT'S CHANGED
+sectionsHtml += `<section id="certifications" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.certifications.title}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 gap-8">${certsHtml}</div><div class="mt-16"><h3 class="text-2xl font-bold text-center mb-8">Upcoming Certifications</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">${upcomingCertsHtml}</div></div></div></section>`;
+            // --- PROJECTS SECTION ---
+            let projectsHtml = content.projects.items.map(p => `
+                <div class="card p-6 rounded-lg flex flex-col group">
+                    <div class="flex-shrink-0 mb-4 flex items-center justify-between">
+                        <div class="w-12 h-12 text-[var(--accent)]">${p.icon}</div>
+                        <div class="flex gap-2">${p.tags.map(tag => `<span class="text-xs font-medium bg-[var(--accent)]/10 text-[var(--accent)] px-2 py-1 rounded-full">${tag}</span>`).join('')}</div>
+                    </div>
+                    <h3 class="text-xl font-bold">${p.title}</h3>
+                    <p class="text-secondary mt-2 flex-grow">${p.description}</p>
+                    <a href="#" class="inline-block mt-6 text-sm font-semibold text-[var(--accent)] opacity-50 cursor-not-allowed">Coming Soon &rarr;</a>
+                </div>`).join('');
+            sectionsHtml += `<section id="projects" class="py-20 md:py-28 section-bg fade-in-section"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="text-center mb-16"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.projects.title}</h2></div><div class="grid gap-8 md:grid-cols-2">${projectsHtml}</div></div></section>`;
+            
+            // --- TERMINAL SECTION ---
+            sectionsHtml += `
+                <section id="terminal-section" class="py-20 md:py-28 section-bg fade-in-section">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.terminal.title}</h2>
+                            <p class="mt-4 max-w-2xl mx-auto text-lg text-secondary">${content.terminal.subtitle}</p>
+                        </div>
+                        <div id="terminal" class="terminal max-w-3xl mx-auto rounded-lg shadow-lg overflow-hidden">
+                            <div class="terminal-header p-3 flex items-center">
+                                <div class="flex space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                </div>
+                                <div class="flex-grow text-center text-sm font-semibold">aaron@portfolio</div>
+                            </div>
+                            <div id="terminal-body" class="p-4 h-96 overflow-y-auto">
+                                <div id="terminal-output"></div>
+                                <div class="terminal-input-area">
+                                    <span class="terminal-prompt">$&nbsp;</span>
+                                    <input type="text" id="terminal-input" class="terminal-input" autofocus>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+
+            main.innerHTML += sectionsHtml;
+
+            // Footer
+            footer.innerHTML = `
+                <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">${content.footer.title}</h2>
+                    <p class="mt-4 text-lg text-secondary">${content.footer.subtitle}</p>
+                    <div class="mt-8"><a href="mailto:aaronchakraborty631@gmail.com" class="inline-block btn-primary font-bold py-3 px-6 rounded-md">Email Me</a></div>
+                    <p class="mt-12 text-sm text-secondary">&copy; ${new Date().getFullYear()} AARON CHAKRABORTY. All rights reserved.</p>
+                </div>`;
+                
+            document.querySelectorAll('main > section:not(#hero)').forEach(section => {
+                observer.observe(section);
+            });
+            
+            // --- TERMINAL LOGIC ---
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            const terminalBody = document.getElementById('terminal-body');
+            let commandHistory = [];
+            let historyIndex = -1;
+
+            const commands = {
+                'help': {
+                    description: 'Shows a list of all available commands.',
+                    execute: () => {
+                        let helpText = 'Available commands:<br><br>';
+                        for (const cmd in commands) {
+                            helpText += `<span class="text-[var(--accent)] w-24 inline-block">${cmd}</span> - ${commands[cmd].description}<br>`;
+                        }
+                        return helpText;
+                    }
+                },
+                'about': {
+                    description: 'Displays a summary about me.',
+                    execute: () => {
+                        window.location.href = '#about';
+                        return content.about.paragraphs.join('<br><br>');
+                    }
+                },
+                'skills': {
+                    description: 'Lists my technical skills and toolkit.',
+                    execute: () => {
+                        let skillsText = 'My Skills:<br><br>';
+                        for (const category in content.skills.categories) {
+                            skillsText += `<strong class="text-[var(--accent)]">${category}:</strong><br>`;
+                            skillsText += content.skills.categories[category].map(s => s.name).join(', ') + '<br><br>';
+                        }
+                        window.location.href = '#skills';
+                        return skillsText;
+                    }
+                },
+                'projects': {
+                    description: 'Shows some of my recent projects.',
+                    execute: () => {
+                        let projectsText = 'My Projects:<br><br>';
+                        content.projects.items.forEach(p => {
+                            projectsText += `<strong class="text-[var(--accent)]">${p.title}</strong>: ${p.description}<br>`;
+                        });
+                        window.location.href = '#projects';
+                        return projectsText;
+                    }
+                },
+                'contact': {
+                    description: 'Shows my social media and contact information.',
+                    execute: () => {
+                        let contactText = 'Get in touch:<br><br>';
+                        content.hero.socials.forEach(s => {
+                            contactText += `<strong class="text-[var(--accent)] w-24 inline-block">${s.name}:</strong> <a href="${s.url}" target="_blank" class="hover:underline">${s.url}</a><br>`;
+                        });
+                        window.location.href = '#contact';
+                        return contactText;
+                    }
+                },
+                'resume': {
+                    description: 'Provides a link to download my resume.',
+                    execute: () => {
+                        // Create a temporary link to trigger the download
+                        const a = document.createElement('a');
+                        a.href = "Aaron's Resume.pdf";
+                        a.download = "Aaron_Chakraborty_Resume.pdf";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        return 'Downloading resume...';
+                    }
+                },
+                'date': {
+                    description: 'Displays the current date and time.',
+                    execute: () => new Date().toString()
+                },
+                'echo': {
+                    description: 'Prints the given text. Usage: echo [text]',
+                    execute: (args) => args.join(' ')
+                },
+                'clear': {
+                    description: 'Clears the terminal screen.',
+                    execute: () => {
+                        terminalOutput.innerHTML = '';
+                        return ''; // No output message for clear
+                    }
+                },
+                'theme': {
+                    description: 'Changes the website theme. Usage: theme [dark|light]',
+                    execute: (args) => {
+                        const theme = args[0];
+                        if (theme === 'light' || theme === 'dark') {
+                            localStorage.setItem('color-theme', theme);
+                            return applyTheme(theme);
+                        }
+                        return 'Invalid theme. Use "light" or "dark".';
+                    }
+                },
+                'neofetch': {
+                    description: 'Displays a summary of the portfolio in a neofetch-style format.',
+                    execute: () => {
+                        const accent = 'text-[var(--accent)]';
+                        const asciiArt = `
+<pre class="${accent}">
+    _         _                       _          _   _             
+   / \\   _ __| |__   ___  _ __   __ _| |__   ___| |_| |__   ___  ___ 
+  / _ \\ | '__| '_ \\ / _ \\| '_ \\ / _\` | '_ \\ / _ \\ __| '_ \\ / _ \\/ __|
+ / ___ \\| |  | |_) | (_) | | | | (_| | |_) |  __/ |_| | | |  __/\\__ \\
+/_/   \\_\\_|  |_.__/ \\___/|_| |_|\\__,_|_.__/ \\___|\\__|_| |_|\\___||___/
+</pre>
+                        `;
+                        let neofetchHTML = asciiArt;
+                        neofetchHTML += `<div style="display: grid; grid-template-columns: 120px auto; gap: 5px 15px;">`;
+                        neofetchHTML += `<span class="${accent}">User</span><span>aaron@portfolio</span>`;
+                        neofetchHTML += `<span class="${accent}">Title</span><span>Penetration Tester</span>`;
+                        neofetchHTML += `<span class="${accent}">Location</span><span>Bhubaneswar, India</span>`;
+                        neofetchHTML += `<span class="${accent}">Kernel</span><span>Human v20.24</span>`;
+                        neofetchHTML += `<span class="${accent}">Uptime</span><span>${Math.floor(performance.now() / 1000 / 60)} minutes</span>`;
+                        neofetchHTML += `<span class="${accent}">Shell</span><span>zsh (emulated)</span>`;
+                        neofetchHTML += `<span class="${accent}">Theme</span><span>${localStorage.getItem('color-theme')}</span>`;
+                        neofetchHTML += `</div>`;
+                        return neofetchHTML;
+                    }
+                }
+            };
+
+            function executeCommand(input) {
+                const parts = input.trim().split(' ');
+                const command = parts[0].toLowerCase();
+                const args = parts.slice(1);
+
+                let outputText = '';
+                if (commands[command]) {
+                    outputText = commands[command].execute(args);
+                } else if (command !== '') {
+                    outputText = `bash: command not found: ${command}`;
+                }
+
+                const outputElement = document.createElement('div');
+                outputElement.classList.add('mb-2');
+                if (command) {
+                    outputElement.innerHTML = `<div class="flex"><span class="terminal-prompt">$&nbsp;</span><span>${input}</span></div><div class="whitespace-pre-wrap">${outputText}</div>`;
+                }
+                
+                if (outputText) { // Only append if there's something to show
+                    terminalOutput.appendChild(outputElement);
+                }
+            }
+
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const commandText = this.value;
+                    if (commandText.trim() !== '') {
+                        commandHistory.unshift(commandText);
+                        historyIndex = -1;
+                    }
+                    executeCommand(commandText);
+                    this.value = '';
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+                } else if (e.key === 'ArrowUp') {
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                        this.value = commandHistory[historyIndex];
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (historyIndex > 0) {
+                        historyIndex--;
+                        this.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = -1;
+                        this.value = '';
+                    }
+                }
+            });
+
+            document.getElementById('terminal').addEventListener('click', () => {
+                terminalInput.focus();
+            });
+
+            // Initial welcome message
+            terminalOutput.innerHTML = `<div class="mb-2">Welcome to my interactive terminal! Type 'help' to get started.</div>`;
+        }
+        
+        renderContent();
+    });
+    </script>
+</body>
+</html>
+
+
+
