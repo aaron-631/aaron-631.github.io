@@ -76,8 +76,25 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
 
     <!-- privacy-friendly analytics: no cookies, no fingerprinting, ~3KB.
          counts page views + resume downloads so I know what recruiters read.
+         no_onload + manual counting because the site navigates client-side:
+         without this only the first page of a visit would ever be counted.
          dashboard: aaron631.goatcounter.com -->
+    <script is:inline>window.goatcounter = { no_onload: true };</script>
     <script is:inline data-goatcounter="https://aaron631.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+    <script is:inline>
+      (function () {
+        function count() {
+          // count.js loads async; retry briefly if it isn't ready yet
+          var tries = 0;
+          (function go() {
+            if (window.goatcounter && window.goatcounter.count) {
+              window.goatcounter.count({ path: location.pathname });
+            } else if (tries++ < 10) setTimeout(go, 300);
+          })();
+        }
+        document.addEventListener('astro:page-load', count);
+      })();
+    </script>
 
     <ClientRouter />
 
