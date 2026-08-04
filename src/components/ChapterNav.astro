@@ -18,7 +18,9 @@ const here = chapters.find((c) => {
           <p class="font-mono text-[0.78rem] text-paper-dim">
             <span class="inline-block transition-transform group-hover:-translate-x-1">←</span> previous chapter · {prev.idx}
           </p>
-          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">{prev.title}</p>
+          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">
+            <span class="m-build">{prev.title.build}</span><span class="m-break">{prev.title.break}</span>
+          </p>
         </a>
       ) : (
         <a href="/" class="group justify-self-start text-left">
@@ -35,7 +37,9 @@ const here = chapters.find((c) => {
           <p class="font-mono text-[0.78rem] text-paper-dim">
             next chapter · {next.idx} <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
           </p>
-          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">{next.title}</p>
+          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">
+            <span class="m-build">{next.title.build}</span><span class="m-break">{next.title.break}</span>
+          </p>
         </a>
       ) : (
         <a href="/" class="group justify-self-end text-right">
@@ -54,7 +58,7 @@ const here = chapters.find((c) => {
           {chapters.map((c) => (
             <a
               href={c.href}
-              title={`${c.idx} · ${c.title}`}
+              title={`${c.idx} · ${c.title.build}`}
               class={`h-[3px] flex-1 rounded-full transition-colors ${c.href === here.href ? 'bg-accent' : 'bg-line hover:bg-accent/50'}`}
             />
           ))}

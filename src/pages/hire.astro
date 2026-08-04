@@ -1,0 +1,77 @@
+---
+// /hire/ — the 60-second version. For the recruiter with 40 tabs open.
+// No modes, no terminal, no storybook. Just the case, made fast.
+import Base from '../layouts/Base.astro';
+import { profile } from '../content/profile';
+---
+
+<Base
+  title="Hire Aaron Chakraborty · 60-second overview"
+  description="AI/ML + security engineer, graduating 2027. Trained a 567M-param LLM from scratch, disclosed a production XSS, AIR 45 in a national CTF. The quick version."
+>
+  <main class="pt-24 md:pt-14">
+    <section class="mx-auto max-w-3xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><span class="idx">// hire</span> · the 60-second version</p>
+      <h1 class="h-serif reveal text-4xl sm:text-5xl">In a hurry?<br />Here's the whole case.</h1>
+
+      <div class="reveal mt-10 space-y-10">
+        <!-- who / when -->
+        <div class="border-l-2 border-accent pl-5">
+          <p class="text-[1.05rem] leading-relaxed text-paper">
+            Aaron Chakraborty. AI/ML engineer and security researcher: I build systems from
+            scratch, then test how they fail.
+          </p>
+          <p class="mt-3 font-mono text-[0.8rem] text-paper-dim">
+            B.Tech CSE @ KIIT · CGPA 9.42 · graduating 2027 · currently Technology Apprentice @ DBS Tech India (SEED)
+            <br />open to: AI/ML engineering · security engineering · placement season 2026-27
+          </p>
+        </div>
+
+        <!-- the three proofs -->
+        <div>
+          <p class="label-mono mb-4">three things that are true and verifiable</p>
+          <ol class="space-y-4 text-[0.98rem] leading-relaxed text-paper-dim">
+            <li class="flex gap-3">
+              <span class="font-mono text-accent">1.</span>
+              <span>Trained a <span class="text-paper">567,068,416-parameter MoE transformer from scratch</span> on a single A100: my architecture, 30,000 steps, 86/86 tests. <a class="link" href="/projects/vantallm/">case study</a></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="font-mono text-accent">2.</span>
+              <span>Found and responsibly disclosed a <span class="text-paper">reflected XSS in a production AI chatbot</span> (Yatra.com); vendor acknowledged and fixed it. <a class="link" href="/work/#disclosure">the disclosure</a></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="font-mono text-accent">3.</span>
+              <span><span class="text-paper">AIR 45, top 0.90%</span>, at Pentathon 2025, a 48-hour national CTF, playing mostly solo. Plus eJPTv2 at 91%.</span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- the two systems -->
+        <div>
+          <p class="label-mono mb-4">two systems worth your time</p>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <a href="/projects/vantallm/" class="group border border-line bg-ink p-5 transition-colors hover:border-accent/60">
+              <p class="font-mono text-[0.95rem] text-paper transition-colors group-hover:text-accent">VantaLLM →</p>
+              <p class="mt-2 text-[0.85rem] leading-relaxed text-paper-dim">567M-param MoE LLM, from-scratch training framework. Scales 567M → 125B by config.</p>
+            </a>
+            <a href="/projects/argus/" class="group border border-line bg-ink p-5 transition-colors hover:border-accent/60">
+              <p class="font-mono text-[0.95rem] text-paper transition-colors group-hover:text-accent">Project Argus →</p>
+              <p class="mt-2 text-[0.85rem] leading-relaxed text-paper-dim">Two-layer AI-agent security platform: release gate + runtime gateway. Public repo.</p>
+            </a>
+          </div>
+        </div>
+
+        <!-- act -->
+        <div class="flex flex-wrap items-center gap-4 border-t border-dashed border-line pt-8">
+          <a href="/resume.pdf" download="Aaron_Chakraborty_Resume.pdf" class="btn-accent">download resume ↓</a>
+          <a href={profile.links.email + '?subject=Saw%20the%2060-second%20version'} class="btn-ghost">email me →</a>
+          <a href={profile.links.linkedin} target="_blank" rel="noopener" class="btn-ghost">linkedin →</a>
+        </div>
+
+        <p class="font-mono text-[0.75rem] text-paper-dim">
+          got more than 60 seconds? the <a class="link" href="/">full site</a> is a much better story.
+        </p>
+      </div>
+    </section>
+  </main>
+</Base>

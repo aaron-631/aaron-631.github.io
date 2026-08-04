@@ -1,0 +1,13 @@
+/* TEAM */
+Developer, designer, writer: Aaron Chakraborty
+Contact: aaronchakraborty631@gmail.com
+Location: Bhubaneswar, Odisha, India
+
+/* SITE */
+Stack: Astro 5, Tailwind CSS v4, Firebase, Cloudflare Workers, Gemini
+Hosting: GitHub Pages
+Design: "Terminal Editorial" — serif headlines, mono artifacts, one amber accent
+Built: mostly after midnight, 2026
+
+/* NOTE */
+Every claim on this site carries a receipt. Check them.

@@ -258,13 +258,21 @@ html[data-mode='break'] .m-build { display: none !important; }
 .reveal.in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .cursor-block, .logo-block { animation: none; }
   #intro { display: none; }
-  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  /* motion-sensitive ≠ no feedback: page turns become a quick, still crossfade.
+     (Windows "Animation effects: off" turns this query on for the whole PC,
+     which is why a desktop can see none of the movement a phone shows.) */
+  ::view-transition-old(root) { animation: vt-fade-out 0.22s ease both !important; }
+  ::view-transition-new(root) { animation: vt-fade-in 0.22s ease both !important; }
+  html[data-astro-transition-fallback='old'] body { animation: vt-fade-out 0.18s ease both !important; }
+  html[data-astro-transition-fallback='new'] body { animation: vt-fade-in 0.22s ease both !important; }
 }
+@keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ── links ── */
 .link {
@@ -430,41 +438,43 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 .nudge { animation: nudge-pulse 1.6s ease-in-out 3; }
 
 /* ── page turns, a real leaf. The old chapter is ON TOP and folds away
-   from the spine (left edge), darkening as it lifts; the new chapter is
-   already lying beneath it, easing flat. Transform/opacity/filter only:
-   compositor-driven, zero scroll jank. ── */
+   from the spine (left edge), darkening as it lifts; the new chapter
+   slides in from the right edge like the next page settling flat.
+   Slow enough to read on a 27" monitor, quick enough to never feel laggy.
+   Transform/opacity/filter only: compositor-driven, zero scroll jank. ── */
 @keyframes page-fold-away {
-  0%   { transform: perspective(1400px) rotateY(0deg); filter: brightness(1); opacity: 1; }
-  55%  { opacity: 1; }
-  100% { transform: perspective(1400px) rotateY(-68deg) translateX(-2%); filter: brightness(0.55); opacity: 0; }
+  0%   { transform: perspective(1200px) rotateY(0deg); filter: brightness(1); opacity: 1; }
+  60%  { opacity: 1; filter: brightness(0.7); }
+  100% { transform: perspective(1200px) rotateY(-78deg) translateX(-3%); filter: brightness(0.45); opacity: 0; }
 }
 @keyframes page-settle {
-  0%   { transform: scale(0.985) translateX(1.2%); filter: brightness(0.82); }
-  100% { transform: none; filter: brightness(1); }
+  0%   { transform: translateX(2.5%) scale(0.985); filter: brightness(0.75); opacity: 0.6; }
+  100% { transform: none; filter: brightness(1); opacity: 1; }
 }
 ::view-transition-group(root) { background: var(--color-ink); }
 ::view-transition-old(root) {
   transform-origin: left center; /* the book's spine */
-  animation: page-fold-away 0.4s cubic-bezier(0.5, 0.05, 0.7, 0.3) both;
+  animation: page-fold-away 0.5s cubic-bezier(0.45, 0.05, 0.6, 0.35) both;
   z-index: 2; /* the turning leaf stays above the incoming page */
 }
 ::view-transition-new(root) {
-  transform-origin: center center;
-  animation: page-settle 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left center;
+  animation: page-settle 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
   z-index: 1;
 }
 /* the room behind the turning page stays ink, never white */
 ::view-transition { background: var(--color-ink); }
 
-/* browsers without the View Transitions API (desktop Firefox, older Safari):
-   Astro's ClientRouter falls back to attribute-marked phases. Give them the
-   same fold so desktop feels identical to mobile. */
+/* browsers without the View Transitions API (desktop Firefox pre-139, older
+   Safari): Astro's ClientRouter falls back to attribute-marked phases. Give
+   them the same fold so desktop feels identical to mobile. */
 html[data-astro-transition-fallback='old'] body {
   transform-origin: left center;
-  animation: page-fold-away 0.32s cubic-bezier(0.5, 0.05, 0.7, 0.3) both;
+  animation: page-fold-away 0.38s cubic-bezier(0.45, 0.05, 0.6, 0.35) both;
 }
 html[data-astro-transition-fallback='new'] body {
-  animation: page-settle 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left center;
+  animation: page-settle 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ── contact, every door lit, email loudest ── */

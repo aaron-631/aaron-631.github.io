@@ -30,15 +30,21 @@ export const profile = {
     break: 'offensive security researcher',
   },
   chips: [
-    { label: '567M params trained', href: '#vantallm' },
-    { label: 'AIR 45 · top 0.90%', href: '#journey' },
-    { label: '1 production XSS disclosed', href: '#disclosure' },
+    { label: '567M params trained', href: '/projects/#vantallm' },
+    { label: 'AIR 45 · top 0.90%', href: '/about/#journey' },
+    { label: '1 production XSS disclosed', href: '/work/#disclosure' },
   ],
   // The human bit. This is the part recruiters actually remember.
+  // Two tellings of the same life: the builder's and the breaker's.
   about: [
     "There's no grand origin story here. Somewhere in second year I looked around, saw how easy it was to coast through college, and realised that scared me more than failing ever did. So I went at the two things that intimidated me the most: AI and LLMs in general, and security, breaking the things people assume are safe.",
     'Before tech I actually wanted the Indian Army. Cleared the Service Selection Board, All India Rank 83. Five days with people whose entire job is figuring out who you really are. I ended up not joining, but those five days rewired how I work. Show up, do the reps, no excuses.',
     "Everything else is pretty simple: coffee, David Goggins podcasts, and posting whatever I'm building or breaking on X. Including the failures. Especially the failures, honestly, because the OOM crashes and NCCL hangs taught me more than anything that worked first try.",
+  ],
+  aboutBreak: [
+    "Here's the part the other mode won't tell you: I got into security because breaking something honestly is the fastest way to actually understand it. Second year, everyone around me was suddenly trusting AI with everything, and almost nobody was asking how it fails. That question stuck. It still hasn't let go.",
+    "Before any of this I wanted the Indian Army. Cleared the Service Selection Board, All India Rank 83. Five days with assessors whose entire job is finding the gap between who you say you are and who you actually are. I didn't join, but that's more or less what I do to software now: find the gap between what it claims and what it does.",
+    "The rest: coffee, Goggins podcasts, and hunting on HackerOne and Bugcrowd at hours I won't defend. The Yatra chatbot XSS started as 'let me just poke it once before bed'. It usually starts like that.",
   ],
   // one closing line, re-lensed per mode
   aboutClose: {

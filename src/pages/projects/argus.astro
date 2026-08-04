@@ -1,0 +1,123 @@
+---
+// Project Argus, the full case study. Shareable, indexable, no modals.
+import Base from '../../layouts/Base.astro';
+
+const ARGUS_ARCH = `  ┌─────────────────────────────────────────────┐
+  │ ARGUS · two gates for AI agents             │
+  ├─────────────────────────────────────────────┤
+  │ V1 · release gate (local-first)             │
+  │  repo/config/skills → 27 canonical rules    │
+  │  → live probes (opt-in) → mcp-probe         │
+  │  → R = (S_base × C_env) × P_conf            │
+  │  → report.json / report.md → PASS | BLOCK   │
+  ├─────────────────────────────────────────────┤
+  │ V2 · runtime gateway                        │
+  │  agent → [request policy → approval 428     │
+  │  → upstream → redact/block → audit chain]   │
+  │  → model · /healthz · /metrics              │
+  └─────────────────────────────────────────────┘`;
+---
+
+<Base
+  title="Project Argus case study · Aaron Chakraborty"
+  description="A two-layer security platform for AI agents: a local-first release gate with 27 canonical rules, and a runtime gateway that blocks prompt injection before it reaches the model."
+>
+  <main class="pt-24 md:pt-14">
+    <article class="mx-auto max-w-3xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><a class="link" href="/projects/">← projects</a> <span class="idx">/ case study</span></p>
+      <h1 class="h-serif reveal text-4xl sm:text-5xl">Project Argus.</h1>
+      <p class="reveal mt-4 font-mono text-[0.8rem] text-paper-dim">
+        AI-agent security platform · 27 canonical rules · runtime gateway · 53 tests ·
+        <a class="link" href="https://github.com/aaron-631/PROJECT-ARGUS" target="_blank" rel="noopener">public on github</a>
+      </p>
+
+      <div class="reveal mt-10 space-y-14 text-[1.02rem] leading-[1.8] text-paper-dim">
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">01</span> · the problem</h2>
+          <p>
+            I found an XSS in a production AI chatbot by hand. That bug got fixed, but the class of
+            bug didn't go anywhere: teams are shipping AI agents with tool access, file access, and
+            network access, and almost nobody audits what those agents are actually allowed to do
+            before they go live. The question Argus answers is the one I kept asking manually:
+            <em class="text-paper">would I let this agent near production?</em>
+          </p>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">02</span> · the constraints</h2>
+          <ul class="space-y-3">
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>Local-first. A security audit tool that phones home is its own vulnerability. V1 runs entirely on your machine; live probes are opt-in.</span></li>
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>Deterministic where it matters. An LLM judge can nudge confidence, but it can never erase a canonical failure. Findings must be reproducible.</span></li>
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>Read-only recon. Probing a live MCP server must never call its tools. Enumerate, don't execute.</span></li>
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>CI-gateable output: structured JSON and Markdown reports a pipeline can block a release on.</span></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">03</span> · the architecture</h2>
+          <pre class="pane-body overflow-x-auto rounded-md border border-line bg-ink-2 font-mono text-[0.7rem] leading-snug sm:text-[0.78rem]" aria-label="Argus architecture diagram">{ARGUS_ARCH}</pre>
+          <p class="mt-6">
+            Two gates. <span class="text-paper">V1 is the release gate</span>: it audits an agent's
+            repo, tools, permissions, secrets, MCP servers, and network config against 27 canonical
+            rules with explicit capability contracts. AST analysis for Python, structured parsing
+            for JSON/YAML/TOML, text rules for the rest, and a structured rule is never silently
+            run against the wrong file type. Risk comes out as
+            <span class="font-mono text-[0.85rem]">R = (S_base × C_env) × P_conf</span>, clamped to
+            documented bounds, with deployment profiles making context explicit: a banking agent
+            scores differently from a public FAQ bot, on purpose.
+          </p>
+          <p class="mt-4">
+            <span class="text-paper">V2 is the runtime gateway</span>: it sits between the agent
+            and its model. Prompt injection gets a 403 before the request reaches the model.
+            Destructive tool calls are held. Business-impacting ones force human approval with an
+            HTTP 428. Responses are inspected too: credential-looking output is stopped with a 502,
+            sensitive fields are redacted, and every decision lands in a hash-chained audit log
+            that tampering would break.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">04</span> · what I owned</h2>
+          <p>
+            All of it. The two-gate design, the rule taxonomy, the risk model and its clamping
+            behaviour, the decision that mcp-probe would be read-only, the audit-chain format.
+            This is the tool version of how I already work: break it by hand first, then encode
+            what I learned so it catches the next one automatically.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">05</span> · failures & fixes</h2>
+          <ul class="space-y-4">
+            <li>
+              <p class="font-mono text-[0.8rem] text-crit">rules firing on the wrong file types</p>
+              <p class="mt-1">Early versions ran text rules against structured files and produced garbage findings. The fix was capability contracts: every rule declares what it can parse, and the engine refuses mismatches instead of guessing.</p>
+            </li>
+            <li>
+              <p class="font-mono text-[0.8rem] text-crit">the LLM judge being too persuasive</p>
+              <p class="mt-1">A semantic judge that can downgrade findings is a prompt-injection target. Now it can only nudge P_conf within bounds; canonical failures are immune to it by construction.</p>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">06</span> · results</h2>
+          <ul class="space-y-3 font-mono text-[0.85rem]">
+            <li><span class="text-accent">▸</span> real-world run: official pinned MCP filesystem server, 14 tools enumerated, 0 tool calls made, 2 HIGH findings, verdict BLOCK</li>
+            <li><span class="text-accent">▸</span> has scanned the configs of Claude Code, Codex CLI, and Gemini CLI</li>
+            <li><span class="text-accent">▸</span> 53 tests + Black + Flake8 + mypy + schema checks, green on every push</li>
+            <li><span class="text-accent">▸</span> reproducible JSON/Markdown reports, documented end-to-end in WORKFLOW.md</li>
+          </ul>
+        </section>
+
+        <section class="border-t border-dashed border-line pt-8">
+          <p class="font-mono text-[0.8rem]">
+            <a class="link" href="https://github.com/aaron-631/PROJECT-ARGUS" target="_blank" rel="noopener">read the source</a>
+            · <a class="link" href="/projects/#argus">back to projects</a>
+            · <a class="link" href="/projects/vantallm/">previous case study: VantaLLM →</a>
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+</Base>

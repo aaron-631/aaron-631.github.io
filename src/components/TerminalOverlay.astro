@@ -41,6 +41,7 @@
 <script>
   import { wireTerminal } from './Terminal';
   import { getMode } from './mode';
+  import { trapFocus, releaseFocus } from './focus-trap';
 
   wireTerminal('term-out-overlay', 'term-in-overlay');
 
@@ -50,12 +51,15 @@
   function openTerm() {
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
+    trapFocus(overlay);
     // don't auto-focus on touch devices, the keyboard would cover the pane
     if (window.matchMedia('(pointer: fine)').matches) setTimeout(() => overlayInput.focus(), 30);
   }
   function closeTerm() {
+    if (overlay.classList.contains('hidden')) return;
     overlay.classList.add('hidden');
     overlay.classList.remove('flex');
+    releaseFocus();
   }
 
   document.addEventListener('keydown', (e) => {

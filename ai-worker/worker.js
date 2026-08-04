@@ -49,6 +49,26 @@ function cors(origin) {
   };
 }
 
+// ── rate limit, per-IP, in-isolate. Not perfect (isolates recycle), but it
+// stops the obvious abuse: a loop hammering /ask burning Gemini quota.
+// 20 requests per IP per 5 minutes is far more than any human visitor needs.
+const RL_WINDOW_MS = 5 * 60 * 1000;
+const RL_MAX = 20;
+const rlHits = new Map(); // ip -> [timestamps]
+
+function rateLimited(ip) {
+  const now = Date.now();
+  const hits = (rlHits.get(ip) ?? []).filter((t) => now - t < RL_WINDOW_MS);
+  if (hits.length >= RL_MAX) {
+    rlHits.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  rlHits.set(ip, hits);
+  if (rlHits.size > 5000) rlHits.clear(); // memory backstop
+  return false;
+}
+
 async function gemini(env, contents, generationConfig) {
   const res = await fetch(API, {
     method: 'POST',
@@ -135,6 +155,15 @@ export default {
     const headers = cors(origin);
     if (req.method === 'OPTIONS') return new Response(null, { headers });
     if (req.method !== 'POST') return new Response('{"error":"POST only"}', { status: 405, headers });
+
+    // origin gate: only the site (and localhost dev) may spend the quota
+    if (!ALLOWED_ORIGINS.includes(origin)) {
+      return new Response('{"error":"forbidden"}', { status: 403, headers });
+    }
+    const ip = req.headers.get('CF-Connecting-IP') ?? 'unknown';
+    if (rateLimited(ip)) {
+      return new Response('{"error":"slow down"}', { status: 429, headers });
+    }
 
     const url = new URL(req.url);
     try {

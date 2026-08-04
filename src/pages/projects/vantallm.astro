@@ -1,0 +1,126 @@
+---
+// VantaLLM, the full case study. The dossier on /projects/ is the trailer;
+// this is the film. One page, shareable URL, no modals, no tricks.
+import Base from '../../layouts/Base.astro';
+
+const ARCH = `  ┌────────────────────────────────────────────┐
+  │ VantaLLM · decoder-only · 567,068,416 params│
+  ├────────────────────────────────────────────┤
+  │ tok(151,003) → emb → 12× [ RMSNorm         │
+  │   → GQA + RoPE (shared lazy cache)         │
+  │   → dense FFN ⇄ MoE 16e top-2              │
+  │     (batched grouped-GEMM, cap=1.25) ]     │
+  │ → RMSNorm → lm_head                        │
+  ├────────────────────────────────────────────┤
+  │ train: DDP / DeepSpeed ZeRO-2·3 · bf16     │
+  │ serve: FastAPI · SSE · persona routing     │
+  └────────────────────────────────────────────┘`;
+---
+
+<Base
+  title="VantaLLM case study · Aaron Chakraborty"
+  description="How I trained a 567M-parameter MoE transformer from scratch on a single A100: the architecture, the constraints, the failures, and what came out the other side."
+>
+  <main class="pt-24 md:pt-14">
+    <article class="mx-auto max-w-3xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><a class="link" href="/projects/">← projects</a> <span class="idx">/ case study</span></p>
+      <h1 class="h-serif reveal text-4xl sm:text-5xl">VantaLLM.</h1>
+      <p class="reveal mt-4 font-mono text-[0.8rem] text-paper-dim">
+        567,068,416 params · trained from scratch · single A100 20GB · 30,000 steps · 86/86 tests
+      </p>
+
+      <div class="reveal mt-10 space-y-14 text-[1.02rem] leading-[1.8] text-paper-dim">
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">01</span> · the problem</h2>
+          <p>
+            During my research internship at SwiftSafe I was handed the kind of brief you don't get
+            twice as a third-year: build the company an LLM stack. Not fine-tune something, not wrap
+            an API. A framework that could train decoder-only models from random weights, on
+            security-domain data, on whatever hardware we could get.
+          </p>
+          <p class="mt-4">
+            The honest version of why this was hard: I had never trained anything past a toy model.
+            Most people at that point reach for a fine-tune. I decided that if I was going to own
+            an LLM, I wanted to own all of it, which meant starting from an empty repo.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">02</span> · the constraints</h2>
+          <ul class="space-y-3">
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>One A100 with 20GB usable. Not a cluster. Every architecture decision had to survive that budget.</span></li>
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>The same codebase had to scale from a 567M dev model to a 125B bring-up profile by editing a JSON config. No forks, no "big model branch".</span></li>
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>Security-native from day one: the tokenizer had to round-trip SQLi payloads and CVE strings exactly, because a security model that shreds its own domain vocabulary is useless.</span></li>
+            <li class="flex gap-2.5"><span class="mt-[0.65rem] h-px w-3 shrink-0 bg-accent"></span><span>Everything testable. If a component couldn't be verified against a reference implementation, it didn't ship.</span></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">03</span> · the architecture</h2>
+          <pre class="pane-body overflow-x-auto rounded-md border border-line bg-ink-2 font-mono text-[0.7rem] leading-snug sm:text-[0.78rem]" aria-label="VantaLLM architecture diagram">{ARCH}</pre>
+          <p class="mt-6">
+            Decoder-only, 12 layers, with alternating dense FFN and Mixture-of-Experts blocks:
+            16 experts, top-2 routing, capacity factor 1.25. Grouped-query attention with RoPE and
+            a shared lazy cache keeps the KV memory sane on 20GB. RMSNorm and SwiGLU because they
+            earn their place, not because a paper said so. The tokenizer is a custom 151,003-token
+            BPE trained on security corpora.
+          </p>
+          <p class="mt-4">
+            Training runs through DDP or DeepSpeed ZeRO-2/3 in bf16, picked per hardware profile.
+            Serving is FastAPI with SSE streaming and persona routing.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">04</span> · what I owned</h2>
+          <p>
+            The architecture and every technical call in it: the MoE layout, the routing strategy,
+            the tokenizer decision, the scaling-by-config design, the test plan. I used AI tooling
+            in the loop the way modern teams do, and I reviewed and debugged every line that
+            mattered, because when a training run hangs at 3am the tooling doesn't debug it for
+            you. I can explain every layer because I had to debug every layer.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">05</span> · failures & fixes</h2>
+          <ul class="space-y-4">
+            <li>
+              <p class="font-mono text-[0.8rem] text-crit">ZeRO-3 param-gather hang</p>
+              <p class="mt-1">A Python loop over 128 experts deadlocked DeepSpeed's parameter gathering. The fix replaced the loop with three batched tensor ops, a grouped-GEMM formulation. Verified equivalent to the naive loop within 5.22e-08. That debugging week taught me more about distributed training than any course.</p>
+            </li>
+            <li>
+              <p class="font-mono text-[0.8rem] text-crit">OOM crashes, repeatedly</p>
+              <p class="mt-1">20GB is unforgiving at 567M params with optimizer states. Activation checkpointing choices, bf16 everywhere it's safe, and honest measurements of what each block actually costs. Posted the crashes on X as they happened.</p>
+            </li>
+            <li>
+              <p class="font-mono text-[0.8rem] text-crit">multi-node launches hanging at 0% GPU</p>
+              <p class="mt-1">NAT and duplicate-IP setups made NCCL hang silently. The launcher now fails fast with a real error message instead. Paranoia as a design principle.</p>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="label-mono mb-4"><span class="idx">06</span> · results</h2>
+          <ul class="space-y-3 font-mono text-[0.85rem]">
+            <li><span class="text-accent">▸</span> 30,000-step training run completed on a single A100 20GB</li>
+            <li><span class="text-accent">▸</span> param_count = 567,068,416, exact, not estimated</li>
+            <li><span class="text-accent">▸</span> 86/86 tests: 41 unit · 20 integration · 25 live serving, green in CI</li>
+            <li><span class="text-accent">▸</span> KV-cache decode bit-identical to no-cache decode</li>
+            <li><span class="text-accent">▸</span> tokenizer round-trips SQLi payloads and CVE strings exactly</li>
+            <li><span class="text-accent">▸</span> the build-in-public thread crossed 7,800 impressions</li>
+          </ul>
+        </section>
+
+        <section class="border-t border-dashed border-line pt-8">
+          <p class="font-mono text-[0.8rem]">
+            The repo is private (company work). I walk people through it on request:
+            <a class="link" href="mailto:aaronchakraborty631@gmail.com?subject=VantaLLM%20walkthrough">ask for the walkthrough</a>
+            · <a class="link" href="/projects/#vantallm">back to projects</a>
+            · <a class="link" href="/projects/argus/">next case study: Argus →</a>
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+</Base>

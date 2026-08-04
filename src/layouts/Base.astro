@@ -65,6 +65,7 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content="https://aaron-631.github.io/og.png" />
+    <meta property="og:image:alt" content="Aaron Chakraborty, AI/ML security engineer. Builds AI systems, then breaks them." />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
@@ -72,6 +73,11 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
     <meta name="twitter:creator" content="@AaronChakr47884" />
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- privacy-friendly analytics: no cookies, no fingerprinting, ~3KB.
+         counts page views + resume downloads so I know what recruiters read.
+         dashboard: aaron631.goatcounter.com -->
+    <script is:inline data-goatcounter="https://aaron631.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 
     <ClientRouter />
 

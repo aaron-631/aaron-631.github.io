@@ -1,0 +1,35 @@
+# Aaron Chakraborty
+
+> AI/ML Security Engineer. B.Tech CSE at KIIT, Bhubaneswar (graduating 2027, CGPA 9.42).
+> Builds AI systems from scratch, then breaks them. This file is the site's index for
+> AI crawlers and agents.
+
+## Who
+
+Aaron trained VantaLLM, a 567,068,416-parameter Mixture-of-Experts transformer, from
+scratch (random weights, his own architecture) on a single A100 over 30,000 steps.
+He also found and responsibly disclosed a reflected XSS in Yatra.com's production AI
+chatbot, placed AIR 45 (top 0.90%) at Pentathon 2025, and holds eJPTv2 (91%).
+Currently a Technology Apprentice at DBS Tech India (SEED programme). Open to AI/ML
+engineering and security engineering roles, placement season 2026-27.
+
+## Navigation
+
+- [Home](https://aaron-631.github.io/): the thesis, the numbers, the chapter doors
+- [Hire (60-second view)](https://aaron-631.github.io/hire/): the quick case for recruiters
+- [About](https://aaron-631.github.io/about/): the person, the IoT Lab years, the journey
+- [Work](https://aaron-631.github.io/work/): experience with receipts, the XSS disclosure
+- [Projects](https://aaron-631.github.io/projects/): VantaLLM, Argus, ReconForge, more
+- [VantaLLM case study](https://aaron-631.github.io/projects/vantallm/): the full training story
+- [Argus case study](https://aaron-631.github.io/projects/argus/): AI-agent security platform
+- [Writing](https://aaron-631.github.io/writing/): build-in-public posts, crashes included
+- [The wall](https://aaron-631.github.io/wall/): live named recommendations
+- [Contact](https://aaron-631.github.io/contact/): every channel, plus the Argus scan
+
+## Contacts
+
+- Email: aaronchakraborty631@gmail.com
+- GitHub: https://github.com/aaron-631
+- LinkedIn: https://www.linkedin.com/in/aaron-chakraborty-309197287
+- X: https://x.com/AaronChakr47884
+- Resume: https://aaron-631.github.io/resume.pdf

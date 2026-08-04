@@ -60,6 +60,8 @@
 </style>
 
 <script>
+  import { trapFocus, releaseFocus } from './focus-trap';
+
   const view = document.getElementById('resume-view')!;
   const frame = document.getElementById('resume-frame') as HTMLIFrameElement;
   const peek = document.getElementById('resume-peek')!;
@@ -70,11 +72,15 @@
     view.classList.remove('hidden');
     view.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    trapFocus(view);
+    (document.getElementById('resume-close') as HTMLElement | null)?.focus();
   }
   function closeView() {
+    if (view.classList.contains('hidden')) return;
     view.classList.add('hidden');
     view.classList.remove('flex');
     document.body.style.overflow = '';
+    releaseFocus();
   }
 
   const isResumeLink = (el: HTMLElement | null) =>

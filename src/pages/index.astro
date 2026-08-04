@@ -56,8 +56,12 @@ import { chapters } from '../content/chapters';
             >
               <div>
                 <p class="label-mono mb-4"><span class="idx">// {c.idx}</span></p>
-                <h3 class="h-serif text-2xl text-paper">{c.title}</h3>
-                <p class="mt-3 text-[0.9rem] leading-relaxed text-paper-dim">{c.hook}</p>
+                <h3 class="h-serif text-2xl text-paper">
+                  <span class="m-build">{c.title.build}</span><span class="m-break">{c.title.break}</span>
+                </h3>
+                <p class="mt-3 text-[0.9rem] leading-relaxed text-paper-dim">
+                  <span class="m-build">{c.hook.build}</span><span class="m-break">{c.hook.break}</span>
+                </p>
               </div>
               <p class="mt-8 font-mono text-[0.75rem] text-paper-dim transition-colors group-hover:text-accent">
                 <span class="t-prompt">$ </span>{c.cmd}

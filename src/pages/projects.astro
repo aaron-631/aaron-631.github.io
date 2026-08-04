@@ -101,7 +101,9 @@ const ARGUS_ARCH = `  ┌──────────────────�
           </div>
           <div class="proof-detail mt-3 hidden" data-proof-out></div>
           <p class="mt-7 font-mono text-[0.75rem] text-paper-dim">
-            → <a class="link" href={flagship.links[0].href}>{flagship.links[0].label}</a>
+            → <a class="link" href="/projects/vantallm/">read the full case study</a>
+            <span class="text-line"> · </span>
+            <a class="link" href={flagship.links[0].href}>{flagship.links[0].label}</a>
           </p>
         </div>
 
@@ -170,7 +172,9 @@ const ARGUS_ARCH = `  ┌──────────────────�
           </div>
           <div class="proof-detail mt-3 hidden" data-proof-out></div>
           <p class="mt-7 font-mono text-[0.75rem] text-paper-dim">
-            → <a class="link" href={argus.links[0].href} target="_blank" rel="noopener">{argus.links[0].label}</a>
+            → <a class="link" href="/projects/argus/">read the full case study</a>
+            <span class="text-line"> · </span>
+            <a class="link" href={argus.links[0].href} target="_blank" rel="noopener">{argus.links[0].label}</a>
           </p>
         </div>
       </article>
@@ -344,6 +348,8 @@ const ARGUS_ARCH = `  ┌──────────────────�
 </style>
 
 <script>
+  import { trapFocus, releaseFocus } from '../components/focus-trap';
+
   document.addEventListener('astro:page-load', () => {
     // ── dossier panel: card → centre-stage reading panel ──
     const dossier = document.getElementById('dossier');
@@ -357,11 +363,14 @@ const ARGUS_ARCH = `  ┌──────────────────�
         });
         dossier.classList.add('open');
         document.body.style.overflow = 'hidden';
+        trapFocus(dossier);
         (dossier.querySelector('.dossier-page:not(.hidden) .dossier-close') as HTMLElement | null)?.focus();
       };
       const close = () => {
+        if (!dossier.classList.contains('open')) return;
         dossier.classList.remove('open');
         document.body.style.overflow = '';
+        releaseFocus();
         lastFocus?.focus();
       };
 
