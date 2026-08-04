@@ -1,0 +1,43 @@
+---
+// About — the human part. Photo, the real story, and a "now" block.
+// This is deliberately written like I talk, not like a resume.
+import { profile } from '../content/profile';
+import { now } from '../content/writing';
+---
+
+<section id="about" class="border-t border-line">
+  <div class="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-5 py-24 lg:grid-cols-[0.8fr_1.2fr]">
+    <div class="reveal">
+      <div class="relative max-w-[19rem]">
+        <img
+          src="/aaron.jpg"
+          alt="Aaron Chakraborty"
+          width="304"
+          height="405"
+          loading="lazy"
+          class="w-full rounded-sm border border-line object-cover grayscale-[35%] transition-all duration-300 hover:grayscale-0"
+          style="aspect-ratio: 3/4;"
+        />
+        <p class="mt-3 font-mono text-[0.68rem] text-paper-dim">
+          <span class="text-accent">$</span> whoami — bhubaneswar, india · est. 2005
+        </p>
+      </div>
+
+      <!-- now block — dated, alive -->
+      <div class="mt-10 border-l-2 border-accent pl-4">
+        <p class="label-mono mb-2">now · {now.updated}</p>
+        <ul class="space-y-1.5 font-mono text-[0.78rem] text-paper-dim">
+          {now.items.map((i) => <li>→ {i}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <p class="label-mono reveal mb-3"><span class="idx">// 00</span> — about</p>
+      <h2 class="h-serif reveal mb-8 text-4xl sm:text-5xl">Not your average<br />college guy. On purpose.</h2>
+      <div class="reveal space-y-5 text-[1.02rem] leading-relaxed text-paper-dim">
+        {profile.about.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,57 @@
+---
+// Arsenal (skills as a man page) + Journey (shell history).
+import { arsenal } from '../content/writing';
+import { journey } from '../content/achievements';
+---
+
+<section id="arsenal" class="border-t border-line bg-ink-2/30">
+  <div class="mx-auto max-w-6xl px-5 py-24">
+    <p class="label-mono reveal mb-3"><span class="idx">// 04</span> — arsenal</p>
+    <h2 class="h-serif reveal mb-4 text-4xl sm:text-5xl">man aaron</h2>
+    <p class="reveal mb-12 max-w-md font-mono text-[0.8rem] text-paper-dim">
+      No skill bars, no percentages. If it's listed here, I've shipped something with it.
+    </p>
+
+    <div class="grid grid-cols-1 gap-10 font-mono md:grid-cols-3">
+      {
+        Object.entries(arsenal).map(([group, items]) => (
+          <div class="reveal">
+            <h3 class="mb-4 text-[0.72rem] tracking-widest text-accent uppercase">{group}</h3>
+            <ul class="space-y-1.5 text-[0.82rem] text-paper-dim">
+              {items.map((i) => (
+                <li class="border-l border-line pl-3 transition-colors hover:border-accent hover:text-paper">{i}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<section id="journey" class="mx-auto max-w-6xl px-5 py-24">
+  <p class="label-mono reveal mb-3"><span class="idx">// 05</span> — journey</p>
+  <h2 class="h-serif reveal mb-12 text-4xl sm:text-5xl">$ history</h2>
+
+  <div class="pane reveal max-w-3xl">
+    <div class="pane-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="ml-2">~/.aaron_history</span>
+    </div>
+    <div class="pane-body space-y-2">
+      {
+        journey.map((h, i) => (
+          <p class="group grid grid-cols-[2rem_5.5rem_1fr] gap-2 sm:grid-cols-[2.5rem_6.5rem_1fr]">
+            <span class="t-dim text-right">{i + 1}</span>
+            <span class="t-dim">{h.date}</span>
+            <span>
+              <span class={h.kind === 'achievement' ? 't-warn' : h.kind === 'cert' ? 't-ok' : 'text-paper'}>{h.cmd}</span>
+              <span class="t-dim block pl-0 sm:inline sm:pl-2"># {h.note}</span>
+            </span>
+          </p>
+        ))
+      }
+      <p class="pt-2"><span class="t-prompt">$ </span><span class="cursor-block"></span></p>
+    </div>
+  </div>
+</section>

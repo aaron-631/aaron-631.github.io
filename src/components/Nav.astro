@@ -1,0 +1,79 @@
+---
+// Nav — block-cursor mark, sparse links, BUILD/BREAK rocker, terminal hint.
+---
+
+<nav
+  class="fixed top-0 left-0 right-0 z-50 border-b border-line bg-ink/85 backdrop-blur-sm"
+  aria-label="Primary"
+>
+  <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
+    <a href="#top" class="flex items-baseline gap-0.5 font-mono text-lg text-paper" aria-label="Aaron Chakraborty — home">
+      <span>a</span><span class="text-accent">▮</span>
+    </a>
+
+    <!-- live local time — proof there's a human in Asia/Kolkata behind this -->
+    <span class="hidden font-mono text-[0.68rem] text-paper-dim lg:inline" id="ist-clock" title="my local time">
+      bhubaneswar · <span data-time>--:--</span> IST
+    </span>
+
+    <div class="hidden items-center gap-6 font-mono text-[0.72rem] tracking-widest uppercase md:flex">
+      <a class="text-paper-dim transition-colors hover:text-accent" href="#about">about</a>
+      <a class="text-paper-dim transition-colors hover:text-accent" href="#work">work</a>
+      <a class="text-paper-dim transition-colors hover:text-accent" href="#projects">projects</a>
+      <a class="text-paper-dim transition-colors hover:text-accent" href="#disclosure">disclosure</a>
+      <a class="text-paper-dim transition-colors hover:text-accent" href="#writing">writing</a>
+      <a class="text-paper-dim transition-colors hover:text-accent" href="#contact">contact</a>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <!-- the dual-lens rocker -->
+      <button
+        id="mode-toggle"
+        class="group flex items-center gap-2 rounded-sm border border-line px-2.5 py-1.5 font-mono text-[0.7rem] transition-colors hover:border-accent"
+        aria-label="Toggle between build and break mode"
+        title="dual_use=true"
+      >
+        <span class="mode-opt mode-build text-accent">BUILD</span>
+        <span class="text-line">/</span>
+        <span class="mode-opt mode-break text-paper-dim">BREAK</span>
+      </button>
+
+      <button
+        id="terminal-hint"
+        class="hidden items-center gap-1.5 font-mono text-[0.7rem] text-paper-dim transition-colors hover:text-accent md:flex"
+        aria-label="Open terminal"
+      >
+        <span class="rounded-sm border border-line px-1.5 py-0.5">~</span>
+        <span>terminal</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<style>
+  html[data-mode='break'] .mode-build { color: var(--color-paper-dim); }
+  html[data-mode='break'] .mode-break { color: var(--accent); }
+</style>
+
+<script>
+  import { toggleMode } from './mode';
+  document.getElementById('mode-toggle')?.addEventListener('click', () => toggleMode());
+  document.getElementById('terminal-hint')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('terminal:open'));
+  });
+
+  // live IST clock
+  const t = document.querySelector('#ist-clock [data-time]');
+  if (t) {
+    const tick = () => {
+      t.textContent = new Date().toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+    };
+    tick();
+    setInterval(tick, 30_000);
+  }
+</script>

@@ -1,0 +1,148 @@
+---
+// Hero — the signature first-paint moment.
+// BUILD: types a real VantaLLM bring-up log. BREAK: replays an Argus scan.
+// Skippable on click/keypress. Static fallback under reduced motion.
+import { profile } from '../content/profile';
+---
+
+<section id="top" class="mx-auto grid min-h-screen max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-24 pb-16 lg:grid-cols-[1.15fr_0.85fr]">
+  <div>
+    <p class="label-mono mb-6"><span class="idx">//</span> aaron chakraborty — {profile.title.toLowerCase()}</p>
+
+    <h1 class="h-serif text-[2.6rem] leading-[1.05] sm:text-6xl lg:text-[4.2rem]">
+      <span class="hero-build">I train language models<br />from scratch.</span>
+      <span class="hero-break">Then I attack them.</span>
+    </h1>
+
+    <p class="mt-7 max-w-xl text-[1.05rem] text-paper-dim">
+      <span class="hero-build">{profile.hero.build.sub}</span>
+      <span class="hero-break">{profile.hero.break.sub}</span>
+    </p>
+
+    <div class="mt-8 flex flex-wrap gap-2.5 font-mono text-[0.72rem]">
+      {
+        profile.chips.map((c) => (
+          <a
+            href={c.href}
+            class="rounded-sm border border-line px-2.5 py-1 text-paper-dim transition-colors hover:border-accent hover:text-accent"
+          >
+            {c.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="mt-10 flex flex-wrap items-center gap-5">
+      <a
+        href={profile.links.resume}
+        class="rounded-sm bg-accent px-5 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85"
+        download="Aaron_Chakraborty_Resume.pdf"
+      >
+        resume.pdf ↓
+      </a>
+      <span class="font-mono text-[0.72rem] text-paper-dim">
+        or press <kbd class="rounded-sm border border-line px-1.5 py-0.5">~</kbd> and type <span class="text-accent">scan me</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- the log pane -->
+  <div class="pane reveal" id="hero-pane" aria-label="Training log">
+    <div class="pane-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="ml-2" data-swap data-build="tmux · vanta-train-0" data-break="argus · pre-deploy scan"></span>
+    </div>
+    <div class="pane-body min-h-[19rem]" id="hero-log" aria-live="off"></div>
+  </div>
+</section>
+
+<style>
+  .hero-break { display: none; }
+  html[data-mode='break'] .hero-build { display: none; }
+  html[data-mode='break'] .hero-break { display: inline; }
+</style>
+
+<script>
+  import { getMode } from './mode';
+
+  // Real numbers. Every line is true.
+  const LOGS = {
+    build: [
+      { t: '$ ', c: 't-prompt' },
+      { t: 'bash launch_ddp.sh 1 --config vanta_567m.json\n', c: '' },
+      { t: '[init] param_count = 567,068,416  # exact, not estimated\n', c: 't-dim' },
+      { t: '[init] tokenizer vocab = 151,003 · GQA · RoPE · MoE 16e/top-2\n', c: 't-dim' },
+      { t: '[step     0] loss=11.99  # ≈ ln(151003): correct uniform prior\n', c: '' },
+      { t: '[step  1000] loss=7.41   grad_norm=1.88\n', c: '' },
+      { t: '[step 30000] run complete · A100-20GB · ckpt saved ✓\n', c: 't-ok' },
+      { t: '[eval] KV-cache decode: bit-identical to no-cache ✓\n', c: 't-ok' },
+      { t: '[test] 86/86 passing\n', c: 't-ok' },
+      { t: '$ ', c: 't-prompt' },
+      { t: 'whoami\n', c: '' },
+      { t: 'aaron — 20. builds the model, then breaks it.\n', c: 't-warn' },
+    ],
+    break: [
+      { t: '$ ', c: 't-prompt' },
+      { t: 'argus scan --target production_ai --profile strict\n', c: '' },
+      { t: '[✓] static analysis .......... 15/15 rules\n', c: 't-dim' },
+      { t: '[▶] dynamic probes: prompt-injection · jailbreak · extraction\n', c: 't-dim' },
+      { t: '[!] FINDING: reflected XSS — travel-platform AI chatbot\n', c: 't-crit' },
+      { t: '    reported → acknowledged → remediated ✓\n', c: 't-ok' },
+      { t: '[✓] R = S_base × C_env × P_conf → scored, bounded, shipped\n', c: '' },
+      { t: '[✓] report.md written · exit 0\n', c: 't-ok' },
+      { t: '$ ', c: 't-prompt' },
+      { t: 'whoami\n', c: '' },
+      { t: 'aaron — breaks the model he builds.\n', c: 't-warn' },
+    ],
+  };
+
+  const el = document.getElementById('hero-log')!;
+  let timer: number | undefined;
+  let skipped = false;
+
+  function render(mode: 'build' | 'break', instant: boolean) {
+    if (timer) clearTimeout(timer);
+    el.innerHTML = '';
+    const lines = LOGS[mode];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (instant || reduced || skipped) {
+      el.innerHTML =
+        lines.map((l) => `<span class="${l.c}">${esc(l.t)}</span>`).join('') +
+        '<span class="cursor-block"></span>';
+      return;
+    }
+
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor-block';
+    el.appendChild(cursor);
+
+    const step = () => {
+      if (i >= lines.length) return;
+      const l = lines[i++];
+      const span = document.createElement('span');
+      span.className = l.c;
+      span.textContent = l.t;
+      el.insertBefore(span, cursor);
+      timer = window.setTimeout(step, l.t.startsWith('$') ? 420 : 190);
+    };
+    step();
+  }
+
+  function esc(s: string) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
+
+  // skip animation on any interaction with the pane
+  document.getElementById('hero-pane')?.addEventListener('click', () => {
+    skipped = true;
+    render(getMode(), true);
+  });
+
+  document.addEventListener('modechange', ((e: CustomEvent) => {
+    render(e.detail, false);
+  }) as EventListener);
+
+  render(getMode(), false);
+</script>

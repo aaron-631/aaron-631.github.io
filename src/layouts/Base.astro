@@ -1,0 +1,88 @@
+---
+// Base layout — SEO, fonts, mode engine bootstrap, grain overlay.
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/newsreader/400-italic.css';
+import '@fontsource/newsreader/500-italic.css';
+import '../styles/global.css';
+import { profile } from '../content/profile';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Aaron Chakraborty — AI/ML Security Engineer',
+  description = 'I build AI systems, and I break them. 567M-param MoE LLM trained from scratch · production XSS disclosed · AIR 45 Pentathon 2025 · B.Tech CSE @ KIIT.',
+} = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: profile.title,
+  email: profile.email.replace('mailto:', ''),
+  url: 'https://aaron-631.github.io',
+  image: 'https://aaron-631.github.io/aaron.jpg',
+  sameAs: [profile.links.github, profile.links.linkedin, profile.links.x, profile.links.tryhackme],
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'Kalinga Institute of Industrial Technology' },
+  knowsAbout: ['Machine Learning', 'LLM Training', 'Penetration Testing', 'AI Security', 'Distributed Systems'],
+};
+---
+
+<!doctype html>
+<html lang="en" data-mode="build">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href="https://aaron-631.github.io/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0a0a0b" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content="https://aaron-631.github.io/" />
+    <meta property="og:image" content="https://aaron-631.github.io/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://aaron-631.github.io/og.png" />
+    <meta name="twitter:creator" content="@AaronChakr47884" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- mode bootstrap: apply persisted mode before first paint (no flash) -->
+    <script is:inline>
+      try {
+        const m = localStorage.getItem('mode');
+        if (m === 'break' || m === 'build') document.documentElement.dataset.mode = m;
+      } catch {}
+    </script>
+  </head>
+  <body class="grain">
+    <slot />
+    <script>
+      // scroll reveal — IntersectionObserver, once per element
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.12 }
+      );
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
