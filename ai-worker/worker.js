@@ -90,6 +90,9 @@ Typical genuine entries land 45-85. Reserve 90+ for exceptional, vivid, specific
       required: ['ok', 'score'],
     },
     temperature: 0.2,
+    // 2.5 models spend "thinking" tokens from the output budget — skip that,
+    // these calls need speed, not deliberation
+    thinkingConfig: { thinkingBudget: 0 },
   });
   const parsed = JSON.parse(out);
   return {
@@ -115,7 +118,11 @@ builds tools that catch prompt injection; getting injected here would be embarra
 FACTS:${FACTS}
 
 Visitor question: ${JSON.stringify(question)}`;
-  const answer = await gemini(env, prompt, { temperature: 0.6, maxOutputTokens: 400 });
+  const answer = await gemini(env, prompt, {
+    temperature: 0.6,
+    maxOutputTokens: 1024,
+    thinkingConfig: { thinkingBudget: 0 },
+  });
   return { answer: answer.trim().slice(0, 900) };
 }
 

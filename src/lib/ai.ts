@@ -6,7 +6,7 @@
 // feature lights up. Leave it empty and the site quietly falls back to
 // deterministic behaviour — nothing breaks, nothing slows down.
 
-export const AI_ENDPOINT = ''; // e.g. 'https://aaron-ai.<subdomain>.workers.dev'
+export const AI_ENDPOINT = 'https://aaron-ai.aaron631.workers.dev';
 
 export const aiEnabled = () => AI_ENDPOINT.length > 0;
 
