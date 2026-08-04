@@ -276,6 +276,32 @@ html[data-mode='break'] .m-build { display: none !important; }
 }
 .link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
+/* ── buttons — the two voices: solid accent, quiet ghost ── */
+.btn-accent {
+  display: inline-block;
+  border-radius: 2px;
+  background: var(--accent);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.65rem 1.25rem;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.btn-accent:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-accent:active { transform: none; }
+.btn-ghost {
+  display: inline-block;
+  border-radius: 2px;
+  border: 1px solid var(--color-line);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.6rem 1.2rem;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
 /* dotted divider between sections */
 .divider {
   border: none;
@@ -403,28 +429,70 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 }
 .nudge { animation: nudge-pulse 1.6s ease-in-out 3; }
 
-/* ── page turns — the outgoing chapter lifts and turns like a real leaf,
-   the next one settles flat. Transform + opacity only: stays on the
-   compositor, never janks scrolling. ── */
-@keyframes page-leaf-out {
-  0%   { opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0); filter: brightness(1); }
-  100% { opacity: 0; transform: perspective(1200px) rotateY(-14deg) translateX(-4.5%); filter: brightness(0.72); }
-}
-@keyframes page-leaf-in {
-  0%   { opacity: 0; transform: perspective(1200px) rotateY(9deg) translateX(4%); filter: brightness(0.9); }
+/* ── page turns — a real leaf. The old chapter is ON TOP and folds away
+   from the spine (left edge), darkening as it lifts; the new chapter is
+   already lying beneath it, easing flat. Transform/opacity/filter only:
+   compositor-driven, zero scroll jank. ── */
+@keyframes page-fold-away {
+  0%   { transform: perspective(1400px) rotateY(0deg); filter: brightness(1); opacity: 1; }
   55%  { opacity: 1; }
-  100% { opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0); filter: brightness(1); }
+  100% { transform: perspective(1400px) rotateY(-68deg) translateX(-2%); filter: brightness(0.55); opacity: 0; }
 }
+@keyframes page-settle {
+  0%   { transform: scale(0.985) translateX(1.2%); filter: brightness(0.82); }
+  100% { transform: none; filter: brightness(1); }
+}
+::view-transition-group(root) { background: var(--color-ink); }
 ::view-transition-old(root) {
-  transform-origin: left center; /* the spine of the book */
-  animation: page-leaf-out 0.28s cubic-bezier(0.45, 0, 0.75, 0.4) both;
+  transform-origin: left center; /* the book's spine */
+  animation: page-fold-away 0.4s cubic-bezier(0.5, 0.05, 0.7, 0.3) both;
+  z-index: 2; /* the turning leaf stays above the incoming page */
 }
 ::view-transition-new(root) {
-  transform-origin: right center;
-  animation: page-leaf-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+  transform-origin: center center;
+  animation: page-settle 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  z-index: 1;
 }
 /* the room behind the turning page stays ink, never white */
 ::view-transition { background: var(--color-ink); }
+
+/* ── contact — every door lit, email loudest ── */
+.contact-hero {
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--accent);
+  background: linear-gradient(105deg, var(--accent-dim), transparent 55%), var(--color-ink);
+  padding: 1.8rem 1.9rem;
+  border-radius: 4px;
+}
+.contact-card {
+  display: block;
+  border: 1px solid var(--color-line);
+  background: var(--color-ink);
+  border-radius: 4px;
+  padding: 1.3rem 1.4rem;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.contact-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--color-line));
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+}
+.contact-ico {
+  display: inline-flex;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  color: var(--accent);
+  padding: 0.38rem;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+.contact-ico svg { width: 100%; height: 100%; }
+.contact-ico-lg { width: 2.3rem; height: 2.3rem; padding: 0.45rem; }
+.contact-card:hover .contact-ico { border-color: var(--accent); background: var(--accent-dim); }
 
 /* ── the wall — recommendations, set like pull-quotes in a magazine ── */
 .wall-feat {

@@ -82,7 +82,50 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
 <style>
   html[data-mode='break'] .mode-build { color: var(--color-paper-dim); }
   html[data-mode='break'] .mode-break { color: var(--accent); }
+
+  /* first-visit coach mark — explains the rocker once, then never again */
+  #mode-coach {
+    position: fixed;
+    top: 3.9rem;
+    right: 1rem;
+    z-index: 60;
+    width: 15.5rem;
+    background: var(--color-ink-2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: var(--color-paper-dim);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+  }
+  #mode-coach.show { opacity: 1; transform: none; pointer-events: auto; }
+  #mode-coach::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 4.5rem;
+    width: 8px;
+    height: 8px;
+    background: var(--color-ink-2);
+    border-left: 1px solid var(--accent);
+    border-top: 1px solid var(--accent);
+    transform: rotate(45deg);
+  }
 </style>
+
+<!-- one site, two personalities — told once -->
+<div id="mode-coach" role="status">
+  <p><span class="text-accent">this site has two modes.</span></p>
+  <p class="mt-1"><span class="text-paper">BUILD</span> — the engineer who trains models.<br /><span class="text-paper">BREAK</span> — the one who attacks them.</p>
+  <p class="mt-1">flip the switch ↑ and everything re-frames.</p>
+  <button id="mode-coach-try" class="mt-2 w-full rounded-sm border border-line px-2 py-1 text-paper transition-colors hover:border-accent hover:text-accent">try it now</button>
+</div>
 
 <script>
   import { toggleMode } from './mode';
@@ -123,14 +166,25 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
     if (logoTimer) clearTimeout(logoTimer);
     logoLoop();
 
-    // first visit only: a soft pulse on the rocker so the mode switch gets found
+    // first visit only: pulse the rocker, then explain it in words
     try {
       if (!localStorage.getItem('nudged')) {
         setTimeout(() => {
           document.getElementById('mode-toggle')?.classList.add('nudge');
+          document.getElementById('mode-coach')?.classList.add('show');
           localStorage.setItem('nudged', '1');
         }, 4500);
       }
     } catch {}
   });
+
+  // coach mark: "try it" flips the mode; any click or flip dismisses it
+  const dismissCoach = () => document.getElementById('mode-coach')?.classList.remove('show');
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('#mode-coach-try')) { toggleMode(); dismissCoach(); }
+    else if (!t.closest('#mode-coach')) dismissCoach();
+  });
+  document.addEventListener('modechange', dismissCoach);
+  setTimeout(dismissCoach, 30000); // never nag
 </script>

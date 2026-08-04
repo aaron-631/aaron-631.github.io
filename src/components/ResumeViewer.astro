@@ -24,9 +24,45 @@
   </div>
 </div>
 
+<!-- hover preview — the actual first page floats up beside any resume link -->
+<div id="resume-peek" transition:persist="resumepeek" aria-hidden="true">
+  <img src="/resume-preview.webp" alt="" width="480" height="621" loading="lazy" />
+  <p class="rp-hint"><span class="t-prompt">click</span> read here · <span class="t-prompt">↓</span> download inside</p>
+</div>
+
+<style>
+  #resume-peek {
+    position: fixed;
+    z-index: 72;
+    width: 15rem;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px) rotate(-1.5deg);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.6));
+  }
+  #resume-peek.show { opacity: 1; transform: rotate(-1.5deg); }
+  #resume-peek img {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background: #fff;
+  }
+  #resume-peek .rp-hint {
+    margin-top: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--color-paper-dim);
+    text-align: center;
+  }
+  @media (pointer: coarse) { #resume-peek { display: none; } }
+</style>
+
 <script>
   const view = document.getElementById('resume-view')!;
   const frame = document.getElementById('resume-frame') as HTMLIFrameElement;
+  const peek = document.getElementById('resume-peek')!;
 
   function openView() {
     // load the PDF only on first open — costs nothing until someone asks
@@ -41,13 +77,35 @@
     document.body.style.overflow = '';
   }
 
+  const isResumeLink = (el: HTMLElement | null) =>
+    el?.closest<HTMLAnchorElement>('a[href="/resume.pdf"], a[href$="/resume.pdf"]') ?? null;
+
+  // hover: float the first page up next to the cursor (desktop only)
+  document.addEventListener('pointerover', (e) => {
+    const a = isResumeLink(e.target as HTMLElement);
+    if (!a || (e as PointerEvent).pointerType === 'touch') return;
+    if (a.closest('#resume-view')) return;
+    const r = a.getBoundingClientRect();
+    const pw = 240, ph = 350;
+    let x = r.right + 18;
+    if (x + pw > window.innerWidth - 12) x = r.left - pw - 18;
+    let y = Math.min(Math.max(12, r.top - 40), window.innerHeight - ph - 12);
+    peek.style.left = `${Math.max(12, x)}px`;
+    peek.style.top = `${y}px`;
+    peek.classList.add('show');
+  });
+  document.addEventListener('pointerout', (e) => {
+    if (isResumeLink(e.target as HTMLElement)) peek.classList.remove('show');
+  });
+
   // any resume link on any page opens the viewer — unless it's the explicit
   // download button, a coarse-pointer device, or a modified click
   document.addEventListener('click', (e) => {
     const me = e as MouseEvent;
     if (me.ctrlKey || me.metaKey || me.shiftKey) return;
-    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href="/resume.pdf"], a[href$="/resume.pdf"]');
+    const a = isResumeLink(e.target as HTMLElement);
     if (!a) return;
+    peek.classList.remove('show');
     if (a.closest('#resume-view')) return; // the download button inside the viewer
     if (a.hasAttribute('download') && a.dataset.view !== 'yes') return; // explicit download links still download
     if (window.matchMedia('(pointer: coarse)').matches) return; // phones: native PDF viewer wins
@@ -59,5 +117,5 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !view.classList.contains('hidden')) closeView();
   });
-  document.addEventListener('astro:before-swap', closeView);
+  document.addEventListener('astro:before-swap', () => { closeView(); peek.classList.remove('show'); });
 </script>

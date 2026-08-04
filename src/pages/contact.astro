@@ -1,19 +1,28 @@
 ---
-// Contact — the actual ways to reach me, unmissable, first.
+// Contact — every door visible at first glance, email loudest.
 // The Argus scan and the terminal come after; they're the dessert.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
 import { profile } from '../content/profile';
 
+// inline SVGs — no icon library, no extra requests
+const icons: Record<string, string> = {
+  email:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  linkedin:
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.5-1 1.8-2.2 3.8-2.2 4 0 4.8 2.6 4.8 6V24h-4v-8.5c0-2-.04-4.7-2.9-4.7-2.9 0-3.3 2.2-3.3 4.5V24H8V8z"/></svg>',
+  github:
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.7 5.5.7 11.8c0 5 3.2 9.2 7.7 10.7.6.1.8-.2.8-.5v-2c-3.1.7-3.8-1.3-3.8-1.3-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.7 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.5-.3-5.2-1.3-5.2-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17 4.7 18 5 18 5c.6 1.6.2 2.8.1 3 .8.9 1.2 1.9 1.2 3.2 0 4.4-2.7 5.4-5.2 5.7.4.4.8 1 .8 2.1v3.1c0 .3.2.7.8.5a11.3 11.3 0 0 0 7.6-10.7C23.3 5.5 18.3.5 12 .5z"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 1.2h3.7l-8.1 9.3L24 22.8h-7.5l-5.9-7.7-6.7 7.7H.2l8.7-9.9L0 1.2h7.7l5.3 7 5.9-7zm-1.3 19.4h2L6.6 3.3H4.4l13.2 17.3z"/></svg>',
+  tryhackme:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 7v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V7l-8-4z"/><path d="m9 12 2 2 4-4"/></svg>',
+  resume:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h8M9 17h8M9 9h3"/></svg>',
+};
+
 const ways = [
   {
-    label: 'email',
-    value: 'aaronchakraborty631@gmail.com',
-    note: 'the fastest way. i reply quick.',
-    href: profile.links.email,
-    external: false,
-  },
-  {
+    key: 'linkedin',
     label: 'linkedin',
     value: 'aaron-chakraborty',
     note: 'recruiter-friendly, full history',
@@ -21,6 +30,7 @@ const ways = [
     external: true,
   },
   {
+    key: 'github',
     label: 'github',
     value: 'aaron-631',
     note: 'the code behind every claim here',
@@ -28,6 +38,7 @@ const ways = [
     external: true,
   },
   {
+    key: 'x',
     label: 'x / twitter',
     value: '@AaronChakr47884',
     note: 'build-in-public, crashes included',
@@ -35,6 +46,7 @@ const ways = [
     external: true,
   },
   {
+    key: 'tryhackme',
     label: 'tryhackme',
     value: 'aaronchakraborty',
     note: 'where the breaking gets practiced',
@@ -42,12 +54,12 @@ const ways = [
     external: true,
   },
   {
+    key: 'resume',
     label: 'resume',
     value: 'resume.pdf',
     note: 'opens right here · download inside',
     href: profile.links.resume,
     external: false,
-    download: false,
   },
 ];
 ---
@@ -60,22 +72,47 @@ const ways = [
       <h1 class="h-serif reveal text-4xl sm:text-5xl">Let's talk.</h1>
       <p class="reveal mt-6 max-w-lg leading-relaxed text-paper-dim">
         Placement season 2026-27. If you're hiring for AI/ML engineering, security engineering,
-        or the rare seat that needs both: pick any door below. Email is the fast one.
+        or the rare seat that needs both — every door is right here.
       </p>
 
-      <div class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- email: the headline act, impossible to miss -->
+      <div class="reveal contact-hero mt-12">
+        <div class="flex items-center gap-3">
+          <span class="contact-ico contact-ico-lg" set:html={icons.email} />
+          <p class="label-mono">email · the fast lane</p>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-4">
+          <a
+            href={profile.links.email}
+            class="break-all font-mono text-xl text-paper transition-colors hover:text-accent sm:text-3xl"
+          >aaronchakraborty631@gmail.com</a>
+          <div class="flex gap-2.5">
+            <a href={profile.links.email} class="btn-accent">write to me →</a>
+            <button class="btn-ghost" data-copy-email data-mail={profile.email}>copy address</button>
+          </div>
+        </div>
+        <p class="mt-3 font-mono text-[0.72rem] text-paper-dim">i reply quick. usually the same day, often within the hour.</p>
+      </div>
+
+      <!-- everything else, one glance -->
+      <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {
           ways.map((w) => (
             <a
               href={w.href}
               target={w.external ? '_blank' : undefined}
               rel={w.external ? 'noopener' : undefined}
-              download={w.download ? 'Aaron_Chakraborty_Resume.pdf' : undefined}
-              class="card-open reveal group border border-line bg-ink p-6 transition-colors hover:border-accent/60"
+              class="contact-card reveal group"
             >
-              <p class="label-mono">{w.label}</p>
-              <p class="mt-2 break-all font-mono text-[0.95rem] text-paper transition-colors group-hover:text-accent">{w.value}</p>
-              <p class="mt-2 text-[0.8rem] text-paper-dim">{w.note}</p>
+              <div class="flex items-center gap-3">
+                <span class="contact-ico" set:html={icons[w.key]} />
+                <div class="min-w-0">
+                  <p class="label-mono">{w.label}</p>
+                  <p class="mt-1 truncate font-mono text-[1.02rem] text-paper transition-colors group-hover:text-accent">{w.value}</p>
+                </div>
+                <span class="ml-auto text-paper-dim transition-all group-hover:translate-x-1 group-hover:text-accent">→</span>
+              </div>
+              <p class="mt-3 text-[0.8rem] text-paper-dim">{w.note}</p>
             </a>
           ))
         }
@@ -172,6 +209,22 @@ const ways = [
 
   document.addEventListener('astro:page-load', () => {
     wireTerminal('term-out-embed', 'term-in-embed');
+
+    // copy-email button — instant feedback, no clipboard API drama
+    const copyBtn = document.querySelector<HTMLButtonElement>('[data-copy-email]');
+    if (copyBtn && !copyBtn.dataset.wired) {
+      copyBtn.dataset.wired = '1';
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(copyBtn.dataset.mail ?? '');
+          const orig = copyBtn.textContent;
+          copyBtn.textContent = '✓ copied';
+          setTimeout(() => (copyBtn.textContent = orig), 1600);
+        } catch {
+          copyBtn.textContent = copyBtn.dataset.mail ?? '';
+        }
+      });
+    }
 
     const OUT = document.getElementById('scan-out');
     const BTN = document.getElementById('scan-btn') as HTMLButtonElement | null;

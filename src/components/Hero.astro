@@ -1,40 +1,71 @@
 ---
-// Hero — one statement, nothing else competing for attention.
-// The full thesis is always visible; the mode decides which half is lit.
-// Clicking the dim half switches the lens. That IS the navigation.
+// Hero — the statement plus the human behind it. The mode decides which
+// half of the thesis is lit; clicking the dim half IS the navigation.
 import { profile } from '../content/profile';
 ---
 
-<section id="top" class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-5 pt-14">
-  <div class="hero-stagger">
-    <p class="label-mono mb-8">aaron chakraborty · {profile.title.toLowerCase()} · kiit '27</p>
+<section id="top" class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-5 pt-24 pb-16 md:pt-14">
+  <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.25fr_0.75fr]">
+    <div class="hero-stagger">
+      <p class="label-mono mb-8">aaron chakraborty · {profile.title.toLowerCase()} · kiit '27</p>
 
-    <h1 class="h-serif text-[2.7rem] leading-[1.12] sm:text-6xl lg:text-[4.6rem]">
-      <button class="hero-line hero-line-build block text-left" data-set-mode="build">I build AI systems.</button>
-      <button class="hero-line hero-line-break block text-left" data-set-mode="break">Then I break them.</button>
-    </h1>
-    <p class="mt-4 font-mono text-[0.7rem] text-paper-dim">
-      <span class="m-build">← that second line is clickable. everything changes.</span>
-      <span class="m-break">← so is the first one. two sides, same person.</span>
-    </p>
+      <h1 class="h-serif text-[2.7rem] leading-[1.12] sm:text-6xl lg:text-[4.3rem]">
+        <button class="hero-line hero-line-build block text-left" data-set-mode="build">I build AI systems.</button>
+        <button class="hero-line hero-line-break block text-left" data-set-mode="break">Then I break them.</button>
+      </h1>
+      <p class="mt-4 font-mono text-[0.7rem] text-paper-dim">
+        <span class="m-build">← that second line is clickable. everything changes.</span>
+        <span class="m-break">← so is the first one. two sides, same person.</span>
+      </p>
 
-    <p class="mt-9 max-w-xl text-[1.05rem] leading-relaxed text-paper-dim">
-      <span class="m-build">{profile.hero.build.sub}</span>
-      <span class="m-break">{profile.hero.break.sub}</span>
-    </p>
+      <p class="mt-9 max-w-xl text-[1.05rem] leading-relaxed text-paper-dim">
+        <span class="m-build">{profile.hero.build.sub}</span>
+        <span class="m-break">{profile.hero.break.sub}</span>
+      </p>
 
-    <div class="mt-11 flex flex-wrap items-center gap-5">
-      <a
-        href={profile.links.resume}
-        class="rounded-sm bg-accent px-5 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85"
-        title="opens right here · download button inside"
-      >
-        resume.pdf →
-      </a>
-      <span class="hidden font-mono text-[0.72rem] text-paper-dim sm:inline">
-        or press <kbd class="rounded-sm border border-line px-1.5 py-0.5">~</kbd> and type <span class="text-accent">scan me</span>
-      </span>
+      <!-- receipts you can touch, before you've scrolled an inch -->
+      <div class="mt-8 flex flex-wrap gap-2.5">
+        {
+          profile.chips.map((c) => (
+            <a
+              href={c.href.startsWith('#') ? `/work/${c.href}` : c.href}
+              class="hero-chip"
+            >
+              {c.label}
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="mt-10 flex flex-wrap items-center gap-5">
+        <a
+          href={profile.links.resume}
+          class="btn-accent"
+          title="opens right here · download button inside"
+        >
+          resume.pdf →
+        </a>
+        <a href="/contact/" class="btn-ghost">let's talk →</a>
+        <span class="hidden font-mono text-[0.72rem] text-paper-dim lg:inline">
+          or press <kbd class="rounded-sm border border-line px-1.5 py-0.5">~</kbd> and type <span class="text-accent">scan me</span>
+        </span>
+      </div>
     </div>
+
+    <!-- the human — proof there's a person behind the parameters -->
+    <figure class="hero-portrait reveal hidden lg:block">
+      <img
+        src="/aaron.jpg"
+        alt="Aaron Chakraborty"
+        width="720" height="900"
+        fetchpriority="high"
+        class="photo aspect-[4/5] w-full object-cover"
+      />
+      <figcaption class="photo-caption flex items-center justify-between">
+        <span><span class="t-prompt">$</span> whoami</span>
+        <span class="text-paper-dim" data-swap data-build="status: building" data-break="status: probing"></span>
+      </figcaption>
+    </figure>
   </div>
 
   <!-- quiet scroll cue -->
@@ -70,6 +101,37 @@ import { profile } from '../content/profile';
   html[data-mode='build'] .hero-line-build,
   html[data-mode='break'] .hero-line-break {
     color: var(--accent);
+  }
+
+  .hero-chip {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-paper-dim);
+    border: 1px solid var(--color-line);
+    border-radius: 2px;
+    padding: 0.35rem 0.7rem;
+    transition: color 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .hero-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .hero-chip::before { content: '▸ '; color: var(--accent); }
+
+  .hero-portrait { position: relative; }
+  .hero-portrait::before {
+    content: '';
+    position: absolute;
+    inset: 0.9rem -0.9rem -0.9rem 0.9rem;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    transition: border-color 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .hero-portrait:hover::before {
+    border-color: var(--accent);
+    transform: translate(-4px, -4px);
   }
 </style>
 
