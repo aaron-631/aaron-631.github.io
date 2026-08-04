@@ -1,0 +1,63 @@
+---
+// Resume viewer — click any resume link, read it right here, download if you like.
+// Desktop gets the in-site panel; phones open the PDF natively (better there).
+---
+
+<div id="resume-view" transition:persist="resume" class="fixed inset-0 z-[75] hidden items-center justify-center bg-ink/85 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Resume">
+  <div class="flex h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-md border border-line bg-ink-2">
+    <div class="flex items-center gap-3 border-b border-line px-4 py-2.5 font-mono text-[0.72rem] text-paper-dim">
+      <span class="dot inline-block h-[9px] w-[9px] rounded-full bg-line"></span>
+      <span>resume.pdf · one page, all receipts</span>
+      <a
+        href="/resume.pdf"
+        download="Aaron_Chakraborty_Resume.pdf"
+        class="ml-auto rounded-sm bg-accent px-3 py-1 font-medium text-ink transition-opacity hover:opacity-85"
+      >download ↓</a>
+      <button id="resume-close" class="rounded-sm border border-line px-2 py-1 transition-colors hover:border-accent hover:text-accent" aria-label="Close resume viewer">esc ✕</button>
+    </div>
+    <iframe
+      id="resume-frame"
+      title="Aaron Chakraborty resume"
+      class="h-full w-full bg-white"
+      loading="lazy"
+    ></iframe>
+  </div>
+</div>
+
+<script>
+  const view = document.getElementById('resume-view')!;
+  const frame = document.getElementById('resume-frame') as HTMLIFrameElement;
+
+  function openView() {
+    // load the PDF only on first open — costs nothing until someone asks
+    if (!frame.src) frame.src = '/resume.pdf#view=FitH';
+    view.classList.remove('hidden');
+    view.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeView() {
+    view.classList.add('hidden');
+    view.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  // any resume link on any page opens the viewer — unless it's the explicit
+  // download button, a coarse-pointer device, or a modified click
+  document.addEventListener('click', (e) => {
+    const me = e as MouseEvent;
+    if (me.ctrlKey || me.metaKey || me.shiftKey) return;
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href="/resume.pdf"], a[href$="/resume.pdf"]');
+    if (!a) return;
+    if (a.closest('#resume-view')) return; // the download button inside the viewer
+    if (a.hasAttribute('download') && a.dataset.view !== 'yes') return; // explicit download links still download
+    if (window.matchMedia('(pointer: coarse)').matches) return; // phones: native PDF viewer wins
+    e.preventDefault();
+    openView();
+  });
+  document.getElementById('resume-close')?.addEventListener('click', closeView);
+  view.addEventListener('click', (e) => { if (e.target === view) closeView(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !view.classList.contains('hidden')) closeView();
+  });
+  document.addEventListener('astro:before-swap', closeView);
+</script>

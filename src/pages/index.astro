@@ -57,7 +57,7 @@ const chapters = [
           {
             statsByMode.build.map((s) => (
               <div class="reveal py-3 pr-6">
-                <div class="text-2xl text-accent">{s.value}</div>
+                <div class="text-2xl text-accent" data-count={s.value}>{s.value}</div>
                 <div class="mt-1 text-[0.68rem] tracking-wider text-paper-dim uppercase">{s.label}</div>
               </div>
             ))
@@ -67,7 +67,7 @@ const chapters = [
           {
             statsByMode.break.map((s) => (
               <div class="py-3 pr-6">
-                <div class="text-2xl text-accent">{s.value}</div>
+                <div class="text-2xl text-accent" data-count={s.value}>{s.value}</div>
                 <div class="mt-1 text-[0.68rem] tracking-wider text-paper-dim uppercase">{s.label}</div>
               </div>
             ))
@@ -122,3 +122,49 @@ const chapters = [
     </section>
   </main>
 </Base>
+
+<script>
+  // stats count up from zero when they enter view — numbers you watch arrive
+  document.addEventListener('astro:page-load', () => {
+    const els = document.querySelectorAll<HTMLElement>('[data-count]:not([data-counted])');
+    if (!els.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const animate = (el: HTMLElement) => {
+      const target = el.dataset.count ?? '';
+      const m = target.match(/^([^\d]*)([\d,.]+)(.*)$/);
+      if (!m) return; // "AIR 45" etc. — leave non-leading-number values alone
+      const [, prefix, numStr, suffix] = m;
+      const hasComma = numStr.includes(',');
+      const hasDot = numStr.includes('.');
+      const end = parseFloat(numStr.replace(/,/g, ''));
+      const t0 = performance.now();
+      const dur = 900;
+      const step = (t: number) => {
+        const p = Math.min((t - t0) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        let v = end * eased;
+        let text = hasDot ? v.toFixed(numStr.split('.')[1].length) : String(Math.round(v));
+        if (hasComma) text = Number(text).toLocaleString('en-US');
+        el.textContent = prefix + text + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+      };
+      requestAnimationFrame(step);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            const el = e.target as HTMLElement;
+            el.dataset.counted = '1';
+            animate(el);
+            io.unobserve(el);
+          }
+        }
+      },
+      { threshold: 0.6 }
+    );
+    els.forEach((el) => io.observe(el));
+  });
+</script>

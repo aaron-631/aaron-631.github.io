@@ -190,6 +190,46 @@ export const commands: Record<string, Command> = {
     desc: 'smaller experiments',
     run: () => lab.map((l) => ({ text: `${l.name} · ${l.note}`, cls: 't-dim' })),
   },
+  man: {
+    desc: 'man aaron · the manual page',
+    run: (args) => {
+      if ((args[0] ?? '') !== 'aaron')
+        return [
+          { text: "'man' shows the manual for a command. the only manual here is mine:", cls: 't-dim' },
+          { text: '  try: man aaron', cls: '' },
+        ];
+      return [
+        { text: 'AARON(1)                    Human Manual                    AARON(1)', cls: 't-dim' },
+        { text: '' },
+        { text: 'NAME', cls: 't-warn' },
+        { text: '  aaron - builds AI systems, then breaks them' },
+        { text: '' },
+        { text: 'SYNOPSIS', cls: 't-warn' },
+        { text: '  aaron [--build | --break] [--coffee] target' },
+        { text: '' },
+        { text: 'DESCRIPTION', cls: 't-warn' },
+        { text: '  Trains language models from scratch (567M params, real run).', cls: 't-dim' },
+        { text: '  Finds security holes in AI products before someone worse does.', cls: 't-dim' },
+        { text: '  Documents failures in public. Answers email fast.', cls: 't-dim' },
+        { text: '' },
+        { text: 'BUGS', cls: 't-warn' },
+        { text: '  Cannot stop mid-project. Will not stop mid-project.', cls: 't-dim' },
+        { text: '' },
+        { text: 'SEE ALSO', cls: 't-warn' },
+        { text: '  whoami(1), history(1), scan me(1)', cls: 't-dim' },
+      ];
+    },
+  },
+  hello: {
+    desc: '',
+    hidden: true,
+    run: () => [
+      { text: "hey! you're talking to a small shell i wrote, not an AI.", cls: 't-warn' },
+      { text: "it understands plain words though. try asking:", cls: 't-dim' },
+      { text: "  'who are you'  ·  'show me projects'  ·  'skills'  ·  'scan me'", cls: '' },
+      { text: 'or tap one of the suggestion pills below the input.', cls: 't-dim' },
+    ],
+  },
   clear: { desc: 'clear the screen', run: () => 'CLEAR' },
 
   // ── undocumented ──
@@ -283,16 +323,43 @@ export const commands: Record<string, Command> = {
 };
 
 export function execute(input: string): Line[] | 'CLEAR' {
-  const parts = input.trim().split(/\s+/);
+  const raw = input.trim();
+  const parts = raw.split(/\s+/);
   const name = (parts[0] ?? '').toLowerCase();
   if (!name) return [];
   const cmd = commands[name];
-  if (!cmd)
+  if (!cmd) {
+    // be kind to people who talk to it like a person — most visitors will
+    const alias = naturalAlias(raw.toLowerCase());
+    if (alias) {
+      return [
+        { text: `(interpreting that as: ${alias})`, cls: 't-dim' },
+        ...(execute(alias) as Line[]),
+      ];
+    }
     return [
       { text: `bash: ${esc(name)}: command not found`, cls: 't-crit' },
-      { text: "type 'help' for the list.", cls: 't-dim' },
+      { text: "type 'help' for the list, or just ask in plain words. i try to understand.", cls: 't-dim' },
     ];
+  }
   return cmd.run(parts.slice(1));
+}
+
+// plain-English → command. no AI, just honest pattern matching.
+function naturalAlias(q: string): string | null {
+  if (/^(hi|hii+|hello|hey|yo|namaste|sup)\b/.test(q)) return 'hello';
+  if (/who are you|about (you|aaron)|tell me about/.test(q)) return 'whoami';
+  if (/project|what.*(built|made)/.test(q)) return 'ls projects/';
+  if (/resume|cv\b/.test(q)) return 'open resume';
+  if (/experience|work|job|intern/.test(q)) return 'work';
+  if (/contact|email|reach|hire/.test(q)) return 'sudo hire aaron';
+  if (/skill|stack|tools|tech/.test(q)) return 'man aaron';
+  if (/scan|evaluate|recruit/.test(q)) return 'scan me';
+  if (/stat|number|proof/.test(q)) return 'stats';
+  if (/story|journey|history|life/.test(q)) return 'history';
+  if (/secret|easter|hidden|egg/.test(q)) return 'ls -la';
+  if (/joke|fun/.test(q)) return 'goggins';
+  return null;
 }
 
 export function complete(partial: string): string | null {
@@ -316,6 +383,8 @@ export function wireTerminal(outId: string, inId: string): void {
   const out = document.getElementById(outId);
   const input = document.getElementById(inId) as HTMLInputElement | null;
   if (!out || !input) return;
+  if (input.dataset.wired) return; // overlay persists across page turns — wire once
+  input.dataset.wired = '1';
   const hist: string[] = [];
   let hi = -1;
 
@@ -332,20 +401,36 @@ export function wireTerminal(outId: string, inId: string): void {
     out!.scrollTop = out!.scrollHeight;
   }
 
-  print([{ text: 'VantaShell v2.0 · type help to begin.', cls: 't-dim' }, { text: '' }]);
+  print([
+    { text: 'VantaShell v2.0', cls: 't-warn' },
+    { text: "type help for commands · or just ask in plain words ('who are you')", cls: 't-dim' },
+    { text: 'never used a terminal? tap the pills below the input. that counts.', cls: 't-dim' },
+    { text: '' },
+  ]);
+
+  function run(v: string) {
+    if (v.trim()) {
+      hist.unshift(v);
+      hi = -1;
+    }
+    print([{ text: `${promptStr()} ${v}`, cls: 't-prompt' }]);
+    const res = execute(v);
+    if (res === 'CLEAR') out!.innerHTML = '';
+    else print(res);
+    input!.value = '';
+  }
+
+  // command chips near this terminal inject straight into it
+  input.closest('.pane')?.parentElement?.querySelectorAll<HTMLButtonElement>('.cmd-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      run(chip.dataset.cmd ?? chip.textContent ?? '');
+      input.focus();
+    });
+  });
 
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      const v = input.value;
-      if (v.trim()) {
-        hist.unshift(v);
-        hi = -1;
-      }
-      print([{ text: `${promptStr()} ${v}`, cls: 't-prompt' }]);
-      const res = execute(v);
-      if (res === 'CLEAR') out.innerHTML = '';
-      else print(res);
-      input.value = '';
+      run(input.value);
     } else if (e.key === 'Tab') {
       e.preventDefault();
       const c = complete(input.value);

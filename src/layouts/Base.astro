@@ -1,6 +1,7 @@
 ---
 // Base layout — SEO, fonts, mode engine bootstrap, nav + footer + terminal overlay.
 // Every page shares this shell; only the landing plays the intro beat.
+// ClientRouter gives the "turning the page" feel between chapters.
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import '@fontsource/inter/400.css';
@@ -9,10 +10,13 @@ import '@fontsource/inter/600.css';
 import '@fontsource/newsreader/400-italic.css';
 import '@fontsource/newsreader/500-italic.css';
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 import { profile } from '../content/profile';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import TerminalOverlay from '../components/TerminalOverlay.astro';
+import SkillPopover from '../components/SkillPopover.astro';
+import ResumeViewer from '../components/ResumeViewer.astro';
 
 interface Props {
   title?: string;
@@ -69,14 +73,22 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-    <!-- mode bootstrap: apply persisted mode before first paint (no flash) -->
+    <ClientRouter />
+
+    <!-- mode bootstrap: apply persisted mode before first paint (no flash).
+         Re-applied after every page swap too — the router replaces <html> attrs. -->
     <script is:inline>
-      try {
-        const m = localStorage.getItem('mode');
-        if (m === 'break' || m === 'build') document.documentElement.dataset.mode = m;
-        // intro plays once per session; returning visitors go straight in
-        if (sessionStorage.getItem('seen')) document.documentElement.classList.add('intro-skip');
-      } catch {}
+      (function () {
+        function applyMode() {
+          try {
+            const m = localStorage.getItem('mode');
+            if (m === 'break' || m === 'build') document.documentElement.dataset.mode = m;
+            if (sessionStorage.getItem('seen')) document.documentElement.classList.add('intro-skip');
+          } catch {}
+        }
+        applyMode();
+        document.addEventListener('astro:after-swap', applyMode);
+      })();
     </script>
   </head>
   <body class="grain">
@@ -91,42 +103,56 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
       )
     }
     {!bare && <Nav />}
+    {!bare && <div id="read-progress" aria-hidden="true"></div>}
     <slot />
     {!bare && <Footer />}
     <TerminalOverlay />
+    <SkillPopover />
+    <ResumeViewer />
 
     <script>
-      // intro: dismiss after the beat (or instantly on click), remember per session
-      const intro = document.getElementById('intro');
-      if (intro && !document.documentElement.classList.contains('intro-skip')) {
-        const done = () => {
-          intro.classList.add('out');
-          try { sessionStorage.setItem('seen', '1'); } catch {}
-          setTimeout(() => intro.remove(), 700);
-        };
-        intro.addEventListener('click', done);
-        setTimeout(done, 2100);
-      } else {
-        intro?.remove();
-      }
+      // everything here re-wires on astro:page-load, which fires on first
+      // load AND after every client-side page turn.
+      function init() {
+        // intro: dismiss after the beat (or instantly on click), remember per session
+        const intro = document.getElementById('intro');
+        if (intro && !document.documentElement.classList.contains('intro-skip')) {
+          // hold the hero's entrance until the curtain lifts
+          document.documentElement.classList.add('intro-wait');
+          const done = () => {
+            intro.classList.add('out');
+            document.documentElement.classList.remove('intro-wait');
+            try { sessionStorage.setItem('seen', '1'); } catch {}
+            setTimeout(() => intro.remove(), 700);
+          };
+          intro.addEventListener('click', done);
+          setTimeout(done, 2100);
+        } else {
+          intro?.remove();
+        }
 
-      // scroll reveal — IntersectionObserver, once per element
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (e.isIntersecting) {
-              e.target.classList.add('in');
-              io.unobserve(e.target);
+        // scroll reveal — IntersectionObserver, once per element,
+        // staggered slightly within each visible batch so sections breathe in
+        const io = new IntersectionObserver(
+          (entries) => {
+            let i = 0;
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                const el = e.target as HTMLElement;
+                el.style.transitionDelay = `${Math.min(i++ * 70, 280)}ms`;
+                el.classList.add('in');
+                // clear the stagger once revealed, so hover transitions stay instant
+                setTimeout(() => (el.style.transitionDelay = ''), 1000);
+                io.unobserve(el);
+              }
             }
-          }
-        },
-        { threshold: 0.12 }
-      );
-      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+          },
+          { threshold: 0.12 }
+        );
+        document.querySelectorAll('.reveal:not(.in)').forEach((el) => io.observe(el));
 
-      // live IST clocks — anything carrying [data-ist]
-      const clocks = document.querySelectorAll('[data-ist]');
-      if (clocks.length) {
+        // live IST clocks — anything carrying [data-ist]
+        const clocks = document.querySelectorAll('[data-ist]');
         const tick = () => {
           const t = new Date().toLocaleTimeString('en-IN', {
             timeZone: 'Asia/Kolkata',
@@ -136,11 +162,34 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
           });
           clocks.forEach((c) => (c.textContent = t));
         };
-        tick();
-        setInterval(tick, 30_000);
+        if (clocks.length) tick();
+
+        // reading progress hairline — the "how far into the chapter am i" cue
+        const bar = document.getElementById('read-progress');
+        if (bar) {
+          const onScroll = () => {
+            const h = document.documentElement;
+            const max = h.scrollHeight - h.clientHeight;
+            bar.style.width = max > 0 ? `${(h.scrollTop / max) * 100}%` : '0';
+          };
+          if (progressHandler) window.removeEventListener('scroll', progressHandler);
+          progressHandler = onScroll;
+          window.addEventListener('scroll', onScroll, { passive: true });
+          onScroll();
+        }
+        return tick;
       }
 
-      // for the ones who open devtools first. respect.
+      let progressHandler: (() => void) | undefined;
+
+      let clockTimer: ReturnType<typeof setInterval> | undefined;
+      document.addEventListener('astro:page-load', () => {
+        const tick = init();
+        if (clockTimer) clearInterval(clockTimer);
+        clockTimer = setInterval(tick, 30_000);
+      });
+
+      // for the ones who open devtools first. respect. (once per visit)
       console.log(
         '%caaron@portfolio:~$ %cyou checked the console. good instinct.\n' +
           'the real easter eggs live in the terminal. press ~ and start digging.\n' +

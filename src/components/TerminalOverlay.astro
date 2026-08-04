@@ -1,25 +1,39 @@
 ---
 // Terminal overlay — available on every page via ~ / Ctrl+K.
+// Persists across page turns so your session survives navigation.
+// The pills under the input exist for everyone who's never used a shell.
 ---
 
-<div id="term-overlay" class="fixed inset-0 z-[70] hidden items-start justify-center bg-ink/80 p-4 pt-[12vh] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Terminal">
-  <div class="pane w-full max-w-2xl shadow-2xl">
-    <div class="pane-bar">
-      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      <span class="ml-2">aaron@portfolio · press esc to close</span>
+<div id="term-overlay" transition:persist="terminal" class="fixed inset-0 z-[70] hidden items-start justify-center bg-ink/80 p-4 pt-[10vh] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Terminal">
+  <div class="w-full max-w-2xl">
+    <div class="pane shadow-2xl">
+      <div class="pane-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="ml-2">aaron@portfolio · esc closes</span>
+        <button id="term-close" class="ml-auto px-2 text-paper-dim transition-colors hover:text-accent" aria-label="Close terminal">✕</button>
+      </div>
+      <div class="pane-body h-[50vh] max-h-[24rem] overflow-y-auto" id="term-out-overlay"></div>
+      <div class="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-[0.8rem]">
+        <span class="t-prompt" data-prompt>aaron@build:~$</span>
+        <input
+          id="term-in-overlay"
+          class="w-full bg-transparent text-paper outline-none placeholder:text-paper-dim/40"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="type, or just ask in plain words"
+          aria-label="Terminal input"
+        />
+      </div>
     </div>
-    <div class="pane-body h-[24rem] overflow-y-auto" id="term-out-overlay"></div>
-    <div class="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-[0.8rem]">
-      <span class="t-prompt" data-prompt>aaron@build:~$</span>
-      <input
-        id="term-in-overlay"
-        class="w-full bg-transparent text-paper outline-none placeholder:text-paper-dim/40"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="help"
-        aria-label="Terminal input"
-      />
+    <!-- no keyboard skills needed — tap these -->
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button class="cmd-chip" data-cmd="whoami">who are you?</button>
+      <button class="cmd-chip" data-cmd="ls projects/">show projects</button>
+      <button class="cmd-chip" data-cmd="scan me">scan me</button>
+      <button class="cmd-chip" data-cmd="history">life story</button>
+      <button class="cmd-chip" data-cmd="man aaron">the manual</button>
+      <button class="cmd-chip" data-cmd="ls -la">secrets?</button>
     </div>
   </div>
 </div>
@@ -36,7 +50,8 @@
   function openTerm() {
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
-    setTimeout(() => overlayInput.focus(), 30);
+    // don't auto-focus on touch devices — the keyboard would cover the pane
+    if (window.matchMedia('(pointer: fine)').matches) setTimeout(() => overlayInput.focus(), 30);
   }
   function closeTerm() {
     overlay.classList.add('hidden');
@@ -59,14 +74,17 @@
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeTerm();
   });
+  document.getElementById('term-close')?.addEventListener('click', closeTerm);
   document.addEventListener('terminal:open', openTerm);
+  document.addEventListener('astro:before-swap', closeTerm);
 
-  // keep prompts in sync with mode
+  // keep prompts in sync with mode — re-sync after page turns too
   const syncPrompts = () => {
     document.querySelectorAll('[data-prompt]').forEach((el) => {
       el.textContent = `${getMode() === 'build' ? 'aaron@build' : 'aaron@break'}:~$`;
     });
   };
   document.addEventListener('modechange', syncPrompts);
+  document.addEventListener('astro:page-load', syncPrompts);
   syncPrompts();
 </script>

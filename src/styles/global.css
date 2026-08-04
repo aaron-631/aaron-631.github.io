@@ -27,7 +27,8 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-/* mode engine — BUILD is canonical, BREAK re-lenses the accent + labels */
+/* mode engine — BUILD is canonical, BREAK re-lenses the accent + labels.
+   The two modes are different rooms: warm workshop vs red-lit ops floor. */
 :root,
 html[data-mode='build'] {
   --accent: #ffb454;
@@ -39,6 +40,13 @@ html[data-mode='break'] {
   --accent-dim: rgba(224, 108, 95, 0.14);
   --prompt-user: 'aaron@break';
 }
+
+/* BREAK personality: colder photos, restless cursor, inverted rocker slash */
+html[data-mode='break'] .photo { filter: saturate(0.45) contrast(1.12); }
+html[data-mode='break'] .photo:hover { filter: saturate(0.85) contrast(1.05); }
+html[data-mode='break'] .cursor-block,
+html[data-mode='break'] .logo-block { animation-duration: 0.55s; }
+html[data-mode='break'] .grain::before { opacity: 0.045; }
 
 html {
   background: var(--color-ink);
@@ -254,6 +262,7 @@ html[data-mode='break'] .m-build { display: none !important; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .cursor-block, .logo-block { animation: none; }
   #intro { display: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
@@ -272,4 +281,193 @@ html[data-mode='break'] .m-build { display: none !important; }
   border: none;
   border-top: 1px dashed var(--color-line);
   margin: 0;
+}
+
+/* ── accent transitions — the whole room changes temperature on mode switch.
+   Colours only: transform/filter stay instant so nothing ever feels laggy. ── */
+a, button, .t-prompt, .label-mono .idx, .proof-chip {
+  transition-property: color, border-color, background-color, opacity, text-decoration-color;
+  transition-duration: 0.35s;
+  transition-timing-function: ease;
+}
+.card-open { transition: border-color 0.35s ease, transform 0.18s ease; }
+.cmd-chip:active, .skill-chip:active { transition-duration: 0.06s; }
+
+/* ── skill chips + popover — plain words on hover/tap, receipt on click ── */
+.skill-chip {
+  position: relative;
+  font-family: var(--font-mono);
+  background: var(--color-ink-3);
+  color: var(--color-paper-dim);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.skill-chip::after {
+  content: '?';
+  margin-left: 0.35em;
+  opacity: 0.45;
+  font-size: 0.85em;
+}
+.skill-chip:hover,
+.skill-chip[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+#skill-pop {
+  position: absolute;
+  z-index: 90; /* above the dossier panel — chips live inside it too */
+  width: min(21rem, calc(100vw - 2rem));
+  background: var(--color-ink-2);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+}
+#skill-pop.show { opacity: 1; transform: none; pointer-events: auto; }
+#skill-pop .sp-name { font-family: var(--font-mono); color: var(--accent); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
+#skill-pop .sp-what { color: var(--color-paper); margin-top: 0.4rem; }
+#skill-pop .sp-used {
+  display: none;
+  color: var(--color-paper-dim);
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--color-line);
+}
+#skill-pop.expanded .sp-used { display: block; }
+#skill-pop .sp-more {
+  display: inline-block;
+  margin-top: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+#skill-pop.expanded .sp-more-label { display: none; }
+
+/* ── project dossier panel — a card opens into a centred reading panel ── */
+#dossier {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4.5rem 1rem 2rem;
+  background: rgba(10, 10, 11, 0.82);
+  backdrop-filter: blur(4px);
+}
+#dossier.open { display: flex; }
+#dossier .dossier-card {
+  width: 100%;
+  max-width: 44rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  background: var(--color-ink-2);
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  animation: dossier-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes dossier-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.card-open {
+  cursor: pointer;
+}
+.card-open:hover { transform: translateY(-3px); }
+.card-open:active { transform: translateY(-1px); }
+
+/* ── logo — "Aaron" types and deletes itself, cursor always alive ── */
+.logo-type { display: inline-block; min-width: 3.6em; text-align: left; }
+
+/* ── first-visit nudge — a soft pulse pointing at the mode switch, once ── */
+@keyframes nudge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-dim); }
+  50% { box-shadow: 0 0 0 7px var(--accent-dim); border-color: var(--accent); }
+}
+.nudge { animation: nudge-pulse 1.6s ease-in-out 3; }
+
+/* ── page turns — chapters slide like turning a page ── */
+@keyframes page-out { to { opacity: 0; transform: translateX(-2.5%); } }
+@keyframes page-in { from { opacity: 0; transform: translateX(2.5%); } }
+::view-transition-old(root) { animation: page-out 0.22s ease-in both; }
+::view-transition-new(root) { animation: page-in 0.28s ease-out both; }
+
+/* ── command chips under terminals — buttons for the no-keyboard crowd ── */
+.cmd-chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-paper-dim);
+  background: var(--color-ink-3);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.cmd-chip:hover { color: var(--accent); border-color: var(--accent); }
+.cmd-chip:active { transform: scale(0.96); }
+
+/* touch devices: everything tappable gets a real target */
+@media (pointer: coarse) {
+  .cmd-chip { padding: 0.45rem 0.95rem; font-size: 0.75rem; }
+  .skill-chip { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; }
+}
+
+/* ── reading progress — a hairline of accent along the top of the page ── */
+#read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  z-index: 55;
+  background: var(--accent);
+  transition: width 0.1s linear;
+}
+
+/* ── scrollbar — part of the room, not the browser's ── */
+* { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── hero entrance — the page breathes in, line by line ── */
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.hero-stagger > * { opacity: 0; animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.hero-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.hero-stagger > *:nth-child(2) { animation-delay: 0.18s; }
+.hero-stagger > *:nth-child(3) { animation-delay: 0.34s; }
+.hero-stagger > *:nth-child(4) { animation-delay: 0.5s; }
+.hero-stagger > *:nth-child(5) { animation-delay: 0.66s; }
+html.intro-wait .hero-stagger > * { animation-play-state: paused; }
+
+/* ── mode sweep — flipping the switch changes the room's light ── */
+#mode-sweep {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--sweep-x, 90%) 3rem, var(--accent) 0%, transparent 60%);
+  opacity: 0;
+}
+#mode-sweep.on { animation: sweep 0.55s ease-out; }
+@keyframes sweep { 0% { opacity: 0.22; } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stagger > * { animation: none; opacity: 1; }
+  #mode-sweep { display: none; }
 }

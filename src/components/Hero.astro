@@ -6,33 +6,35 @@ import { profile } from '../content/profile';
 ---
 
 <section id="top" class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-5 pt-14">
-  <p class="label-mono mb-8">aaron chakraborty · {profile.title.toLowerCase()} · kiit '27</p>
+  <div class="hero-stagger">
+    <p class="label-mono mb-8">aaron chakraborty · {profile.title.toLowerCase()} · kiit '27</p>
 
-  <h1 class="h-serif text-[2.7rem] leading-[1.12] sm:text-6xl lg:text-[4.6rem]">
-    <button class="hero-line hero-line-build block text-left" data-set-mode="build">I build AI systems.</button>
-    <button class="hero-line hero-line-break block text-left" data-set-mode="break">Then I break them.</button>
-  </h1>
-  <p class="mt-4 font-mono text-[0.7rem] text-paper-dim">
-    <span class="m-build">← that second line is clickable. everything changes.</span>
-    <span class="m-break">← so is the first one. two sides, same person.</span>
-  </p>
+    <h1 class="h-serif text-[2.7rem] leading-[1.12] sm:text-6xl lg:text-[4.6rem]">
+      <button class="hero-line hero-line-build block text-left" data-set-mode="build">I build AI systems.</button>
+      <button class="hero-line hero-line-break block text-left" data-set-mode="break">Then I break them.</button>
+    </h1>
+    <p class="mt-4 font-mono text-[0.7rem] text-paper-dim">
+      <span class="m-build">← that second line is clickable. everything changes.</span>
+      <span class="m-break">← so is the first one. two sides, same person.</span>
+    </p>
 
-  <p class="mt-9 max-w-xl text-[1.05rem] leading-relaxed text-paper-dim">
-    <span class="m-build">{profile.hero.build.sub}</span>
-    <span class="m-break">{profile.hero.break.sub}</span>
-  </p>
+    <p class="mt-9 max-w-xl text-[1.05rem] leading-relaxed text-paper-dim">
+      <span class="m-build">{profile.hero.build.sub}</span>
+      <span class="m-break">{profile.hero.break.sub}</span>
+    </p>
 
-  <div class="mt-11 flex flex-wrap items-center gap-5">
-    <a
-      href={profile.links.resume}
-      class="rounded-sm bg-accent px-5 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85"
-      download="Aaron_Chakraborty_Resume.pdf"
-    >
-      resume.pdf ↓
-    </a>
-    <span class="hidden font-mono text-[0.72rem] text-paper-dim sm:inline">
-      or press <kbd class="rounded-sm border border-line px-1.5 py-0.5">~</kbd> and type <span class="text-accent">scan me</span>
-    </span>
+    <div class="mt-11 flex flex-wrap items-center gap-5">
+      <a
+        href={profile.links.resume}
+        class="rounded-sm bg-accent px-5 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85"
+        title="opens right here · download button inside"
+      >
+        resume.pdf →
+      </a>
+      <span class="hidden font-mono text-[0.72rem] text-paper-dim sm:inline">
+        or press <kbd class="rounded-sm border border-line px-1.5 py-0.5">~</kbd> and type <span class="text-accent">scan me</span>
+      </span>
+    </div>
   </div>
 
   <!-- quiet scroll cue -->
@@ -74,7 +76,9 @@ import { profile } from '../content/profile';
 <script>
   import { setMode } from './mode';
   import type { Mode } from './mode';
-  document.querySelectorAll<HTMLButtonElement>('[data-set-mode]').forEach((b) => {
-    b.addEventListener('click', () => setMode(b.dataset.setMode as Mode));
+  // delegated: survives client-side page turns
+  document.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-set-mode]');
+    if (b) setMode(b.dataset.setMode as Mode);
   });
 </script>

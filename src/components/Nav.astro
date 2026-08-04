@@ -1,5 +1,5 @@
 ---
-// Nav — block-cursor mark, page links, BUILD/BREAK rocker, terminal hint.
+// Nav — typing logo, page links, BUILD/BREAK rocker, terminal hint.
 const { pathname } = Astro.url;
 const links = [
   { href: '/about/', label: 'about' },
@@ -17,7 +17,7 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
 >
   <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
     <a href="/" class="flex items-baseline gap-[3px] font-mono text-lg text-paper" aria-label="Aaron Chakraborty, home">
-      <span>aaron</span><span class="logo-block" aria-hidden="true"></span>
+      <span class="logo-type" data-logo>Aaron</span><span class="logo-block" aria-hidden="true"></span>
     </a>
 
     <!-- live local time — proof there's a human in Asia/Kolkata behind this -->
@@ -85,8 +85,51 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
 
 <script>
   import { toggleMode } from './mode';
-  document.getElementById('mode-toggle')?.addEventListener('click', () => toggleMode());
-  document.getElementById('terminal-hint')?.addEventListener('click', () => {
-    document.dispatchEvent(new CustomEvent('terminal:open'));
+
+  // delegated — nav is re-rendered on every page turn, listeners must not die
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('#mode-toggle')) toggleMode();
+    else if (t.closest('#terminal-hint')) document.dispatchEvent(new CustomEvent('terminal:open'));
+  });
+
+  // the logo breathes: "Aaron" deletes itself and retypes, every so often
+  let logoTimer: number | undefined;
+  function logoLoop() {
+    const el = document.querySelector<HTMLElement>('[data-logo]');
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const word = 'Aaron';
+    let phase: 'wait' | 'del' | 'type' = 'wait';
+    let n = word.length;
+    const step = () => {
+      if (phase === 'wait') { phase = 'del'; logoTimer = window.setTimeout(step, 6000); return; }
+      if (phase === 'del') {
+        n--;
+        el.textContent = word.slice(0, n);
+        if (n === 0) { phase = 'type'; logoTimer = window.setTimeout(step, 500); }
+        else logoTimer = window.setTimeout(step, 85);
+        return;
+      }
+      n++;
+      el.textContent = word.slice(0, n);
+      if (n === word.length) { phase = 'wait'; logoTimer = window.setTimeout(step, 30); }
+      else logoTimer = window.setTimeout(step, 120);
+    };
+    logoTimer = window.setTimeout(step, 3500);
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    if (logoTimer) clearTimeout(logoTimer);
+    logoLoop();
+
+    // first visit only: a soft pulse on the rocker so the mode switch gets found
+    try {
+      if (!localStorage.getItem('nudged')) {
+        setTimeout(() => {
+          document.getElementById('mode-toggle')?.classList.add('nudge');
+          localStorage.setItem('nudged', '1');
+        }, 4500);
+      }
+    } catch {}
   });
 </script>

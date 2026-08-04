@@ -1,11 +1,15 @@
 ---
-// Projects — flagship dossier + cards + arsenal.
+// Projects — flagship dossier + cards that open into a reading panel + arsenal.
 import Base from '../layouts/Base.astro';
 import { projects, lab } from '../content/projects';
 import { arsenal } from '../content/writing';
+import { findSkill } from '../content/skills';
 
 const flagship = projects.find((p) => p.flagship)!;
 const rest = projects.filter((p) => !p.flagship);
+
+// which arsenal / stack labels get a plain-words popover
+const skillId = (label: string) => findSkill(label)?.id ?? null;
 
 const ARCH = `  ┌────────────────────────────────────────────┐
   │ VantaLLM · decoder-only · 567,068,416 params│
@@ -25,10 +29,13 @@ const ARCH = `  ┌────────────────────�
   <main class="pt-24 md:pt-14">
     <section class="mx-auto max-w-6xl px-5 py-24">
       <p class="label-mono reveal mb-3"><span class="idx">// 03</span> <span data-swap data-build="· things i built" data-break="· attack & defense tooling"></span></p>
-      <h1 class="h-serif reveal mb-16 text-4xl sm:text-5xl">
+      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">
         <span class="m-build">The systems.</span>
         <span class="m-break">The tools that break systems.</span>
       </h1>
+      <p class="reveal mb-16 font-mono text-[0.75rem] text-paper-dim">
+        tip: any tech chip with a <span class="text-accent">?</span> explains itself in plain words. cards open, click one.
+      </p>
 
       <!-- flagship dossier -->
       <article id="vantallm" class="reveal grid grid-cols-1 gap-10 border border-line bg-ink p-7 md:p-12 lg:grid-cols-[1.1fr_0.9fr]">
@@ -59,9 +66,13 @@ const ARCH = `  ┌────────────────────�
             ))}
           </ul>
           <div class="mt-7 flex flex-wrap gap-2">
-            {flagship.stack.map((s) => (
-              <span class="rounded-sm bg-ink-3 px-2 py-1 font-mono text-[0.68rem] text-paper-dim">{s}</span>
-            ))}
+            {flagship.stack.map((s) =>
+              skillId(s) ? (
+                <button class="skill-chip px-2 py-1 text-[0.68rem]" data-skill={skillId(s)} aria-expanded="false">{s}</button>
+              ) : (
+                <span class="rounded-sm bg-ink-3 px-2 py-1 font-mono text-[0.68rem] text-paper-dim">{s}</span>
+              )
+            )}
           </div>
           <div class="mt-7 flex flex-wrap gap-2" data-proofs>
             {flagship.proofs.map((pr, i) => (
@@ -92,13 +103,17 @@ const ARCH = `  ┌────────────────────�
         </div>
       </article>
 
-      <!-- supporting cards -->
+      <!-- supporting cards — click one, it opens into a reading panel -->
       <div class="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
         {
           rest.map((p) => (
             <article
-              class="reveal flex flex-col border border-line bg-ink p-7 transition-colors hover:border-accent/50"
+              class="card-open reveal flex flex-col border border-line bg-ink p-7 transition-all hover:border-accent/50"
               data-card={p.id}
+              tabindex="0"
+              role="button"
+              aria-haspopup="dialog"
+              aria-label={`Open ${p.name} details`}
             >
               <div class="flex items-center justify-between">
                 <h2 class="font-mono text-lg">{p.name}</h2>
@@ -110,34 +125,14 @@ const ARCH = `  ┌────────────────────�
                 <span class="m-build">{p.oneliner.build}</span>
                 <span class="m-break">{p.oneliner.break}</span>
               </p>
-              <ul class="m-build mt-4 space-y-2 text-[0.82rem] leading-relaxed text-paper-dim">
-                {p.points.build.slice(0, 2).map((pt) => (
-                  <li class="flex gap-2">
-                    <span class="mt-[0.55rem] h-px w-2.5 shrink-0 bg-accent" aria-hidden="true" />
-                    <span>{pt}</span>
-                  </li>
-                ))}
-              </ul>
-              <ul class="m-break mt-4 space-y-2 text-[0.82rem] leading-relaxed text-paper-dim">
-                {p.points.break.slice(0, 2).map((pt) => (
-                  <li class="flex gap-2">
-                    <span class="mt-[0.55rem] h-px w-2.5 shrink-0 bg-accent" aria-hidden="true" />
-                    <span>{pt}</span>
-                  </li>
-                ))}
-              </ul>
               <div class="mt-4 flex flex-wrap gap-1.5">
                 {p.stack.slice(0, 4).map((s) => (
                   <span class="rounded-sm bg-ink-3 px-1.5 py-0.5 font-mono text-[0.62rem] text-paper-dim">{s}</span>
                 ))}
               </div>
-              <p class="mt-5 font-mono text-[0.72rem]">
-                {p.links.map((l, i) => (
-                  <>
-                    {i > 0 && <span class="text-line"> · </span>}
-                    <a class="link" href={l.href} target="_blank" rel="noopener">{l.label}</a>
-                  </>
-                ))}
+              <p class="mt-5 font-mono text-[0.72rem] text-paper-dim transition-colors group-hover:text-accent">
+                <span class="t-prompt">$ </span>open {p.id}
+                <span class="ml-1 inline-block">→</span>
               </p>
             </article>
           ))
@@ -156,13 +151,88 @@ const ARCH = `  ┌────────────────────�
       </div>
     </section>
 
+    <!-- the dossier panel — projects open here, centre stage -->
+    <div id="dossier" role="dialog" aria-modal="true" aria-label="Project details">
+      <div class="dossier-card">
+        {
+          rest.map((p) => (
+            <div class="dossier-page hidden p-7 md:p-10" data-dossier={p.id}>
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="font-mono text-2xl">{p.name}</h2>
+                    <span class={`font-mono text-[0.62rem] tracking-wider uppercase ${p.status === 'live' ? 't-ok' : 'text-paper-dim'}`}>{p.status}</span>
+                  </div>
+                </div>
+                <button class="dossier-close shrink-0 rounded-sm border border-line px-2.5 py-1 font-mono text-[0.8rem] text-paper-dim transition-colors hover:border-accent hover:text-accent" aria-label="Close">esc ✕</button>
+              </div>
+
+              <p class="mt-5 leading-relaxed text-paper-dim">
+                <span class="m-build">{p.oneliner.build}</span>
+                <span class="m-break">{p.oneliner.break}</span>
+              </p>
+
+              <ul class="m-build mt-6 space-y-3 text-[0.92rem] leading-relaxed text-paper-dim">
+                {p.points.build.map((pt) => (
+                  <li class="flex gap-2.5">
+                    <span class="mt-[0.6rem] h-px w-3 shrink-0 bg-accent" aria-hidden="true" />
+                    <span>{pt}</span>
+                  </li>
+                ))}
+              </ul>
+              <ul class="m-break mt-6 space-y-3 text-[0.92rem] leading-relaxed text-paper-dim">
+                {p.points.break.map((pt) => (
+                  <li class="flex gap-2.5">
+                    <span class="mt-[0.6rem] h-px w-3 shrink-0 bg-accent" aria-hidden="true" />
+                    <span>{pt}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div class="mt-6 flex flex-wrap gap-2">
+                {p.stack.map((s) =>
+                  skillId(s) ? (
+                    <button class="skill-chip px-2 py-1 text-[0.68rem]" data-skill={skillId(s)} aria-expanded="false">{s}</button>
+                  ) : (
+                    <span class="rounded-sm bg-ink-3 px-2 py-1 font-mono text-[0.68rem] text-paper-dim">{s}</span>
+                  )
+                )}
+              </div>
+
+              <div class="mt-6 flex flex-wrap gap-2" data-proofs>
+                {p.proofs.map((pr) => (
+                  <button class="proof-chip" aria-expanded="false" data-detail={pr.detail} data-href={pr.href ?? ''}>
+                    {pr.label}
+                  </button>
+                ))}
+              </div>
+              <div class="proof-detail mt-3 hidden" data-proof-out></div>
+
+              <p class="mt-7 border-t border-dashed border-line pt-5 font-mono text-[0.78rem]">
+                {p.links.map((l, i) => (
+                  <>
+                    {i > 0 && <span class="text-line"> · </span>}
+                    <a class="link" href={l.href} target="_blank" rel="noopener">{l.label}</a>
+                  </>
+                ))}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
     <!-- arsenal -->
     <section id="arsenal" class="border-t border-line bg-ink-2/30">
       <div class="mx-auto max-w-6xl px-5 py-24">
         <p class="label-mono reveal mb-3"><span class="idx">// 03.5</span> · arsenal</p>
         <h2 class="h-serif reveal mb-4 text-4xl sm:text-5xl">man aaron</h2>
-        <p class="reveal mb-14 max-w-md font-mono text-[0.8rem] text-paper-dim">
+        <p class="reveal mb-3 max-w-md font-mono text-[0.8rem] text-paper-dim">
           No skill bars, no percentages. If it's listed here, I've shipped something with it.
+        </p>
+        <p class="reveal mb-14 max-w-md font-mono text-[0.72rem] text-paper-dim opacity-70">
+          (<span class="text-accent">man</span> is the Linux command that opens a tool's manual.
+          this is mine. hover anything with a <span class="text-accent">?</span> for the plain-words version.)
         </p>
 
         <div class="grid grid-cols-1 gap-10 font-mono md:grid-cols-3">
@@ -171,9 +241,17 @@ const ARCH = `  ┌────────────────────�
               <div class="reveal">
                 <h3 class="mb-4 text-[0.72rem] tracking-widest text-accent uppercase">{group}</h3>
                 <ul class="space-y-1.5 text-[0.82rem] text-paper-dim">
-                  {items.map((i) => (
-                    <li class="border-l border-line pl-3 transition-colors hover:border-accent hover:text-paper">{i}</li>
-                  ))}
+                  {items.map((i) =>
+                    skillId(i) ? (
+                      <li>
+                        <button class="skill-chip w-full border-l border-line bg-transparent pl-3 text-left" data-skill={skillId(i)} aria-expanded="false" style="border-radius:0">
+                          {i}
+                        </button>
+                      </li>
+                    ) : (
+                      <li class="border-l border-line pl-3 transition-colors hover:border-accent hover:text-paper">{i}</li>
+                    )
+                  )}
                 </ul>
               </div>
             ))
@@ -201,31 +279,78 @@ const ARCH = `  ┌────────────────────�
 </style>
 
 <script>
-  // proof chip expansion — one open at a time inside the dossier
-  document.querySelectorAll('[data-proofs]').forEach((wrap) => {
-    const out = wrap.parentElement?.querySelector('[data-proof-out]') as HTMLElement | null;
-    if (!out) return;
-    wrap.querySelectorAll<HTMLButtonElement>('.proof-chip').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const open = btn.getAttribute('aria-expanded') === 'true';
-        wrap.querySelectorAll('.proof-chip').forEach((b) => b.setAttribute('aria-expanded', 'false'));
-        if (open) {
-          out.classList.add('hidden');
-          return;
-        }
-        btn.setAttribute('aria-expanded', 'true');
-        const href = btn.dataset.href;
-        out.textContent = btn.dataset.detail ?? '';
-        if (href) {
-          const a = document.createElement('a');
-          a.href = href;
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.className = 'link';
-          a.textContent = ' → open';
-          out.appendChild(a);
-        }
-        out.classList.remove('hidden');
+  document.addEventListener('astro:page-load', () => {
+    // ── dossier panel: card → centre-stage reading panel ──
+    const dossier = document.getElementById('dossier');
+    if (dossier && !dossier.dataset.wired) {
+      dossier.dataset.wired = '1';
+      let lastFocus: HTMLElement | null = null;
+
+      const open = (id: string) => {
+        dossier.querySelectorAll<HTMLElement>('.dossier-page').forEach((pg) => {
+          pg.classList.toggle('hidden', pg.dataset.dossier !== id);
+        });
+        dossier.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        (dossier.querySelector('.dossier-page:not(.hidden) .dossier-close') as HTMLElement | null)?.focus();
+      };
+      const close = () => {
+        dossier.classList.remove('open');
+        document.body.style.overflow = '';
+        lastFocus?.focus();
+      };
+
+      document.querySelectorAll<HTMLElement>('[data-card]').forEach((card) => {
+        const go = () => {
+          lastFocus = card;
+          open(card.dataset.card!);
+        };
+        card.addEventListener('click', (e) => {
+          // links inside a card still work normally
+          if ((e.target as HTMLElement).closest('a')) return;
+          go();
+        });
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+        });
+      });
+      dossier.querySelectorAll('.dossier-close').forEach((b) => b.addEventListener('click', close));
+      dossier.addEventListener('click', (e) => { if (e.target === dossier) close(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && dossier.classList.contains('open')) close();
+      });
+      document.addEventListener('astro:before-swap', close);
+    }
+
+    // ── proof chip expansion — one open at a time per group ──
+    document.querySelectorAll('[data-proofs]').forEach((wrap) => {
+      if ((wrap as HTMLElement).dataset.wired) return;
+      (wrap as HTMLElement).dataset.wired = '1';
+      const out = wrap.parentElement?.querySelector('[data-proof-out]') as HTMLElement | null;
+      if (!out) return;
+      wrap.querySelectorAll<HTMLButtonElement>('.proof-chip').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const open = btn.getAttribute('aria-expanded') === 'true';
+          wrap.querySelectorAll('.proof-chip').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+          if (open) {
+            out.classList.add('hidden');
+            return;
+          }
+          btn.setAttribute('aria-expanded', 'true');
+          const href = btn.dataset.href;
+          out.textContent = btn.dataset.detail ?? '';
+          if (href) {
+            const a = document.createElement('a');
+            a.href = href;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.className = 'link';
+            a.textContent = ' → open';
+            out.appendChild(a);
+          }
+          out.classList.remove('hidden');
+        });
       });
     });
   });

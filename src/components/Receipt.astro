@@ -69,66 +69,71 @@
     ],
   };
 
-  const el = document.getElementById('hero-log')!;
-  const pane = document.getElementById('hero-pane')!;
-  let timer: number | undefined;
-  let skipped = false;
-  let started = false;
-
   function esc(s: string) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
 
-  function render(mode: 'build' | 'break', instant: boolean) {
-    if (timer) clearTimeout(timer);
-    el.innerHTML = '';
-    const lines = LOGS[mode];
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.addEventListener('astro:page-load', () => {
+    const el = document.getElementById('hero-log');
+    const pane = document.getElementById('hero-pane');
+    if (!el || !pane || pane.dataset.wired) return;
+    pane.dataset.wired = '1';
 
-    if (instant || reduced || skipped) {
-      el.innerHTML =
-        lines.map((l) => `<span class="${l.c}">${esc(l.t)}</span>`).join('') +
-        '<span class="cursor-block"></span>';
-      return;
+    let timer: number | undefined;
+    let skipped = false;
+    let started = false;
+
+    function render(mode: 'build' | 'break', instant: boolean) {
+      if (timer) clearTimeout(timer);
+      el!.innerHTML = '';
+      const lines = LOGS[mode];
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (instant || reduced || skipped) {
+        el!.innerHTML =
+          lines.map((l) => `<span class="${l.c}">${esc(l.t)}</span>`).join('') +
+          '<span class="cursor-block"></span>';
+        return;
+      }
+
+      let i = 0;
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor-block';
+      el!.appendChild(cursor);
+
+      const step = () => {
+        if (i >= lines.length) return;
+        const l = lines[i++];
+        const span = document.createElement('span');
+        span.className = l.c;
+        span.textContent = l.t;
+        el!.insertBefore(span, cursor);
+        timer = window.setTimeout(step, l.t.startsWith('$') ? 420 : 190);
+      };
+      step();
     }
 
-    let i = 0;
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor-block';
-    el.appendChild(cursor);
+    // skip animation on any interaction with the pane
+    pane.addEventListener('click', () => {
+      skipped = true;
+      render(getMode(), true);
+    });
 
-    const step = () => {
-      if (i >= lines.length) return;
-      const l = lines[i++];
-      const span = document.createElement('span');
-      span.className = l.c;
-      span.textContent = l.t;
-      el.insertBefore(span, cursor);
-      timer = window.setTimeout(step, l.t.startsWith('$') ? 420 : 190);
-    };
-    step();
-  }
+    document.addEventListener('modechange', ((e: CustomEvent) => {
+      if (started && document.getElementById('hero-pane')) render(e.detail, false);
+    }) as EventListener);
 
-  // skip animation on any interaction with the pane
-  pane.addEventListener('click', () => {
-    skipped = true;
-    render(getMode(), true);
+    // only start typing when the pane is actually on screen
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          started = true;
+          render(getMode(), false);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    io.observe(pane);
   });
-
-  document.addEventListener('modechange', ((e: CustomEvent) => {
-    if (started) render(e.detail, false);
-  }) as EventListener);
-
-  // only start typing when the pane is actually on screen
-  const io = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((e) => e.isIntersecting)) {
-        started = true;
-        render(getMode(), false);
-        io.disconnect();
-      }
-    },
-    { threshold: 0.35 }
-  );
-  io.observe(pane);
 </script>

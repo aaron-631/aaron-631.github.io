@@ -1,29 +1,74 @@
 ---
-// Footer — quiet, grounded, human. Location, live clock, the essentials.
+// Footer — quiet, grounded, human. Location, live clock, real pings.
+// The pings aren't decoration: they're measured from YOUR browser, right now.
 import { profile } from '../content/profile';
 ---
 
 <footer class="border-t border-line">
-  <div class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-10 font-mono text-[0.72rem] text-paper-dim sm:flex-row sm:items-center">
-    <div class="flex flex-col gap-1.5">
-      <p>© 2026 <span class="text-paper">Aaron Chakraborty</span> · designed & written by me, mostly after midnight</p>
-      <p>
-        bhubaneswar, odisha · <span data-ist>--:--</span> IST
-        <span class="mx-2 text-line">|</span>
-        <span class="text-ok">●</span> <span data-swap data-build="mode: build" data-break="mode: break"></span>
-      </p>
+  <div class="mx-auto max-w-6xl px-5 py-10 font-mono text-[0.72rem] text-paper-dim">
+    <div class="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+      <div class="flex flex-col gap-1.5">
+        <p>© 2026 <span class="text-paper">Aaron Chakraborty</span> · designed & written by me, mostly after midnight</p>
+        <p>
+          bhubaneswar, odisha · <span data-ist>--:--</span> IST
+          <span class="mx-2 text-line">|</span>
+          <span class="text-ok">●</span> <span data-swap data-build="mode: build" data-break="mode: break"></span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-5">
+        <a class="link" href={profile.links.github} target="_blank" rel="noopener">github</a>
+        <a class="link" href={profile.links.linkedin} target="_blank" rel="noopener">linkedin</a>
+        <a class="link" href={profile.links.x} target="_blank" rel="noopener">x</a>
+        <a class="link" href={profile.links.email}>email</a>
+        <button
+          class="rounded-sm border border-line px-1.5 py-0.5 transition-colors hover:border-accent hover:text-accent"
+          aria-label="Open terminal"
+          onclick="document.dispatchEvent(new CustomEvent('terminal:open'))"
+        >~</button>
+      </div>
     </div>
 
-    <div class="flex items-center gap-5">
-      <a class="link" href={profile.links.github} target="_blank" rel="noopener">github</a>
-      <a class="link" href={profile.links.linkedin} target="_blank" rel="noopener">linkedin</a>
-      <a class="link" href={profile.links.x} target="_blank" rel="noopener">x</a>
-      <a class="link" href={profile.links.email}>email</a>
-      <button
-        class="rounded-sm border border-line px-1.5 py-0.5 transition-colors hover:border-accent hover:text-accent"
-        aria-label="Open terminal"
-        onclick="document.dispatchEvent(new CustomEvent('terminal:open'))"
-      >~</button>
+    <!-- live telemetry — measured from the visitor's browser, not hardcoded -->
+    <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-dashed border-line pt-4 text-[0.68rem]" id="pings" title="measured live from your browser">
+      <span><span class="t-ok">●</span> site <span data-ping="site" class="text-paper">…</span></span>
+      <span><span class="t-ok">●</span> github api <span data-ping="gh" class="text-paper">…</span></span>
+      <span><span class="t-ok">●</span> page loaded in <span data-ping="load" class="text-paper">…</span></span>
+      <span class="opacity-60">// yes, these are real. refresh and watch them change.</span>
     </div>
   </div>
 </footer>
+
+<script>
+  // Live latency, measured per visit. Static site: the "db" is GitHub's edge.
+  function fmt(ms: number) {
+    return `${Math.max(1, Math.round(ms))}ms`;
+  }
+
+  async function measure() {
+    const set = (k: string, v: string) => {
+      document.querySelectorAll(`[data-ping="${k}"]`).forEach((el) => (el.textContent = v));
+    };
+
+    // how long this page took, from navigation start to full load
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (nav && nav.loadEventEnd > 0) set('load', fmt(nav.loadEventEnd - nav.startTime));
+    else set('load', fmt(performance.now()));
+
+    // round-trip to this site's own edge (tiny asset, cache-busted)
+    try {
+      const t0 = performance.now();
+      await fetch(`/favicon.svg?p=${Date.now()}`, { cache: 'no-store' });
+      set('site', fmt(performance.now() - t0));
+    } catch { set('site', 'offline?'); }
+
+    // round-trip to the GitHub API (where the source of this site lives)
+    try {
+      const t0 = performance.now();
+      await fetch('https://api.github.com/zen', { cache: 'no-store' });
+      set('gh', fmt(performance.now() - t0));
+    } catch { set('gh', 'blocked'); }
+  }
+
+  document.addEventListener('astro:page-load', measure);
+</script>

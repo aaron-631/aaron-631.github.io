@@ -1,0 +1,120 @@
+---
+// One floating popover, shared by every .skill-chip on the site.
+// Hover shows the plain-words explanation; "where did I use it?" expands
+// the receipt + a link into the actual project. Tap-friendly on mobile.
+---
+
+<div id="skill-pop" transition:persist="skillpop" role="tooltip" aria-hidden="true">
+  <p class="sp-name"></p>
+  <p class="sp-what"></p>
+  <div class="sp-used"></div>
+  <button class="sp-more" type="button"></button>
+</div>
+
+<script>
+  import { skills } from '../content/skills';
+
+  const pop = document.getElementById('skill-pop')!;
+  const elName = pop.querySelector('.sp-name')!;
+  const elWhat = pop.querySelector('.sp-what')!;
+  const elUsed = pop.querySelector('.sp-used') as HTMLElement;
+  const btnMore = pop.querySelector('.sp-more') as HTMLButtonElement;
+
+  let current: HTMLElement | null = null;
+  let hideTimer: number | undefined;
+  let currentHref = '';
+
+  function place(anchor: HTMLElement) {
+    const r = anchor.getBoundingClientRect();
+    const pw = Math.min(336, window.innerWidth - 32);
+    let left = r.left + window.scrollX;
+    if (left + pw > window.scrollX + window.innerWidth - 16) {
+      left = window.scrollX + window.innerWidth - pw - 16;
+    }
+    pop.style.left = `${Math.max(16, left)}px`;
+    // below the chip by default; above if there's no room
+    const below = r.bottom + window.scrollY + 8;
+    pop.style.top = `${below}px`;
+  }
+
+  function show(anchor: HTMLElement) {
+    const skill = skills.find((s) => s.id === anchor.dataset.skill);
+    if (!skill) return;
+    clearTimeout(hideTimer);
+    if (current && current !== anchor) current.setAttribute('aria-expanded', 'false');
+    current = anchor;
+    anchor.setAttribute('aria-expanded', 'true');
+    elName.textContent = skill.name;
+    elWhat.textContent = skill.what;
+    elUsed.textContent = skill.used + ' ';
+    currentHref = skill.href;
+    const a = document.createElement('a');
+    a.href = skill.href;
+    a.className = 'link';
+    a.textContent = 'see it →';
+    elUsed.appendChild(a);
+    btnMore.innerHTML = '<span class="sp-more-label">where did I use it? ↓</span>';
+    pop.classList.remove('expanded');
+    place(anchor);
+    pop.classList.add('show');
+    pop.setAttribute('aria-hidden', 'false');
+  }
+
+  function hide() {
+    pop.classList.remove('show', 'expanded');
+    pop.setAttribute('aria-hidden', 'true');
+    current?.setAttribute('aria-expanded', 'false');
+    current = null;
+  }
+
+  function scheduleHide() {
+    clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(hide, 250);
+  }
+
+  btnMore.addEventListener('click', () => {
+    if (pop.classList.contains('expanded')) {
+      // second tap: follow the receipt
+      if (currentHref) window.location.href = currentHref;
+      return;
+    }
+    pop.classList.add('expanded');
+    if (current) place(current); // re-measure, content grew
+  });
+
+  // event delegation — chips can appear on any page, after any page turn
+  document.addEventListener('pointerover', (e) => {
+    const chip = (e.target as HTMLElement).closest<HTMLElement>('.skill-chip');
+    if (chip && (e as PointerEvent).pointerType !== 'touch') show(chip);
+  });
+  document.addEventListener('pointerout', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('.skill-chip') || t.closest('#skill-pop')) {
+      const to = (e as PointerEvent).relatedTarget as HTMLElement | null;
+      if (to && (to.closest('.skill-chip') === current || to.closest('#skill-pop'))) return;
+      scheduleHide();
+    }
+  });
+  pop.addEventListener('pointerenter', () => clearTimeout(hideTimer));
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const chip = t.closest<HTMLElement>('.skill-chip');
+    if (chip) {
+      e.preventDefault();
+      // tap toggles on touch; click expands straight to the receipt on desktop
+      if (current === chip && pop.classList.contains('show')) {
+        pop.classList.add('expanded');
+        place(chip);
+      } else {
+        show(chip);
+      }
+      return;
+    }
+    if (!t.closest('#skill-pop')) hide();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hide();
+  });
+  document.addEventListener('astro:before-swap', hide);
+  window.addEventListener('scroll', () => { if (current) place(current); }, { passive: true });
+</script>

@@ -12,7 +12,23 @@ export function setMode(mode: Mode): void {
   } catch {
     /* private browsing — fine */
   }
+  sweep();
   document.dispatchEvent(new CustomEvent<Mode>('modechange', { detail: mode }));
+}
+
+// a brief wash of the new accent across the page — the light changing
+function sweep(): void {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let el = document.getElementById('mode-sweep');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'mode-sweep';
+    el.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(el);
+  }
+  el.classList.remove('on');
+  void el.offsetWidth; // restart the animation
+  el.classList.add('on');
 }
 
 export function toggleMode(): Mode {

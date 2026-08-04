@@ -5,6 +5,11 @@ import Base from '../layouts/Base.astro';
 import { profile } from '../content/profile';
 import { now } from '../content/writing';
 import { journey } from '../content/achievements';
+import { skills } from '../content/skills';
+
+// the ones worth naming on the about page — the rest live in /projects/#arsenal
+const headline = ['pytorch', 'transformers', 'deepspeed', 'burp', 'prompt-injection', 'python', 'react', 'bash'];
+const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Boolean);
 ---
 
 <Base title="About · Aaron Chakraborty" description="The honest version: SSB AIR 83, the IoT Lab family at KIIT, and why I picked the hard road.">
@@ -45,6 +50,24 @@ import { journey } from '../content/achievements';
             <span class="m-build">{profile.aboutClose.build}</span>
             <span class="m-break">{profile.aboutClose.break}</span>
           </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- the toolkit — hover any of these, they explain themselves -->
+    <section class="border-t border-line">
+      <div class="mx-auto max-w-6xl px-5 py-20">
+        <p class="label-mono reveal mb-3"><span class="idx">// 01.2</span> · the toolkit</p>
+        <h2 class="h-serif reveal mb-4 text-3xl sm:text-4xl">What I work with.</h2>
+        <p class="reveal mb-10 max-w-lg text-[0.92rem] leading-relaxed text-paper-dim">
+          Don't code? Hover (or tap) any of these. Each one tells you what it is in normal
+          words, then shows you exactly where I used it. Full list lives in
+          <a class="link" href="/projects/#arsenal">the arsenal</a>.
+        </p>
+        <div class="reveal flex flex-wrap gap-2.5">
+          {toolkit.map((s) => (
+            <button class="skill-chip px-3 py-1.5 text-[0.78rem]" data-skill={s.id} aria-expanded="false">{s.name}</button>
+          ))}
         </div>
       </div>
     </section>
