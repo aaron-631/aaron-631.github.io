@@ -1,26 +1,124 @@
 ---
+// Landing — one idea per screen. Hero → the receipt → doors into the chapters.
+// Everything else lives on its own page now. The landing just makes you feel it.
 import Base from '../layouts/Base.astro';
-import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
-import About from '../components/About.astro';
-import Work from '../components/Work.astro';
-import Projects from '../components/Projects.astro';
-import Disclosure from '../components/Disclosure.astro';
-import ArsenalJourney from '../components/ArsenalJourney.astro';
-import WritingContact from '../components/WritingContact.astro';
-import TerminalUI from '../components/TerminalUI.astro';
+import Receipt from '../components/Receipt.astro';
+import { statsByMode } from '../content/profile';
+
+const chapters = [
+  {
+    href: '/about/',
+    idx: '01',
+    title: 'The honest version',
+    hook: 'SSB rank 83, a lab full of people I call family, and why I picked the hard road.',
+    cmd: 'cat about.md',
+  },
+  {
+    href: '/work/',
+    idx: '02',
+    title: 'Claims & receipts',
+    hook: 'DBS, SwiftSafe, 20+ VAPTs, and one real bug in production. Every claim carries proof.',
+    cmd: 'cat work.log',
+  },
+  {
+    href: '/projects/',
+    idx: '03',
+    title: 'The systems',
+    hook: 'VantaLLM, Argus, ReconForge. Built end-to-end, tested until boring.',
+    cmd: 'ls projects/',
+  },
+  {
+    href: '/writing/',
+    idx: '04',
+    title: 'From the trenches',
+    hook: 'I post the crashes along with the wins. The OOM errors nobody warns you about.',
+    cmd: 'tail -f trenches.md',
+  },
+  {
+    href: '/contact/',
+    idx: '05',
+    title: 'Run the scan',
+    hook: 'Argus evaluates AI agents before deployment. This copy runs on me. Try it.',
+    cmd: 'scan me',
+  },
+];
 ---
 
-<Base>
-  <Nav />
+<Base intro>
   <main>
     <Hero />
-    <About />
-    <Work />
-    <Projects />
-    <Disclosure />
-    <ArsenalJourney />
-    <WritingContact />
+    <Receipt />
+
+    <!-- the numbers, re-lensed per mode -->
+    <section class="border-t border-line bg-ink-2">
+      <div class="mx-auto max-w-6xl px-5 py-10 font-mono">
+        <div class="m-build grid grid-cols-2 gap-px sm:grid-cols-4">
+          {
+            statsByMode.build.map((s) => (
+              <div class="reveal py-3 pr-6">
+                <div class="text-2xl text-accent">{s.value}</div>
+                <div class="mt-1 text-[0.68rem] tracking-wider text-paper-dim uppercase">{s.label}</div>
+              </div>
+            ))
+          }
+        </div>
+        <div class="m-break grid grid-cols-2 gap-px sm:grid-cols-4">
+          {
+            statsByMode.break.map((s) => (
+              <div class="py-3 pr-6">
+                <div class="text-2xl text-accent">{s.value}</div>
+                <div class="mt-1 text-[0.68rem] tracking-wider text-paper-dim uppercase">{s.label}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- doors into the chapters — the site is a story, pick where to enter -->
+    <section class="mx-auto max-w-6xl px-5 py-28">
+      <p class="label-mono reveal mb-3"><span class="idx">//</span> the chapters</p>
+      <h2 class="h-serif reveal mb-16 text-4xl sm:text-5xl">Where do you<br />want to start?</h2>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {
+          chapters.map((c) => (
+            <a
+              href={c.href}
+              class="reveal group flex flex-col justify-between border border-line bg-ink p-7 transition-colors hover:border-accent/60"
+            >
+              <div>
+                <p class="label-mono mb-4"><span class="idx">// {c.idx}</span></p>
+                <h3 class="h-serif text-2xl text-paper">{c.title}</h3>
+                <p class="mt-3 text-[0.9rem] leading-relaxed text-paper-dim">{c.hook}</p>
+              </div>
+              <p class="mt-8 font-mono text-[0.75rem] text-paper-dim transition-colors group-hover:text-accent">
+                <span class="t-prompt">$ </span>{c.cmd}
+                <span class="ml-1 inline-block transition-transform group-hover:translate-x-1">→</span>
+              </p>
+            </a>
+          ))
+        }
+
+        <!-- the sixth door is the terminal itself -->
+        <button
+          class="reveal group flex flex-col justify-between border border-dashed border-line bg-ink p-7 text-left transition-colors hover:border-accent/60"
+          onclick="document.dispatchEvent(new CustomEvent('terminal:open'))"
+        >
+          <div>
+            <p class="label-mono mb-4"><span class="idx">// ??</span></p>
+            <h3 class="h-serif text-2xl text-paper">Skip the pages</h3>
+            <p class="mt-3 text-[0.9rem] leading-relaxed text-paper-dim">
+              The whole site runs from a shell. Some things only exist in there.
+            </p>
+          </div>
+          <p class="mt-8 font-mono text-[0.75rem] text-paper-dim transition-colors group-hover:text-accent">
+            <span class="t-prompt">~ </span>open terminal
+            <span class="ml-1 inline-block transition-transform group-hover:translate-x-1">→</span>
+          </p>
+        </button>
+      </div>
+    </section>
   </main>
-  <TerminalUI />
 </Base>

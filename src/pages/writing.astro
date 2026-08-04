@@ -1,0 +1,48 @@
+---
+// Writing — the posts, straight from X/LinkedIn.
+import Base from '../layouts/Base.astro';
+import { writing } from '../content/writing';
+import { profile } from '../content/profile';
+---
+
+<Base title="Writing · Aaron Chakraborty" description="Build-in-public posts from X and LinkedIn: LLM training war stories, the crashes, the fixes.">
+  <main class="pt-24 md:pt-14">
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><span class="idx">// 04</span> · writing</p>
+      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">From the trenches.</h1>
+      <p class="reveal mb-14 max-w-lg leading-relaxed text-paper-dim">
+        I post what I'm building while I'm building it, on X mostly. The crashes get posted
+        with the wins. If a tutorial stops where it gets hard, my thread starts there.
+      </p>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {
+          writing.map((w) => (
+            <a href={w.href} target="_blank" rel="noopener" class="reveal group border border-line bg-ink p-7 transition-colors hover:border-accent/50">
+              <p class="h-serif text-xl leading-snug text-paper">“{w.quote}”</p>
+              <p class="mt-5 font-mono text-[0.7rem] text-paper-dim">
+                <span class="text-accent">{w.source}</span> · {w.context}
+                <span class="ml-1 inline-block transition-transform group-hover:translate-x-1">→</span>
+              </p>
+            </a>
+          ))
+        }
+      </div>
+
+      <p class="reveal mt-10 font-mono text-[0.78rem] text-paper-dim">
+        follow along: <a class="link" href={profile.links.x} target="_blank" rel="noopener">@AaronChakr47884</a> ·
+        <a class="link" href={profile.links.linkedin} target="_blank" rel="noopener">linkedin</a>
+      </p>
+    </section>
+
+    <!-- next chapter -->
+    <section class="border-t border-line">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
+        <p class="font-mono text-[0.78rem] text-paper-dim">last chapter</p>
+        <a href="/contact/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
+          Run the scan →
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>

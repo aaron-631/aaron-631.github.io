@@ -12,3 +12,6 @@ node_modules/
 
 # never ship personal source material
 Resources/
+
+# raw personal photos (compressed copies ship from public/photos/)
+images/

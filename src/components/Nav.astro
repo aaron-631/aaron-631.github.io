@@ -1,5 +1,14 @@
 ---
-// Nav — block-cursor mark, sparse links, BUILD/BREAK rocker, terminal hint.
+// Nav — block-cursor mark, page links, BUILD/BREAK rocker, terminal hint.
+const { pathname } = Astro.url;
+const links = [
+  { href: '/about/', label: 'about' },
+  { href: '/work/', label: 'work' },
+  { href: '/projects/', label: 'projects' },
+  { href: '/writing/', label: 'writing' },
+  { href: '/contact/', label: 'contact' },
+];
+const isActive = (href: string) => pathname === href || pathname === href.slice(0, -1);
 ---
 
 <nav
@@ -7,22 +16,27 @@
   aria-label="Primary"
 >
   <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-    <a href="#top" class="flex items-baseline gap-0.5 font-mono text-lg text-paper" aria-label="Aaron Chakraborty — home">
-      <span>a</span><span class="text-accent">▮</span>
+    <a href="/" class="flex items-baseline gap-[3px] font-mono text-lg text-paper" aria-label="Aaron Chakraborty, home">
+      <span>aaron</span><span class="logo-block" aria-hidden="true"></span>
     </a>
 
     <!-- live local time — proof there's a human in Asia/Kolkata behind this -->
-    <span class="hidden font-mono text-[0.68rem] text-paper-dim lg:inline" id="ist-clock" title="my local time">
-      bhubaneswar · <span data-time>--:--</span> IST
+    <span class="hidden font-mono text-[0.68rem] text-paper-dim lg:inline" title="my local time">
+      bhubaneswar · <span data-ist>--:--</span> IST
     </span>
 
     <div class="hidden items-center gap-6 font-mono text-[0.72rem] tracking-widest uppercase md:flex">
-      <a class="text-paper-dim transition-colors hover:text-accent" href="#about">about</a>
-      <a class="text-paper-dim transition-colors hover:text-accent" href="#work">work</a>
-      <a class="text-paper-dim transition-colors hover:text-accent" href="#projects">projects</a>
-      <a class="text-paper-dim transition-colors hover:text-accent" href="#disclosure">disclosure</a>
-      <a class="text-paper-dim transition-colors hover:text-accent" href="#writing">writing</a>
-      <a class="text-paper-dim transition-colors hover:text-accent" href="#contact">contact</a>
+      {
+        links.map((l) => (
+          <a
+            class={`transition-colors hover:text-accent ${isActive(l.href) ? 'text-accent' : 'text-paper-dim'}`}
+            href={l.href}
+            aria-current={isActive(l.href) ? 'page' : undefined}
+          >
+            {l.label}
+          </a>
+        ))
+      }
     </div>
 
     <div class="flex items-center gap-4">
@@ -48,6 +62,20 @@
       </button>
     </div>
   </div>
+
+  <!-- mobile page links -->
+  <div class="flex items-center gap-5 overflow-x-auto border-t border-line px-5 py-2 font-mono text-[0.68rem] tracking-widest uppercase md:hidden">
+    {
+      links.map((l) => (
+        <a
+          class={`whitespace-nowrap transition-colors ${isActive(l.href) ? 'text-accent' : 'text-paper-dim'}`}
+          href={l.href}
+        >
+          {l.label}
+        </a>
+      ))
+    }
+  </div>
 </nav>
 
 <style>
@@ -61,19 +89,4 @@
   document.getElementById('terminal-hint')?.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent('terminal:open'));
   });
-
-  // live IST clock
-  const t = document.querySelector('#ist-clock [data-time]');
-  if (t) {
-    const tick = () => {
-      t.textContent = new Date().toLocaleTimeString('en-IN', {
-        timeZone: 'Asia/Kolkata',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-    };
-    tick();
-    setInterval(tick, 30_000);
-  }
 </script>

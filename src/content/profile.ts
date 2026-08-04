@@ -16,12 +16,12 @@ export const profile = {
   // Hero copy per mode. Same person, two lenses.
   hero: {
     build: {
-      headline: 'I train language models from scratch.',
-      sub: "I'm 20. Not fine-tuning GPT, not wrapping an API — a 567M-parameter MoE transformer I wrote layer by layer in PyTorch, trained on an A100 I had to fight to get access to.",
+      headline: 'I build AI systems.',
+      sub: 'A 567M-parameter MoE transformer, trained from scratch on an A100. I designed the architecture and debugged every layer, which is how I learned why any of it works.',
     },
     break: {
-      headline: 'Then I attack them.',
-      sub: "Prompt injection, jailbreaks, data extraction. I found an XSS in a real company's production AI chatbot and told them before anyone else did. Then I built a tool so it doesn't happen to the next one.",
+      headline: 'Then I break them.',
+      sub: 'Prompt injection, jailbreaks, data extraction. I found an XSS in a production AI chatbot, reported it quietly, and the company fixed it. Everyone won.',
     },
   },
   chips: [
@@ -31,10 +31,15 @@ export const profile = {
   ],
   // The human bit. This is the part recruiters actually remember.
   about: [
-    "I got into tech because I refused to be the average college guy. That's genuinely the whole origin story — I wanted to be hard to replace, so I picked the two hardest things I could find: building AI systems from nothing, and breaking the ones everyone else ships.",
-    "Before any of this I was headed for the Indian Army. I cleared the Service Selection Board with an All India Rank of 83 — five days of them trying to find out who you really are. Didn't join, but the discipline stuck. It's why I train models at 2am and still make it to an 8am class.",
-    "On a free day you'll find me with coffee and a David Goggins podcast. I post my failures on X along with the wins — the OOM crashes, the NCCL hangs, the 500GB fp32 partition that nobody warns you about. Documenting raw engineering from the trenches, as the bio says.",
+    "There's no grand origin story here. Somewhere in second year I looked around, saw how easy it was to coast through college, and realised that scared me more than failing ever did. So I picked the two things that intimidated me most: training AI models from nothing, and security, breaking the things people assume are safe.",
+    'Before tech I actually wanted the Indian Army. Cleared the Service Selection Board, All India Rank 83. Five days with people whose entire job is figuring out who you really are. I ended up not joining, but those five days rewired how I work. Show up, do the reps, no excuses.',
+    "Everything else is pretty simple: coffee, David Goggins podcasts, and posting whatever I'm building or breaking on X. Including the failures. Especially the failures, honestly, because the OOM crashes and NCCL hangs taught me more than anything that worked first try.",
   ],
+  // one closing line, re-lensed per mode
+  aboutClose: {
+    build: 'Right now that means one thing: getting VantaLLM to a released base model.',
+    break: 'Right now that means one thing: finding the holes in AI systems before someone worse does.',
+  },
   links: {
     github: 'https://github.com/aaron-631',
     linkedin: 'https://www.linkedin.com/in/aaron-chakraborty-309197287',
@@ -47,12 +52,20 @@ export const profile = {
 } as const;
 
 // The hard-numbers strip. Mono font, no icons, every figure real.
-export const stats = [
-  { value: '9.42', label: 'CGPA · KIIT CSE' },
-  { value: '30,000', label: 'training steps · A100 20GB' },
-  { value: '86/86', label: 'system tests passing' },
-  { value: '20+', label: 'VAPTs conducted' },
-  { value: '91%', label: 'eJPTv2 · INE Security' },
-] as const;
+// Different lens, different receipts.
+export const statsByMode = {
+  build: [
+    { value: '567M', label: 'params · trained from scratch' },
+    { value: '30,000', label: 'training steps · A100 20GB' },
+    { value: '86/86', label: 'system tests passing' },
+    { value: '9.42', label: 'CGPA · KIIT CSE' },
+  ],
+  break: [
+    { value: '1', label: 'production XSS · disclosed & fixed' },
+    { value: 'AIR 45', label: 'Pentathon 2025 · top 0.90%' },
+    { value: '20+', label: 'VAPTs on live applications' },
+    { value: '91%', label: 'eJPTv2 · INE Security' },
+  ],
+} as const;
 
 export type Mode = 'build' | 'break';

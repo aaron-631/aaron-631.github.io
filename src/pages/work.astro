@@ -1,0 +1,107 @@
+---
+// Work — experience with receipts, plus the disclosure case study.
+import Base from '../layouts/Base.astro';
+import { experience } from '../content/experience';
+import { disclosure } from '../content/projects';
+---
+
+<Base title="Work · Aaron Chakraborty" description="DBS Tech India, SwiftSafe, Panacea Infosec, and a responsibly disclosed production XSS. Every line with the thing that proves it.">
+  <main class="pt-24 md:pt-14">
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><span class="idx">// 02</span> <span data-swap data-build="· work" data-break="· operations"></span></p>
+      <h1 class="h-serif reveal mb-5 text-4xl sm:text-5xl">What I've actually done.</h1>
+      <p class="reveal mb-16 max-w-lg leading-relaxed text-paper-dim">
+        I try not to use adjectives here. Where I can, each line comes with the thing
+        that backs it up: a number, a report, a fix that shipped.
+      </p>
+
+      <div class="space-y-0">
+        {
+          experience.map((r) => (
+            <article class={`reveal grid grid-cols-1 gap-4 border-t border-line py-10 md:grid-cols-[0.9fr_1.6fr_0.9fr] ${r.featured ? 'md:bg-ink-2/40' : ''}`}>
+              <div class="font-mono text-[0.75rem] text-paper-dim">
+                <div>{r.dates}</div>
+                <div class="mt-1 opacity-70">{r.where}</div>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold">
+                  {r.role}
+                  {r.featured && <span class="ml-2 align-middle font-mono text-[0.6rem] tracking-widest text-accent uppercase">● current</span>}
+                </h2>
+                <p class="mt-0.5 font-mono text-[0.8rem] text-paper-dim">{r.org}</p>
+                <ul class="mt-4 space-y-2.5 text-[0.95rem] leading-relaxed text-paper-dim">
+                  {r.points.map((p) => (
+                    <li class="flex gap-2.5">
+                      <span class="mt-[0.6rem] h-px w-3 shrink-0 bg-accent" aria-hidden="true" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div class="md:text-right">
+                {r.receipt && (
+                  <span class="inline-block border-l-2 border-accent bg-accent/8 px-3 py-1.5 font-mono text-[0.7rem] text-paper-dim md:border-r-2 md:border-l-0">
+                    {r.receipt}
+                  </span>
+                )}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- the disclosure -->
+    <section id="disclosure" class="border-t border-line bg-ink-2/30">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="label-mono reveal mb-3"><span class="idx">// 02.5</span> · the disclosure</p>
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1fr]">
+          <div>
+            <h2 class="h-serif reveal text-4xl sm:text-5xl">The one I'm<br />quietly proud of.</h2>
+            <p class="reveal mt-6 max-w-lg leading-relaxed text-paper-dim">
+              I found a reflected XSS in the AI chatbot of Yatra.com, a travel platform millions of
+              people use. I reported it quietly, their security team confirmed it, and they fixed it.
+              No drama, no clout-chasing thread. Just the job done right.
+            </p>
+            <p class="reveal mt-6 max-w-lg border-l-2 border-accent pl-4 text-[0.95rem] text-paper italic">
+              {disclosure.moral}
+            </p>
+          </div>
+
+          <div class="pane reveal self-center">
+            <div class="pane-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="ml-2">cat disclosures/yatra-diya-xss.md</span>
+            </div>
+            <div class="pane-body">
+              <p class="t-warn"># {disclosure.title}</p>
+              <p class="t-dim mt-2">class: reflected XSS · surface: AI chatbot input path</p>
+              <div class="mt-4 space-y-1.5">
+                {
+                  disclosure.timeline.map((t, i) => (
+                    <p>
+                      <span class="t-dim">[{i + 1}/4]</span>
+                      <span class={t.step === 'remediated' ? 't-ok' : 'text-paper'}> {t.step}</span>
+                      <span class="t-dim"> · {t.note}</span>
+                    </p>
+                  ))
+                }
+              </div>
+              <p class="mt-4"><span class="t-ok">status: closed ✓</span> <span class="t-dim">· vendor-acknowledged</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- next chapter -->
+    <section class="border-t border-line">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
+        <p class="font-mono text-[0.78rem] text-paper-dim">next chapter</p>
+        <a href="/projects/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
+          The systems →
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>

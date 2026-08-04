@@ -1,5 +1,6 @@
 ---
-// Base layout — SEO, fonts, mode engine bootstrap, grain overlay.
+// Base layout — SEO, fonts, mode engine bootstrap, nav + footer + terminal overlay.
+// Every page shares this shell; only the landing plays the intro beat.
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import '@fontsource/inter/400.css';
@@ -9,15 +10,22 @@ import '@fontsource/newsreader/400-italic.css';
 import '@fontsource/newsreader/500-italic.css';
 import '../styles/global.css';
 import { profile } from '../content/profile';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import TerminalOverlay from '../components/TerminalOverlay.astro';
 
 interface Props {
   title?: string;
   description?: string;
+  intro?: boolean;
+  bare?: boolean; // 404 page: no nav/footer chrome
 }
 
 const {
-  title = 'Aaron Chakraborty — AI/ML Security Engineer',
+  title = 'Aaron Chakraborty · AI/ML Security Engineer',
   description = 'I build AI systems, and I break them. 567M-param MoE LLM trained from scratch · production XSS disclosed · AIR 45 Pentathon 2025 · B.Tech CSE @ KIIT.',
+  intro = false,
+  bare = false,
 } = Astro.props;
 
 const jsonLd = {
@@ -32,6 +40,8 @@ const jsonLd = {
   alumniOf: { '@type': 'CollegeOrUniversity', name: 'Kalinga Institute of Industrial Technology' },
   knowsAbout: ['Machine Learning', 'LLM Training', 'Penetration Testing', 'AI Security', 'Distributed Systems'],
 };
+
+const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').href;
 ---
 
 <!doctype html>
@@ -41,7 +51,7 @@ const jsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href="https://aaron-631.github.io/" />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0a0a0b" />
 
@@ -49,7 +59,7 @@ const jsonLd = {
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content="https://aaron-631.github.io/" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:image" content="https://aaron-631.github.io/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
@@ -64,12 +74,42 @@ const jsonLd = {
       try {
         const m = localStorage.getItem('mode');
         if (m === 'break' || m === 'build') document.documentElement.dataset.mode = m;
+        // intro plays once per session; returning visitors go straight in
+        if (sessionStorage.getItem('seen')) document.documentElement.classList.add('intro-skip');
       } catch {}
     </script>
   </head>
   <body class="grain">
+    {
+      /* one quiet beat before anything asks for attention */
+      intro && (
+        <div id="intro" aria-hidden="true">
+          <p class="intro-name">Aaron Chakraborty</p>
+          <div class="intro-rule" />
+          <p class="intro-tag">builds ai systems · breaks ai systems</p>
+        </div>
+      )
+    }
+    {!bare && <Nav />}
     <slot />
+    {!bare && <Footer />}
+    <TerminalOverlay />
+
     <script>
+      // intro: dismiss after the beat (or instantly on click), remember per session
+      const intro = document.getElementById('intro');
+      if (intro && !document.documentElement.classList.contains('intro-skip')) {
+        const done = () => {
+          intro.classList.add('out');
+          try { sessionStorage.setItem('seen', '1'); } catch {}
+          setTimeout(() => intro.remove(), 700);
+        };
+        intro.addEventListener('click', done);
+        setTimeout(done, 2100);
+      } else {
+        intro?.remove();
+      }
+
       // scroll reveal — IntersectionObserver, once per element
       const io = new IntersectionObserver(
         (entries) => {
@@ -83,6 +123,31 @@ const jsonLd = {
         { threshold: 0.12 }
       );
       document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      // live IST clocks — anything carrying [data-ist]
+      const clocks = document.querySelectorAll('[data-ist]');
+      if (clocks.length) {
+        const tick = () => {
+          const t = new Date().toLocaleTimeString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          });
+          clocks.forEach((c) => (c.textContent = t));
+        };
+        tick();
+        setInterval(tick, 30_000);
+      }
+
+      // for the ones who open devtools first. respect.
+      console.log(
+        '%caaron@portfolio:~$ %cyou checked the console. good instinct.\n' +
+          'the real easter eggs live in the terminal. press ~ and start digging.\n' +
+          'hint: ls -la shows more than ls.',
+        'color:#ffb454;font-family:monospace',
+        'color:#9d9b94;font-family:monospace'
+      );
     </script>
   </body>
 </html>

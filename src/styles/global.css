@@ -50,7 +50,7 @@ html {
 body {
   font-family: var(--font-sans);
   font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -58,6 +58,48 @@ body {
   background: var(--accent);
   color: var(--color-ink);
 }
+
+/* ── intro — a single quiet beat before the site. once per session. ── */
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  background: var(--color-ink);
+  transition: opacity 0.6s ease;
+  cursor: pointer;
+}
+#intro.out { opacity: 0; pointer-events: none; }
+#intro .intro-name {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+  letter-spacing: -0.02em;
+  opacity: 0;
+  animation: intro-fade 0.9s ease 0.15s forwards;
+}
+#intro .intro-rule {
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  animation: intro-rule 0.8s ease 0.7s forwards;
+}
+#intro .intro-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-paper-dim);
+  opacity: 0;
+  animation: intro-fade 0.7s ease 1s forwards;
+}
+html.intro-skip #intro { display: none; }
+@keyframes intro-fade { to { opacity: 1; } }
+@keyframes intro-rule { to { width: 7rem; } }
 
 /* ── grain / scanline texture — 2.5% opacity, pure CSS ── */
 .grain::before {
@@ -95,9 +137,24 @@ body {
 
 .label-mono .idx { color: var(--accent); }
 
+/* the block-cursor logo mark — drawn, not a font glyph */
+.logo-block {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.95em;
+  background: var(--accent);
+  animation: blink 1.4s step-end infinite;
+  transform: translateY(0.08em);
+}
+
 /* mode-dependent text swap: elements carry data-build / data-break text */
 [data-swap]::after { content: attr(data-build); }
 html[data-mode='break'] [data-swap]::after { content: attr(data-break); }
+
+/* mode-dependent block swap: .m-build / .m-break show per mode.
+   Only ever hides the inactive one, so any display type survives. */
+html:not([data-mode='break']) .m-break { display: none !important; }
+html[data-mode='break'] .m-build { display: none !important; }
 
 /* ── proof chips ── */
 .proof-chip {
@@ -166,18 +223,37 @@ html[data-mode='break'] [data-swap]::after { content: attr(data-break); }
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ── scroll reveal — subtle, 12px max ── */
+/* ── photos — warm, human, slightly desaturated until touched ── */
+.photo {
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  object-fit: cover;
+  filter: saturate(0.82) contrast(1.02);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+.photo:hover { filter: saturate(1) contrast(1); }
+.photo-caption {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-paper-dim);
+  margin-top: 0.6rem;
+  line-height: 1.5;
+}
+.photo-caption .t-prompt { color: var(--accent); }
+
+/* ── scroll reveal — subtle, 14px max ── */
 .reveal {
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 .reveal.in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
-  .cursor-block { animation: none; }
+  .cursor-block, .logo-block { animation: none; }
+  #intro { display: none; }
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 

@@ -1,0 +1,72 @@
+---
+// Terminal overlay — available on every page via ~ / Ctrl+K.
+---
+
+<div id="term-overlay" class="fixed inset-0 z-[70] hidden items-start justify-center bg-ink/80 p-4 pt-[12vh] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Terminal">
+  <div class="pane w-full max-w-2xl shadow-2xl">
+    <div class="pane-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="ml-2">aaron@portfolio · press esc to close</span>
+    </div>
+    <div class="pane-body h-[24rem] overflow-y-auto" id="term-out-overlay"></div>
+    <div class="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-[0.8rem]">
+      <span class="t-prompt" data-prompt>aaron@build:~$</span>
+      <input
+        id="term-in-overlay"
+        class="w-full bg-transparent text-paper outline-none placeholder:text-paper-dim/40"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="help"
+        aria-label="Terminal input"
+      />
+    </div>
+  </div>
+</div>
+
+<script>
+  import { wireTerminal } from './Terminal';
+  import { getMode } from './mode';
+
+  wireTerminal('term-out-overlay', 'term-in-overlay');
+
+  const overlay = document.getElementById('term-overlay')!;
+  const overlayInput = document.getElementById('term-in-overlay') as HTMLInputElement;
+
+  function openTerm() {
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+    setTimeout(() => overlayInput.focus(), 30);
+  }
+  function closeTerm() {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target as HTMLElement).tagName;
+    const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+    if ((e.key === '~' || e.key === '`') && !typing) {
+      e.preventDefault();
+      openTerm();
+    } else if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      openTerm();
+    } else if (e.key === 'Escape') {
+      closeTerm();
+    }
+  });
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeTerm();
+  });
+  document.addEventListener('terminal:open', openTerm);
+
+  // keep prompts in sync with mode
+  const syncPrompts = () => {
+    document.querySelectorAll('[data-prompt]').forEach((el) => {
+      el.textContent = `${getMode() === 'build' ? 'aaron@build' : 'aaron@break'}:~$`;
+    });
+  };
+  document.addEventListener('modechange', syncPrompts);
+  syncPrompts();
+</script>

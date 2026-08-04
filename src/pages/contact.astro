@@ -1,0 +1,168 @@
+---
+// Contact — the Argus scan + the actual ways to reach me + embedded terminal.
+import Base from '../layouts/Base.astro';
+import { profile } from '../content/profile';
+---
+
+<Base title="Contact · Aaron Chakraborty" description="Placement season 2026-27. AI/ML engineering, security engineering, or the rare seat that needs both.">
+  <main class="pt-24 md:pt-14">
+    <section id="contact" class="mx-auto max-w-6xl px-5 py-24">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div>
+          <p class="label-mono reveal mb-3"><span class="idx">// 05</span> · contact</p>
+          <h1 class="h-serif reveal text-4xl sm:text-5xl">Run the scan.<br />Then let's talk.</h1>
+          <p class="reveal mt-6 max-w-md leading-relaxed text-paper-dim">
+            Placement season 2026-27. If you're hiring for AI/ML engineering, security engineering,
+            or the rare seat that needs both: my inbox is open and I reply fast.
+          </p>
+
+          <div class="reveal mt-8 space-y-2.5 font-mono text-[0.85rem]">
+            <p><span class="t-dim">email    </span><a class="link" href={profile.links.email}>aaronchakraborty631@gmail.com</a></p>
+            <p><span class="t-dim">github   </span><a class="link" href={profile.links.github} target="_blank" rel="noopener">aaron-631</a></p>
+            <p><span class="t-dim">linkedin </span><a class="link" href={profile.links.linkedin} target="_blank" rel="noopener">aaron-chakraborty</a></p>
+            <p><span class="t-dim">x        </span><a class="link" href={profile.links.x} target="_blank" rel="noopener">@AaronChakr47884</a></p>
+            <p><span class="t-dim">thm      </span><a class="link" href={profile.links.tryhackme} target="_blank" rel="noopener">aaronchakraborty</a></p>
+            <p><span class="t-dim">resume   </span><a class="link" href={profile.links.resume} download="Aaron_Chakraborty_Resume.pdf">resume.pdf ↓</a></p>
+          </div>
+        </div>
+
+        <!-- the Argus recruiter scan -->
+        <div class="reveal self-center">
+          <div class="pane">
+            <div class="pane-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="ml-2">argus · candidate evaluation</span>
+            </div>
+            <div class="pane-body min-h-[21rem]" id="scan-out">
+              <p class="t-dim">// Argus is my real pre-deployment risk evaluator.</p>
+              <p class="t-dim">// This one runs on me.</p>
+              <p class="mt-3"><span class="t-prompt">$ </span>argus scan --target aaron_chakraborty --profile recruiter</p>
+            </div>
+            <div class="border-t border-line p-3">
+              <button
+                id="scan-btn"
+                class="w-full rounded-sm bg-accent px-4 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85"
+              >
+                ▶ run scan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- the terminal, embedded — the thing that survived every redesign -->
+    <section class="border-t border-line bg-ink-2/30">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="label-mono reveal mb-3"><span class="idx">// 05.5</span> · terminal</p>
+        <h2 class="h-serif reveal mb-4 text-3xl sm:text-4xl">Prefer the command line?<br />Same here.</h2>
+        <p class="reveal mb-10 max-w-md text-[0.95rem] leading-relaxed text-paper-dim">
+          This shell has been on my site since v1. It's the one thing I refused to remove.
+          The whole site is navigable from here. Start with <span class="font-mono text-accent">help</span>,
+          and no, not everything is documented.
+        </p>
+
+        <div class="pane reveal max-w-2xl">
+          <div class="pane-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="ml-2">aaron@portfolio</span>
+          </div>
+          <div class="pane-body h-[18rem] overflow-y-auto" id="term-out-embed"></div>
+          <div class="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-[0.8rem]">
+            <span class="t-prompt" data-prompt>aaron@build:~$</span>
+            <input
+              id="term-in-embed"
+              class="w-full bg-transparent text-paper outline-none placeholder:text-paper-dim/40"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="try: scan me"
+              aria-label="Terminal input"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import { wireTerminal } from '../components/Terminal';
+  wireTerminal('term-out-embed', 'term-in-embed');
+
+  const OUT = document.getElementById('scan-out')!;
+  const BTN = document.getElementById('scan-btn') as HTMLButtonElement;
+
+  const REPORT: Array<[string, string, number]> = [
+    ['$ argus scan --target aaron_chakraborty --profile recruiter', 't-prompt', 300],
+    ['[✓] static analysis .......... 15/15 rules passed', 't-dim', 350],
+    ['[✓] identity verified ........ B.Tech CSE @ KIIT · CGPA 9.42', 't-dim', 300],
+    ['', '', 120],
+    ['[!] FINDING (CRITICAL) · builds end-to-end', 't-crit', 500],
+    ['    trained 567,068,416-param MoE LLM from scratch · A100 · 30k steps', 't-dim', 260],
+    ['[!] FINDING (HIGH) · breaks what others ship', 't-crit', 500],
+    ['    disclosed reflected XSS in production AI chatbot → remediated', 't-dim', 260],
+    ['[!] FINDING (HIGH) · performs under pressure', 't-crit', 500],
+    ['    AIR 45 · top 0.90% · Pentathon 2025 (48-hour national CTF)', 't-dim', 260],
+    ['[!] FINDING (MEDIUM) · certified offense', 't-warn', 400],
+    ['    eJPTv2 91% · INE Security · SSB TES-51 AIR 83', 't-dim', 260],
+    ['', '', 150],
+    ['computing R = S_base × C_env × P_conf ...', 't-dim', 700],
+    ['R = HIRE  (confidence: 0.99, clamped, never claims certainty)', 't-ok', 400],
+    ['verdict: deploy immediately.', 't-ok', 300],
+    ['exit 0', 't-dim', 200],
+  ];
+
+  let running = false;
+
+  function runScan() {
+    if (running) return;
+    running = true;
+    BTN.disabled = true;
+    BTN.textContent = 'scanning…';
+    OUT.innerHTML = '';
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const finish = () => {
+      const p = document.createElement('p');
+      p.className = 'mt-3';
+      p.innerHTML =
+        '<span class="t-prompt">$ </span><a class="link" href="/resume.pdf" download="Aaron_Chakraborty_Resume.pdf">download resume.pdf</a> <span class="t-dim">·</span> <a class="link" href="mailto:aaronchakraborty631@gmail.com?subject=Saw%20the%20scan%20-%20let%27s%20talk">email aaron</a>';
+      OUT.appendChild(p);
+      BTN.disabled = false;
+      BTN.textContent = '↻ re-run scan';
+      running = false;
+    };
+
+    if (reduced) {
+      for (const [text, cls] of REPORT) {
+        const p = document.createElement('p');
+        p.className = cls;
+        p.textContent = text || ' ';
+        OUT.appendChild(p);
+      }
+      finish();
+      return;
+    }
+
+    let i = 0;
+    const step = () => {
+      if (i >= REPORT.length) return finish();
+      const [text, cls, delay] = REPORT[i++];
+      const p = document.createElement('p');
+      p.className = cls;
+      p.textContent = text || ' ';
+      OUT.appendChild(p);
+      OUT.scrollTop = OUT.scrollHeight;
+      setTimeout(step, delay);
+    };
+    step();
+  }
+
+  BTN.addEventListener('click', runScan);
+  // the terminal can trigger this too
+  document.addEventListener('scan:run', () => {
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(runScan, 600);
+  });
+</script>

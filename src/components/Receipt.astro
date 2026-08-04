@@ -1,0 +1,134 @@
+---
+// The receipt — the one artifact that backs the hero claim.
+// Lives below the fold so the landing stays quiet. Types only when visible.
+---
+
+<section id="receipt" class="border-t border-line">
+  <div class="mx-auto max-w-6xl px-5 py-28">
+    <div class="mx-auto max-w-3xl">
+      <p class="label-mono reveal mb-4"><span class="idx">//</span> <span data-swap data-build="the receipt" data-break="the finding"></span></p>
+      <h2 class="h-serif reveal mb-4 text-3xl sm:text-4xl">
+        <span class="m-build">That claim up there? Here's the log.</span>
+        <span class="m-break">And here's what breaking looks like.</span>
+      </h2>
+      <p class="reveal mb-10 max-w-lg text-paper-dim">
+        <span class="m-build">Every line below is from a real training run. Real loss curve, real step count, real hardware.</span>
+        <span class="m-break">A real scan, ending in a real bug on a real production system. Reported and fixed.</span>
+      </p>
+
+      <div class="pane reveal" id="hero-pane" aria-label="Training log">
+        <div class="pane-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="ml-2" data-swap data-build="tmux · vanta-train-0" data-break="argus · pre-deploy scan"></span>
+        </div>
+        <div class="pane-body min-h-[19rem]" id="hero-log" aria-live="off"></div>
+      </div>
+      <p class="reveal mt-4 font-mono text-[0.68rem] text-paper-dim">click the pane to skip the typing · toggle BUILD/BREAK in the nav to see the other half</p>
+      <p class="reveal mt-6 max-w-lg text-[0.9rem] leading-relaxed text-paper-dim">
+        <span class="m-build">If you don't read code, here's the translation: that box shows a language model,
+        the same family of thing behind ChatGPT, being trained from zero. Not customised, not plugged into
+        an API. Started from an empty file, and it learned.</span>
+        <span class="m-break">In plain words: companies ship AI chatbots to millions of users. I found a security
+        hole in one, told the company privately, and they fixed it. Nobody got hurt. That's the whole point.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { getMode } from './mode';
+
+  // Real numbers. Every line is true.
+  const LOGS = {
+    build: [
+      { t: '$ ', c: 't-prompt' },
+      { t: 'bash launch_ddp.sh 1 --config vanta_567m.json\n', c: '' },
+      { t: '[init] param_count = 567,068,416  # exact, not estimated\n', c: 't-dim' },
+      { t: '[init] tokenizer vocab = 151,003 · GQA · RoPE · MoE 16e/top-2\n', c: 't-dim' },
+      { t: '[step     0] loss=11.99  # ≈ ln(151003): correct uniform prior\n', c: '' },
+      { t: '[step  1000] loss=7.41   grad_norm=1.88\n', c: '' },
+      { t: '[step 30000] run complete · A100-20GB · ckpt saved ✓\n', c: 't-ok' },
+      { t: '[eval] KV-cache decode: bit-identical to no-cache ✓\n', c: 't-ok' },
+      { t: '[test] 86/86 passing\n', c: 't-ok' },
+      { t: '$ ', c: 't-prompt' },
+      { t: 'whoami\n', c: '' },
+      { t: 'aaron · builds the model, then breaks it.\n', c: 't-warn' },
+    ],
+    break: [
+      { t: '$ ', c: 't-prompt' },
+      { t: 'argus scan --target production_ai --profile strict\n', c: '' },
+      { t: '[✓] static analysis .......... 15/15 rules\n', c: 't-dim' },
+      { t: '[▶] dynamic probes: prompt-injection · jailbreak · extraction\n', c: 't-dim' },
+      { t: '[!] FINDING: reflected XSS · travel-platform AI chatbot\n', c: 't-crit' },
+      { t: '    reported → acknowledged → remediated ✓\n', c: 't-ok' },
+      { t: '[✓] R = S_base × C_env × P_conf → scored, bounded, shipped\n', c: '' },
+      { t: '[✓] report.md written · exit 0\n', c: 't-ok' },
+      { t: '$ ', c: 't-prompt' },
+      { t: 'whoami\n', c: '' },
+      { t: 'aaron · breaks the model he builds.\n', c: 't-warn' },
+    ],
+  };
+
+  const el = document.getElementById('hero-log')!;
+  const pane = document.getElementById('hero-pane')!;
+  let timer: number | undefined;
+  let skipped = false;
+  let started = false;
+
+  function esc(s: string) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
+
+  function render(mode: 'build' | 'break', instant: boolean) {
+    if (timer) clearTimeout(timer);
+    el.innerHTML = '';
+    const lines = LOGS[mode];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (instant || reduced || skipped) {
+      el.innerHTML =
+        lines.map((l) => `<span class="${l.c}">${esc(l.t)}</span>`).join('') +
+        '<span class="cursor-block"></span>';
+      return;
+    }
+
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor-block';
+    el.appendChild(cursor);
+
+    const step = () => {
+      if (i >= lines.length) return;
+      const l = lines[i++];
+      const span = document.createElement('span');
+      span.className = l.c;
+      span.textContent = l.t;
+      el.insertBefore(span, cursor);
+      timer = window.setTimeout(step, l.t.startsWith('$') ? 420 : 190);
+    };
+    step();
+  }
+
+  // skip animation on any interaction with the pane
+  pane.addEventListener('click', () => {
+    skipped = true;
+    render(getMode(), true);
+  });
+
+  document.addEventListener('modechange', ((e: CustomEvent) => {
+    if (started) render(e.detail, false);
+  }) as EventListener);
+
+  // only start typing when the pane is actually on screen
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        started = true;
+        render(getMode(), false);
+        io.disconnect();
+      }
+    },
+    { threshold: 0.35 }
+  );
+  io.observe(pane);
+</script>

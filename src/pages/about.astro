@@ -1,0 +1,154 @@
+---
+// About — the person. Story, the lab family, the journey history.
+// One chapter, room to breathe.
+import Base from '../layouts/Base.astro';
+import { profile } from '../content/profile';
+import { now } from '../content/writing';
+import { journey } from '../content/achievements';
+---
+
+<Base title="About · Aaron Chakraborty" description="The honest version: SSB AIR 83, the IoT Lab family at KIIT, and why I picked the hard road.">
+  <main class="pt-24 md:pt-14">
+    <!-- the story -->
+    <section class="mx-auto grid max-w-6xl grid-cols-1 gap-14 px-5 py-24 lg:grid-cols-[0.8fr_1.2fr]">
+      <div class="reveal">
+        <div class="relative max-w-[20rem]">
+          <img
+            src="/photos/candid.jpg"
+            alt="Aaron Chakraborty, mid-laugh at a lab session"
+            width="720"
+            height="1080"
+            loading="eager"
+            class="photo w-full"
+            style="aspect-ratio: 3/4;"
+          />
+          <p class="photo-caption">
+            <span class="t-prompt">$</span> whoami · bhubaneswar, india · est. 2005
+          </p>
+        </div>
+
+        <!-- now block — dated, alive -->
+        <div class="mt-12 border-l-2 border-accent pl-4">
+          <p class="label-mono mb-2">now · {now.updated}</p>
+          <ul class="space-y-1.5 font-mono text-[0.78rem] text-paper-dim">
+            {now.items.map((i) => <li>→ {i}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <p class="label-mono reveal mb-3"><span class="idx">// 01</span> · about</p>
+        <h1 class="h-serif reveal mb-10 text-4xl sm:text-5xl">The honest version.</h1>
+        <div class="reveal space-y-6 text-[1.05rem] leading-[1.8] text-paper-dim">
+          {profile.about.map((p) => <p>{p}</p>)}
+          <p class="text-paper">
+            <span class="m-build">{profile.aboutClose.build}</span>
+            <span class="m-break">{profile.aboutClose.break}</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- the family — IoT Lab -->
+    <section class="border-t border-line bg-ink-2/30">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="label-mono reveal mb-3"><span class="idx">// 01.5</span> · the family</p>
+        <h2 class="h-serif reveal mb-5 text-4xl sm:text-5xl">IoT Lab, KIIT.<br />My people.</h2>
+        <div class="reveal mb-14 max-w-xl space-y-5 leading-relaxed text-paper-dim">
+          <p>
+            Every college has societies. IoT Lab is the one I gave my years to, first as a cybersecurity
+            member, then as Lab Coordinator running the whole thing. 30+ members, CTFs, showcase days,
+            onboarding juniors who remind me of me two years ago.
+          </p>
+          <p>
+            These are the people who were there before anything worked. They saw the failed demos,
+            the 3am debugging, the events that almost fell apart and didn't. Family is the only word
+            that fits.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <figure class="reveal sm:col-span-2">
+            <img
+              src="/photos/lab-family.jpg"
+              alt="Full IoT Lab group photo on the red steps at KIIT"
+              width="1000" height="750" loading="lazy"
+              class="photo aspect-[16/9] w-full object-cover"
+            />
+            <figcaption class="photo-caption"><span class="t-prompt">$</span> the whole lab. my job was keeping this running. their job was keeping me sane.</figcaption>
+          </figure>
+          <figure class="reveal">
+            <img
+              src="/photos/iotlab.jpg"
+              alt="Aaron and the app dev lead in custom coordinator tees, facing the crowd at a lab event"
+              width="1000" height="750" loading="lazy"
+              class="photo aspect-[4/3] w-full"
+            />
+            <figcaption class="photo-caption"><span class="t-prompt">$</span> the coordinator tee has my name on the back. still not over it.</figcaption>
+          </figure>
+          <figure class="reveal">
+            <img
+              src="/photos/event.jpg"
+              alt="A lab showcase event at the KIIT amphitheatre"
+              width="1100" height="499" loading="lazy"
+              class="photo aspect-[4/3] w-full object-cover"
+            />
+            <figcaption class="photo-caption"><span class="t-prompt">$</span> showcase day at the amphitheatre. demos or it didn't happen.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- the journey -->
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><span class="idx">// 01.9</span> · journey</p>
+      <h2 class="h-serif reveal mb-14 text-4xl sm:text-5xl">$ history</h2>
+
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="pane reveal self-start">
+          <div class="pane-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="ml-2">~/.aaron_history</span>
+          </div>
+          <div class="pane-body space-y-2">
+            {
+              journey.map((h, i) => (
+                <p class="group grid grid-cols-[2rem_5.5rem_1fr] gap-2 sm:grid-cols-[2.5rem_6.5rem_1fr]">
+                  <span class="t-dim text-right">{i + 1}</span>
+                  <span class="t-dim">{h.date}</span>
+                  <span>
+                    <span class={h.kind === 'achievement' ? 't-warn' : h.kind === 'cert' ? 't-ok' : 'text-paper'}>{h.cmd}</span>
+                    <span class="t-dim block pl-0 sm:inline sm:pl-2"># {h.note}</span>
+                  </span>
+                </p>
+              ))
+            }
+            <p class="pt-2"><span class="t-prompt">$ </span><span class="cursor-block"></span></p>
+          </div>
+        </div>
+
+        <figure class="reveal self-start">
+          <img
+            src="/photos/podium.jpg"
+            alt="Aaron speaking at a KIIT University podium"
+            width="1000" height="666" loading="lazy"
+            class="photo w-full"
+          />
+          <figcaption class="photo-caption">
+            <span class="t-prompt">$</span> echo "some entries in that history happened on a stage"
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- next chapter -->
+    <section class="border-t border-line">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
+        <p class="font-mono text-[0.78rem] text-paper-dim">next chapter</p>
+        <a href="/work/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
+          Claims &amp; receipts →
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>

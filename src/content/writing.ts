@@ -11,7 +11,7 @@ export const writing: Post[] = [
   {
     quote:
       "I'm 20, training a custom MoE LLM from scratch. Not fine-tuning GPT. Not wrapping an API.",
-    context: 'the thread that started it — 7,800+ impressions',
+    context: 'the thread that started it · 7,800+ impressions',
     href: 'https://x.com/AaronChakr47884',
     source: 'X',
   },
@@ -24,7 +24,7 @@ export const writing: Post[] = [
   },
   {
     quote:
-      'Hit a wall nobody talks about — the 500GB fp32 master partition lands on-GPU with params-only offload. Here’s what actually fixes it.',
+      'Hit a wall nobody talks about: the 500GB fp32 master partition lands on-GPU with params-only offload. Here’s what actually fixes it.',
     context: 'distributed-training war stories, posted mid-crash',
     href: 'https://x.com/AaronChakr47884',
     source: 'X',
@@ -32,7 +32,7 @@ export const writing: Post[] = [
   {
     quote:
       'If you build loosely with AI tools: how do you maintain actual knowledge ownership of what you build?',
-    context: 'a question I keep asking — and answering with documentation',
+    context: 'a question I keep asking, and answering with documentation',
     href: 'https://x.com/AaronChakr47884',
     source: 'X',
   },
@@ -40,14 +40,14 @@ export const writing: Post[] = [
 
 export const arsenal = {
   'ai/ml systems': [
-    'PyTorch', 'DeepSpeed ZeRO-2/3', 'Transformer internals — MoE, GQA, RoPE, RMSNorm, SwiGLU',
-    'Distributed training — DDP, multi-node NCCL', 'BPE tokenizer design', 'Training pipelines & data sharding',
+    'PyTorch', 'DeepSpeed ZeRO-2/3', 'Transformer internals · MoE, GQA, RoPE, RMSNorm, SwiGLU',
+    'Distributed training · DDP, multi-node NCCL', 'BPE tokenizer design', 'Training pipelines & data sharding',
     'FastAPI inference · SSE streaming', 'Adversarial / AI evaluation',
   ],
   offensive: [
-    'Web app pentesting — Burp Suite, OWASP Top 10', 'Prompt injection · jailbreak evaluation',
-    'Recon — Nmap, Rustscan, Amass, FFUF', 'Exploitation — Metasploit, SQLMap, Hydra',
-    'Traffic analysis — Wireshark', 'Reverse engineering — Ghidra', 'CVSS scoring & risk reporting',
+    'Web app pentesting · Burp Suite, OWASP Top 10', 'Prompt injection · jailbreak evaluation',
+    'Recon · Nmap, Rustscan, Amass, FFUF', 'Exploitation · Metasploit, SQLMap, Hydra',
+    'Traffic analysis · Wireshark', 'Reverse engineering · Ghidra', 'CVSS scoring & risk reporting',
   ],
   engineering: [
     'Python', 'Java', 'JavaScript / TypeScript', 'SQL', 'Bash', 'C',
@@ -59,9 +59,9 @@ export const arsenal = {
 export const now = {
   updated: 'August 2026',
   items: [
-    'apprenticing at DBS Tech India (SEED) — enterprise infrastructure',
-    'pushing VantaLLM toward a released cybersecurity base model',
-    'placement season prep — DSA reps before breakfast',
+    'apprenticing at DBS Tech India (SEED)',
+    'pushing VantaLLM toward a released base model',
+    'placement season prep · DSA reps before breakfast',
     'still posting every failure and fix on X',
   ],
 } as const;
