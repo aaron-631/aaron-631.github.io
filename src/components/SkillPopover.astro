@@ -65,7 +65,7 @@
     pop.setAttribute('aria-hidden', 'true');
     current?.setAttribute('aria-expanded', 'false');
     current = null;
-    // park it back at the origin — a stale `top` from a long page would
+    // park it back at the origin, a stale `top` from a long page would
     // otherwise stretch the next (shorter) page with empty scroll space
     pop.style.top = '0px';
     pop.style.left = '0px';
@@ -86,7 +86,7 @@
     if (current) place(current); // re-measure, content grew
   });
 
-  // event delegation — chips can appear on any page, after any page turn
+  // event delegation, chips can appear on any page, after any page turn
   document.addEventListener('pointerover', (e) => {
     const chip = (e.target as HTMLElement).closest<HTMLElement>('.skill-chip');
     if (chip && (e as PointerEvent).pointerType !== 'touch') show(chip);

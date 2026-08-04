@@ -1,5 +1,5 @@
 ---
-// Writing — the posts, straight from X/LinkedIn.
+// Writing, the posts, straight from X/LinkedIn.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
 import { writing } from '../content/writing';
@@ -9,11 +9,20 @@ import { profile } from '../content/profile';
 <Base title="Writing · Aaron Chakraborty" description="Build-in-public posts from X and LinkedIn: LLM training war stories, the crashes, the fixes.">
   <main class="pt-24 md:pt-14">
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <p class="label-mono reveal mb-3"><span class="idx">// 04</span> · writing</p>
-      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">From the trenches.</h1>
+      <p class="label-mono reveal mb-3"><span class="idx">// 04</span> <span data-swap data-build="· writing" data-break="· field notes"></span></p>
+      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">
+        <span class="m-build">From the trenches.</span>
+        <span class="m-break">Autopsy reports.</span>
+      </h1>
       <p class="reveal mb-14 max-w-lg leading-relaxed text-paper-dim">
-        I post what I'm building while I'm building it, on X mostly. The crashes get posted
-        with the wins. If a tutorial stops where it gets hard, my thread starts there.
+        <span class="m-build">
+          I post what I'm building while I'm building it, on X mostly. The crashes get posted
+          with the wins. If a tutorial stops where it gets hard, my thread starts there.
+        </span>
+        <span class="m-break">
+          What broke, how it broke, and what it took to break it. Posted while the
+          wreckage was still warm. Polished write-ups always lie a little; these don't get the chance.
+        </span>
       </p>
 
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">

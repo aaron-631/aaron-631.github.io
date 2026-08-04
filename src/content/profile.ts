@@ -13,16 +13,21 @@ export const profile = {
     years: '2023–2027',
     cgpa: '9.42',
   },
-  // Hero copy per mode. Same person, two lenses.
+  // Hero copy per mode. Same person, two very different rooms.
   hero: {
     build: {
       headline: 'I build AI systems.',
-      sub: 'A 567M-parameter MoE transformer, trained from scratch on an A100. I designed the architecture and debugged every layer, which is how I learned why any of it works.',
+      sub: 'A 567M-parameter MoE transformer, trained from scratch on an A100. The architecture is mine, the technical calls are mine, and I debugged every layer down to the tensor shapes. Not a fine-tune, not a wrapper: random weights to a real model.',
     },
     break: {
       headline: 'Then I break them.',
-      sub: 'Prompt injection, jailbreaks, data extraction. I found an XSS in a production AI chatbot, reported it quietly, and the company fixed it. Everyone won.',
+      sub: "Prompt injection, jailbreaks, data extraction. I found an XSS in a production AI chatbot, reported it quietly, and the company fixed it. The systems I build, I build knowing someone like me is coming for them.",
     },
+  },
+  // the identity line under the nav, re-lensed per mode
+  titleByMode: {
+    build: 'ai/ml systems architect',
+    break: 'offensive security researcher',
   },
   chips: [
     { label: '567M params trained', href: '#vantallm' },

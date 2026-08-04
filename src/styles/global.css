@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   aaron-631.github.io — design tokens & base styles
+   aaron-631.github.io, design tokens & base styles
    "Terminal Editorial": serif headlines, mono artifacts, amber accent.
    ───────────────────────────────────────────────────────────── */
 
@@ -14,7 +14,7 @@
   --color-paper-dim: #9d9b94;
   --color-line: #26262a;
 
-  /* the single accent — phosphor amber in BUILD, ember red in BREAK
+  /* the single accent, phosphor amber in BUILD, ember red in BREAK
      (actual live values come from the [data-mode] custom props below) */
   --color-accent: var(--accent);
   --color-ok: #7fb069;
@@ -27,7 +27,7 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-/* mode engine — BUILD is canonical, BREAK re-lenses the accent + labels.
+/* mode engine, BUILD is canonical, BREAK re-lenses the accent + labels.
    The two modes are different rooms: warm workshop vs red-lit ops floor. */
 :root,
 html[data-mode='build'] {
@@ -67,7 +67,7 @@ body {
   color: var(--color-ink);
 }
 
-/* ── intro — a single quiet beat before the site. once per session. ── */
+/* ── intro, a single quiet beat before the site. once per session. ── */
 #intro {
   position: fixed;
   inset: 0;
@@ -109,7 +109,7 @@ html.intro-skip #intro { display: none; }
 @keyframes intro-fade { to { opacity: 1; } }
 @keyframes intro-rule { to { width: 7rem; } }
 
-/* ── grain / scanline texture — 2.5% opacity, pure CSS ── */
+/* ── grain / scanline texture, 2.5% opacity, pure CSS ── */
 .grain::before {
   content: '';
   position: fixed;
@@ -145,7 +145,7 @@ html.intro-skip #intro { display: none; }
 
 .label-mono .idx { color: var(--accent); }
 
-/* the block-cursor logo mark — drawn, not a font glyph */
+/* the block-cursor logo mark, drawn, not a font glyph */
 .logo-block {
   display: inline-block;
   width: 0.5em;
@@ -231,7 +231,7 @@ html[data-mode='break'] .m-build { display: none !important; }
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ── photos — warm, human, slightly desaturated until touched ── */
+/* ── photos, warm, human, slightly desaturated until touched ── */
 .photo {
   border: 1px solid var(--color-line);
   border-radius: 4px;
@@ -249,7 +249,7 @@ html[data-mode='break'] .m-build { display: none !important; }
 }
 .photo-caption .t-prompt { color: var(--accent); }
 
-/* ── scroll reveal — subtle, 14px max ── */
+/* ── scroll reveal, subtle, 14px max ── */
 .reveal {
   opacity: 0;
   transform: translateY(14px);
@@ -276,7 +276,7 @@ html[data-mode='break'] .m-build { display: none !important; }
 }
 .link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
-/* ── buttons — the two voices: solid accent, quiet ghost ── */
+/* ── buttons, the two voices: solid accent, quiet ghost ── */
 .btn-accent {
   display: inline-block;
   border-radius: 2px;
@@ -309,7 +309,7 @@ html[data-mode='break'] .m-build { display: none !important; }
   margin: 0;
 }
 
-/* ── accent transitions — the whole room changes temperature on mode switch.
+/* ── accent transitions, the whole room changes temperature on mode switch.
    Colours only: transform/filter stay instant so nothing ever feels laggy. ── */
 a, button, .t-prompt, .label-mono .idx, .proof-chip {
   transition-property: color, border-color, background-color, opacity, text-decoration-color;
@@ -319,7 +319,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 .card-open { transition: border-color 0.35s ease, transform 0.18s ease; }
 .cmd-chip:active, .skill-chip:active { transition-duration: 0.06s; }
 
-/* ── skill chips + popover — plain words on hover/tap, receipt on click ── */
+/* ── skill chips + popover, plain words on hover/tap, receipt on click ── */
 .skill-chip {
   position: relative;
   font-family: var(--font-mono);
@@ -344,11 +344,11 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 
 #skill-pop {
   position: absolute;
-  /* pinned to the origin until placed — its static position would otherwise
+  /* pinned to the origin until placed, its static position would otherwise
      sit after the footer and stretch short pages with phantom scroll space */
   top: 0;
   left: 0;
-  z-index: 90; /* above the dossier panel — chips live inside it too */
+  z-index: 90; /* above the dossier panel, chips live inside it too */
   width: min(21rem, calc(100vw - 2rem));
   background: var(--color-ink-2);
   border: 1px solid var(--accent);
@@ -386,7 +386,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 }
 #skill-pop.expanded .sp-more-label { display: none; }
 
-/* ── project dossier panel — a card opens into a centred reading panel ── */
+/* ── project dossier panel, a card opens into a centred reading panel ── */
 #dossier {
   position: fixed;
   inset: 0;
@@ -419,17 +419,17 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 .card-open:hover { transform: translateY(-3px); }
 .card-open:active { transform: translateY(-1px); }
 
-/* ── logo — "Aaron" types and deletes itself, cursor always alive ── */
+/* ── logo, "Aaron" types and deletes itself, cursor always alive ── */
 .logo-type { display: inline-block; min-width: 3.6em; text-align: left; }
 
-/* ── first-visit nudge — a soft pulse pointing at the mode switch, once ── */
+/* ── first-visit nudge, a soft pulse pointing at the mode switch, once ── */
 @keyframes nudge-pulse {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-dim); }
   50% { box-shadow: 0 0 0 7px var(--accent-dim); border-color: var(--accent); }
 }
 .nudge { animation: nudge-pulse 1.6s ease-in-out 3; }
 
-/* ── page turns — a real leaf. The old chapter is ON TOP and folds away
+/* ── page turns, a real leaf. The old chapter is ON TOP and folds away
    from the spine (left edge), darkening as it lifts; the new chapter is
    already lying beneath it, easing flat. Transform/opacity/filter only:
    compositor-driven, zero scroll jank. ── */
@@ -456,7 +456,18 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 /* the room behind the turning page stays ink, never white */
 ::view-transition { background: var(--color-ink); }
 
-/* ── contact — every door lit, email loudest ── */
+/* browsers without the View Transitions API (desktop Firefox, older Safari):
+   Astro's ClientRouter falls back to attribute-marked phases. Give them the
+   same fold so desktop feels identical to mobile. */
+html[data-astro-transition-fallback='old'] body {
+  transform-origin: left center;
+  animation: page-fold-away 0.32s cubic-bezier(0.5, 0.05, 0.7, 0.3) both;
+}
+html[data-astro-transition-fallback='new'] body {
+  animation: page-settle 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── contact, every door lit, email loudest ── */
 .contact-hero {
   border: 1px solid var(--color-line);
   border-left: 3px solid var(--accent);
@@ -494,7 +505,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 .contact-ico-lg { width: 2.3rem; height: 2.3rem; padding: 0.45rem; }
 .contact-card:hover .contact-ico { border-color: var(--accent); background: var(--accent-dim); }
 
-/* ── the wall — recommendations, set like pull-quotes in a magazine ── */
+/* ── the wall, recommendations, set like pull-quotes in a magazine ── */
 .wall-feat {
   position: relative;
   border: 1px solid var(--color-line);
@@ -557,7 +568,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
   from { opacity: 0; transform: translateY(14px) scale(0.985); }
   to { opacity: 1; transform: none; }
 }
-/* loading shimmer — three quiet lines, no spinner */
+/* loading shimmer, three quiet lines, no spinner */
 .wall-skel {
   height: 0.8rem;
   border-radius: 2px;
@@ -571,7 +582,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
   .wall-skel { animation: none; }
 }
 
-/* ── command chips under terminals — buttons for the no-keyboard crowd ── */
+/* ── command chips under terminals, buttons for the no-keyboard crowd ── */
 .cmd-chip {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -593,7 +604,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
   .skill-chip { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; }
 }
 
-/* ── reading progress — a hairline of accent along the top of the page ── */
+/* ── reading progress, a hairline of accent along the top of the page ── */
 #read-progress {
   position: fixed;
   top: 0;
@@ -605,13 +616,13 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
   transition: width 0.1s linear;
 }
 
-/* ── scrollbar — part of the room, not the browser's ── */
+/* ── scrollbar, part of the room, not the browser's ── */
 * { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
 *::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-/* ── hero entrance — the page breathes in, line by line ── */
+/* ── hero entrance, the page breathes in, line by line ── */
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .hero-stagger > * { opacity: 0; animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .hero-stagger > *:nth-child(1) { animation-delay: 0.05s; }
@@ -621,7 +632,7 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 .hero-stagger > *:nth-child(5) { animation-delay: 0.66s; }
 html.intro-wait .hero-stagger > * { animation-play-state: paused; }
 
-/* ── mode sweep — flipping the switch changes the room's light ── */
+/* ── mode sweep, flipping the switch changes the room's light ── */
 #mode-sweep {
   position: fixed;
   inset: 0;

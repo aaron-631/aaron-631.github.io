@@ -1,5 +1,5 @@
 ---
-// Work — experience with receipts, plus the disclosure case study.
+// Work, experience with receipts, plus the disclosure case study.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
 import { experience } from '../content/experience';
@@ -9,11 +9,20 @@ import { disclosure } from '../content/projects';
 <Base title="Work · Aaron Chakraborty" description="DBS Tech India, SwiftSafe, Panacea Infosec, and a responsibly disclosed production XSS. Every line with the thing that proves it.">
   <main class="pt-24 md:pt-14">
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <p class="label-mono reveal mb-3"><span class="idx">// 02</span> <span data-swap data-build="· work" data-break="· operations"></span></p>
-      <h1 class="h-serif reveal mb-5 text-4xl sm:text-5xl">What I've actually done.</h1>
+      <p class="label-mono reveal mb-3"><span class="idx">// 02</span> <span data-swap data-build="· work" data-break="· operations log"></span></p>
+      <h1 class="h-serif reveal mb-5 text-4xl sm:text-5xl">
+        <span class="m-build">What I've actually built.</span>
+        <span class="m-break">Where I've drawn blood.</span>
+      </h1>
       <p class="reveal mb-16 max-w-lg leading-relaxed text-paper-dim">
-        I try not to use adjectives here. Where I can, each line comes with the thing
-        that backs it up: a number, a report, a fix that shipped.
+        <span class="m-build">
+          I try not to use adjectives here. Where I can, each line comes with the thing
+          that backs it up: a number, a report, a fix that shipped.
+        </span>
+        <span class="m-break">
+          Engagements, not experiences. Each line ends in a finding, a report someone
+          acted on, or a hole that got patched because I found it first.
+        </span>
       </p>
 
       <div class="space-y-0">

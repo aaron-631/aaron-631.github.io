@@ -1,5 +1,5 @@
 ---
-// Landing — one idea per screen. Hero → the receipt → doors into the chapters.
+// Landing, one idea per screen. Hero → the receipt → doors into the chapters.
 // Everything else lives on its own page now. The landing just makes you feel it.
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
@@ -39,10 +39,13 @@ import { chapters } from '../content/chapters';
       </div>
     </section>
 
-    <!-- doors into the chapters — the site is a story, pick where to enter -->
+    <!-- doors into the chapters, the site is a story, pick where to enter -->
     <section class="mx-auto max-w-6xl px-5 py-28">
-      <p class="label-mono reveal mb-3"><span class="idx">//</span> the chapters</p>
-      <h2 class="h-serif reveal mb-16 text-4xl sm:text-5xl">Where do you<br />want to start?</h2>
+      <p class="label-mono reveal mb-3"><span class="idx">//</span> <span data-swap data-build="the chapters" data-break="the attack surface"></span></p>
+      <h2 class="h-serif reveal mb-16 text-4xl sm:text-5xl">
+        <span class="m-build">Where do you<br />want to start?</span>
+        <span class="m-break">Pick your<br />entry point.</span>
+      </h2>
 
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {
@@ -87,7 +90,7 @@ import { chapters } from '../content/chapters';
 </Base>
 
 <script>
-  // stats count up from zero when they enter view — numbers you watch arrive
+  // stats count up from zero when they enter view, numbers you watch arrive
   document.addEventListener('astro:page-load', () => {
     const els = document.querySelectorAll<HTMLElement>('[data-count]:not([data-counted])');
     if (!els.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -95,7 +98,7 @@ import { chapters } from '../content/chapters';
     const animate = (el: HTMLElement) => {
       const target = el.dataset.count ?? '';
       const m = target.match(/^([^\d]*)([\d,.]+)(.*)$/);
-      if (!m) return; // "AIR 45" etc. — leave non-leading-number values alone
+      if (!m) return; // "AIR 45" etc., leave non-leading-number values alone
       const [, prefix, numStr, suffix] = m;
       const hasComma = numStr.includes(',');
       const hasDot = numStr.includes('.');

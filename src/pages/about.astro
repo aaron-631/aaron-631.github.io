@@ -1,5 +1,5 @@
 ---
-// About — the person. Story, the lab family, the journey history.
+// About, the person. Story, the lab family, the journey history.
 // One chapter, room to breathe.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
@@ -8,7 +8,7 @@ import { now } from '../content/writing';
 import { journey } from '../content/achievements';
 import { skills } from '../content/skills';
 
-// the ones worth naming on the about page — the rest live in /projects/#arsenal
+// the ones worth naming on the about page, the rest live in /projects/#arsenal
 const headline = ['pytorch', 'transformers', 'deepspeed', 'burp', 'prompt-injection', 'python', 'react', 'bash'];
 const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Boolean);
 ---
@@ -33,7 +33,7 @@ const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Bo
           </p>
         </div>
 
-        <!-- now block — dated, alive -->
+        <!-- now block, dated, alive -->
         <div class="mt-12 border-l-2 border-accent pl-4">
           <p class="label-mono mb-2">now · {now.updated}</p>
           <ul class="space-y-1.5 font-mono text-[0.78rem] text-paper-dim">
@@ -43,8 +43,11 @@ const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Bo
       </div>
 
       <div>
-        <p class="label-mono reveal mb-3"><span class="idx">// 01</span> · about</p>
-        <h1 class="h-serif reveal mb-10 text-4xl sm:text-5xl">The honest version.</h1>
+        <p class="label-mono reveal mb-3"><span class="idx">// 01</span> <span data-swap data-build="· about" data-break="· subject profile"></span></p>
+        <h1 class="h-serif reveal mb-10 text-4xl sm:text-5xl">
+          <span class="m-build">The honest version.</span>
+          <span class="m-break">Know your adversary.</span>
+        </h1>
         <div class="reveal space-y-6 text-[1.05rem] leading-[1.8] text-paper-dim">
           {profile.about.map((p) => <p>{p}</p>)}
           <p class="text-paper">
@@ -55,7 +58,7 @@ const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Bo
       </div>
     </section>
 
-    <!-- the toolkit — hover any of these, they explain themselves -->
+    <!-- the toolkit, hover any of these, they explain themselves -->
     <section class="border-t border-line">
       <div class="mx-auto max-w-6xl px-5 py-20">
         <p class="label-mono reveal mb-3"><span class="idx">// 01.2</span> · the toolkit</p>
@@ -73,19 +76,20 @@ const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Bo
       </div>
     </section>
 
-    <!-- the family — IoT Lab -->
+    <!-- the family, IoT Lab -->
     <section class="border-t border-line bg-ink-2/30">
       <div class="mx-auto max-w-6xl px-5 py-24">
         <p class="label-mono reveal mb-3"><span class="idx">// 01.5</span> · the family</p>
         <h2 class="h-serif reveal mb-5 text-4xl sm:text-5xl">IoT Lab, KIIT.<br />My people.</h2>
         <div class="reveal mb-14 max-w-xl space-y-5 leading-relaxed text-paper-dim">
           <p>
-            Every college has societies. IoT Lab is the one I gave my years to, first as a cybersecurity
+            Every college has societies. IoT Lab is the one I gave two years to, first as a cybersecurity
             member, then as Lab Coordinator running the whole thing. 30+ members, CTFs, showcase days,
-            onboarding juniors who remind me of me two years ago.
+            onboarding juniors who reminded me of me when I started.
           </p>
           <p>
-            These are the people who were there before anything worked. They saw the failed demos,
+            My tenure wrapped up in August 2026 and the juniors run it now, which was always the plan.
+            These are still the people who were there before anything worked. They saw the failed demos,
             the 3am debugging, the events that almost fell apart and didn't. Family is the only word
             that fits.
           </p>
@@ -99,7 +103,7 @@ const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Bo
               width="1000" height="750" loading="lazy"
               class="photo aspect-[16/9] w-full object-cover"
             />
-            <figcaption class="photo-caption"><span class="t-prompt">$</span> the whole lab. my job was keeping this running. their job was keeping me sane.</figcaption>
+            <figcaption class="photo-caption"><span class="t-prompt">$</span> the whole lab. my job was keeping this running. their job was keeping me sane. now it's theirs.</figcaption>
           </figure>
           <figure class="reveal">
             <img

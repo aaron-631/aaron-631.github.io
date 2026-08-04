@@ -1,5 +1,5 @@
 ---
-// Hero — the statement plus the human behind it. The mode decides which
+// Hero, the statement plus the human behind it. The mode decides which
 // half of the thesis is lit; clicking the dim half IS the navigation.
 import { profile } from '../content/profile';
 ---
@@ -7,7 +7,11 @@ import { profile } from '../content/profile';
 <section id="top" class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-5 pt-24 pb-16 md:pt-14">
   <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.25fr_0.75fr]">
     <div class="hero-stagger">
-      <p class="label-mono mb-8">aaron chakraborty · {profile.title.toLowerCase()} · kiit '27</p>
+      <p class="label-mono mb-8">
+        aaron chakraborty ·
+        <span class="m-build">{profile.titleByMode.build}</span><span class="m-break">{profile.titleByMode.break}</span>
+        · kiit '27
+      </p>
 
       <h1 class="h-serif text-[2.7rem] leading-[1.12] sm:text-6xl lg:text-[4.3rem]">
         <button class="hero-line hero-line-build block text-left" data-set-mode="build">I build AI systems.</button>
@@ -52,7 +56,7 @@ import { profile } from '../content/profile';
       </div>
     </div>
 
-    <!-- the human — proof there's a person behind the parameters -->
+    <!-- the human, proof there's a person behind the parameters -->
     <figure class="hero-portrait reveal hidden lg:block">
       <img
         src="/aaron.jpg"

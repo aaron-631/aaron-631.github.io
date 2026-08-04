@@ -1,4 +1,4 @@
-// Curated posts — my real voice, verbatim where possible.
+// Curated posts, my real voice, verbatim where possible.
 
 export interface Post {
   quote: string;
@@ -55,7 +55,7 @@ export const arsenal = {
   ],
 } as const;
 
-// The "now" block — what I'm actually doing these days. Feels alive, dates it.
+// The "now" block, what I'm actually doing these days. Feels alive, dates it.
 export const now = {
   updated: 'August 2026',
   items: [

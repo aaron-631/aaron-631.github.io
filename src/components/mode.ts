@@ -10,13 +10,13 @@ export function setMode(mode: Mode): void {
   try {
     localStorage.setItem('mode', mode);
   } catch {
-    /* private browsing — fine */
+    /* private browsing, fine */
   }
   sweep();
   document.dispatchEvent(new CustomEvent<Mode>('modechange', { detail: mode }));
 }
 
-// a brief wash of the new accent across the page — the light changing
+// a brief wash of the new accent across the page, the light changing
 function sweep(): void {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   let el = document.getElementById('mode-sweep');

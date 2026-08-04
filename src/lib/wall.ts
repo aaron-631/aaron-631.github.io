@@ -1,8 +1,8 @@
-// The wall's data layer — Firebase, loaded lazily so the page itself stays
+// The wall's data layer, Firebase, loaded lazily so the page itself stays
 // instant. The SDK only downloads when the wall scrolls into view.
 //
 // Reuses the my-planner Firebase project. This config is public by design
-// (every Firebase web app ships it); security lives in the Firestore rules —
+// (every Firebase web app ships it); security lives in the Firestore rules -
 // see FIREBASE_SETUP.md at the repo root.
 
 import { aiScore } from './ai';
@@ -31,7 +31,7 @@ export interface WallUser {
   photo: string;
 }
 
-// lazy singletons — firebase modules are dynamic imports, split into their
+// lazy singletons, firebase modules are dynamic imports, split into their
 // own chunk by the bundler and fetched only on the wall page
 let dbP: Promise<import('firebase/firestore').Firestore> | null = null;
 let authP: Promise<import('firebase/auth').Auth> | null = null;
@@ -55,7 +55,7 @@ function auth() {
   })());
 }
 
-/** Live subscription to the wall — fires on every change, best-first. */
+/** Live subscription to the wall, fires on every change, best-first. */
 export async function subscribeWall(cb: (entries: WallEntry[]) => void): Promise<() => void> {
   const [d, fs] = await Promise.all([db(), import('firebase/firestore')]);
   const q = fs.query(fs.collection(d, 'wall'), fs.where('kind', '==', 'rec'), fs.limit(120));
@@ -77,7 +77,7 @@ export async function subscribeWall(cb: (entries: WallEntry[]) => void): Promise
       entries.sort((a, b) => b.score - a.score || b.ts - a.ts);
       cb(entries);
     },
-    () => cb([]) // rules not deployed yet / offline — render the empty state
+    () => cb([]) // rules not deployed yet / offline, render the empty state
   );
 }
 
@@ -98,7 +98,7 @@ export async function currentUser(): Promise<WallUser | null> {
   });
 }
 
-/* Deterministic quality heuristic (0–100) — the fallback ranker, and the
+/* Deterministic quality heuristic (0–100), the fallback ranker, and the
    floor while the AI verdict is unavailable. Rewards specific, composed
    writing; penalises drive-by one-liners and shouting. */
 export function heuristicScore(text: string): number {
@@ -133,8 +133,8 @@ export async function submitEntry(
   text: string
 ): Promise<SubmitResult> {
   const body = text.trim();
-  if (body.length < 20) return { ok: false, reason: 'a little more, please — 20 characters minimum.' };
-  if (body.length > 600) return { ok: false, reason: 'keep it under 600 characters — the wall rewards sharp writing.' };
+  if (body.length < 20) return { ok: false, reason: 'a little more, please, 20 characters minimum.' };
+  if (body.length > 600) return { ok: false, reason: 'keep it under 600 characters, the wall rewards sharp writing.' };
 
   // AI moderation + ranking when the brain is online; heuristic otherwise
   let score = heuristicScore(body);

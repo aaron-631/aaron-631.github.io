@@ -1,11 +1,11 @@
 ---
-// Contact — every door visible at first glance, email loudest.
+// Contact, every door visible at first glance, email loudest.
 // The Argus scan and the terminal come after; they're the dessert.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
 import { profile } from '../content/profile';
 
-// inline SVGs — no icon library, no extra requests
+// inline SVGs, no icon library, no extra requests
 const icons: Record<string, string> = {
   email:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
@@ -66,13 +66,22 @@ const ways = [
 
 <Base title="Contact · Aaron Chakraborty" description="Placement season 2026-27. AI/ML engineering, security engineering, or the rare seat that needs both.">
   <main class="pt-24 md:pt-14">
-    <!-- reach me — first thing, no hunting -->
+    <!-- reach me, first thing, no hunting -->
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <p class="label-mono reveal mb-3"><span class="idx">// 06</span> · contact</p>
-      <h1 class="h-serif reveal text-4xl sm:text-5xl">Let's talk.</h1>
+      <p class="label-mono reveal mb-3"><span class="idx">// 06</span> <span data-swap data-build="· contact" data-break="· secure channel"></span></p>
+      <h1 class="h-serif reveal text-4xl sm:text-5xl">
+        <span class="m-build">Let's build something.</span>
+        <span class="m-break">Open a channel.</span>
+      </h1>
       <p class="reveal mt-6 max-w-lg leading-relaxed text-paper-dim">
-        Placement season 2026-27. If you're hiring for AI/ML engineering, security engineering,
-        or the rare seat that needs both — every door is right here.
+        <span class="m-build">
+          Placement season 2026-27. If you're hiring for AI/ML engineering,
+          security engineering, or the rare seat that needs both, every door is right here.
+        </span>
+        <span class="m-break">
+          Red team seat, security engineering, AI security research: if you need someone
+          who attacks systems for the right reasons, the channels are open. Encrypted hellos welcome.
+        </span>
       </p>
 
       <!-- email: the headline act, impossible to miss -->
@@ -158,7 +167,7 @@ const ways = [
       </div>
     </section>
 
-    <!-- the terminal, embedded — the thing that survived every redesign -->
+    <!-- the terminal, embedded, the thing that survived every redesign -->
     <section class="border-t border-line">
       <div class="mx-auto max-w-6xl px-5 py-24">
         <p class="label-mono reveal mb-3"><span class="idx">// 06.9</span> · terminal</p>
@@ -210,7 +219,7 @@ const ways = [
   document.addEventListener('astro:page-load', () => {
     wireTerminal('term-out-embed', 'term-in-embed');
 
-    // copy-email button — instant feedback, no clipboard API drama
+    // copy-email button, instant feedback, no clipboard API drama
     const copyBtn = document.querySelector<HTMLButtonElement>('[data-copy-email]');
     if (copyBtn && !copyBtn.dataset.wired) {
       copyBtn.dataset.wired = '1';
@@ -237,7 +246,7 @@ const ways = [
     ['[✓] identity verified ........ B.Tech CSE @ KIIT · CGPA 9.42', 't-dim', 300],
     ['', '', 120],
     ['[!] FINDING (CRITICAL) · builds end-to-end', 't-crit', 500],
-    ['    trained 567,068,416-param MoE LLM from scratch · A100 · 30k steps', 't-dim', 260],
+    ['    567,068,416-param MoE LLM · his architecture · trained from scratch · A100 · 30k steps', 't-dim', 260],
     ['[!] FINDING (HIGH) · breaks what others ship', 't-crit', 500],
     ['    disclosed reflected XSS in production AI chatbot → remediated', 't-dim', 260],
     ['[!] FINDING (HIGH) · performs under pressure', 't-crit', 500],

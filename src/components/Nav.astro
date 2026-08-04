@@ -1,5 +1,5 @@
 ---
-// Nav — typing logo, page links, BUILD/BREAK rocker, terminal hint.
+// Nav, typing logo, page links, BUILD/BREAK rocker, terminal hint.
 const { pathname } = Astro.url;
 const links = [
   { href: '/about/', label: 'about' },
@@ -21,7 +21,7 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
       <span class="logo-type" data-logo>Aaron</span><span class="logo-block" aria-hidden="true"></span>
     </a>
 
-    <!-- live local time — proof there's a human in Asia/Kolkata behind this -->
+    <!-- live local time, proof there's a human in Asia/Kolkata behind this -->
     <span class="hidden font-mono text-[0.68rem] text-paper-dim lg:inline" title="my local time">
       bhubaneswar · <span data-ist>--:--</span> IST
     </span>
@@ -83,7 +83,7 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
   html[data-mode='break'] .mode-build { color: var(--color-paper-dim); }
   html[data-mode='break'] .mode-break { color: var(--accent); }
 
-  /* first-visit coach mark — explains the rocker once, then never again */
+  /* first-visit coach mark, explains the rocker once, then never again */
   #mode-coach {
     position: fixed;
     top: 3.9rem;
@@ -119,10 +119,10 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
   }
 </style>
 
-<!-- one site, two personalities — told once -->
+<!-- one site, two personalities, told once -->
 <div id="mode-coach" role="status">
   <p><span class="text-accent">this site has two modes.</span></p>
-  <p class="mt-1"><span class="text-paper">BUILD</span> — the engineer who trains models.<br /><span class="text-paper">BREAK</span> — the one who attacks them.</p>
+  <p class="mt-1"><span class="text-paper">BUILD</span>, the engineer who trains models.<br /><span class="text-paper">BREAK</span>, the one who attacks them.</p>
   <p class="mt-1">flip the switch ↑ and everything re-frames.</p>
   <button id="mode-coach-try" class="mt-2 w-full rounded-sm border border-line px-2 py-1 text-paper transition-colors hover:border-accent hover:text-accent">try it now</button>
 </div>
@@ -130,33 +130,43 @@ const isActive = (href: string) => pathname === href || pathname === href.slice(
 <script>
   import { toggleMode } from './mode';
 
-  // delegated — nav is re-rendered on every page turn, listeners must not die
+  // delegated, nav is re-rendered on every page turn, listeners must not die
   document.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     if (t.closest('#mode-toggle')) toggleMode();
     else if (t.closest('#terminal-hint')) document.dispatchEvent(new CustomEvent('terminal:open'));
   });
 
-  // the logo breathes: "Aaron" deletes itself and retypes, every so often
+  // the logo breathes: "Aaron" deletes itself and retypes, usually in English,
+  // sometimes in another script. same name, many homes.
   let logoTimer: number | undefined;
   function logoLoop() {
     const el = document.querySelector<HTMLElement>('[data-logo]');
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const word = 'Aaron';
+    // English leads; the others visit. Hindi, Bengali, Odia, Japanese, Korean,
+    // Arabic, Russian, Greek. mostly english so it stays a logo, not a gimmick.
+    const names = ['Aaron', 'आरोन', 'Aaron', 'অ্যারন', 'Aaron', 'ଆରନ୍', 'Aaron', 'アーロン', 'Aaron', '아론', 'Aaron', 'آرون', 'Aaron', 'Аарон', 'Aaron', 'Άαρον'];
+    let idx = 0;
+    let word = names[0];
     let phase: 'wait' | 'del' | 'type' = 'wait';
     let n = word.length;
+    const chars = (s: string) => Array.from(s); // grapheme-safe enough for these scripts
     const step = () => {
       if (phase === 'wait') { phase = 'del'; logoTimer = window.setTimeout(step, 6000); return; }
       if (phase === 'del') {
         n--;
-        el.textContent = word.slice(0, n);
-        if (n === 0) { phase = 'type'; logoTimer = window.setTimeout(step, 500); }
-        else logoTimer = window.setTimeout(step, 85);
+        el.textContent = chars(word).slice(0, n).join('');
+        if (n === 0) {
+          idx = (idx + 1) % names.length;
+          word = names[idx];
+          phase = 'type';
+          logoTimer = window.setTimeout(step, 500);
+        } else logoTimer = window.setTimeout(step, 85);
         return;
       }
       n++;
-      el.textContent = word.slice(0, n);
-      if (n === word.length) { phase = 'wait'; logoTimer = window.setTimeout(step, 30); }
+      el.textContent = chars(word).slice(0, n).join('');
+      if (n === chars(word).length) { phase = 'wait'; logoTimer = window.setTimeout(step, 30); }
       else logoTimer = window.setTimeout(step, 120);
     };
     logoTimer = window.setTimeout(step, 3500);

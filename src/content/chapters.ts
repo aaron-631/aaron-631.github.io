@@ -1,4 +1,4 @@
-// The story's spine — one ordered list, shared by the landing doors,
+// The story's spine, one ordered list, shared by the landing doors,
 // the nav, and the prev/next chapter rails at the bottom of every page.
 
 export interface Chapter {
@@ -42,7 +42,7 @@ export const chapters: Chapter[] = [
     href: '/wall/',
     idx: '05',
     title: 'In their words',
-    hook: "What people say after working with me — live, named, unedited. Add your line.",
+    hook: "What people say after working with me, live, named, unedited. Add your line.",
     cmd: 'cat wall.log',
   },
   {

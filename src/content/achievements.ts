@@ -19,7 +19,8 @@ export const journey: HistoryEntry[] = [
   { date: 'Apr 2025', cmd: 'ctf pentathon --48h', note: 'AIR 45 · top 0.90% globally, national government CTF', kind: 'achievement' },
   { date: '2025', cmd: 'report yatra --xss', note: 'Disclosed reflected XSS in Yatra’s production AI chatbot · remediated', kind: 'achievement' },
   { date: 'Feb 2026', cmd: 'ine --exam ejptv2', note: 'eJPTv2 · 91%, INE Security', kind: 'cert' },
-  { date: 'Mar 2026', cmd: 'git init vantallm', note: 'SwiftSafe internship · 567M MoE LLM trained from scratch', kind: 'work' },
+  { date: 'Mar 2026', cmd: 'git init vantallm', note: 'SwiftSafe internship · 567M MoE LLM, my architecture, trained from scratch', kind: 'work' },
   { date: 'May 2026', cmd: 'sap --certify', note: 'SAP Certified Backend Developer · Cloud Application Programming', kind: 'cert' },
   { date: 'Jun 2026', cmd: 'cd ~/dbs-tech', note: 'DBS Tech India · SEED Technology Apprentice', kind: 'work' },
+  { date: 'Aug 2026', cmd: 'logout iot-lab', note: 'IoT Lab tenure complete · handed the keys to the juniors', kind: 'work' },
 ];

@@ -1,4 +1,4 @@
-// Experience — newest first. Written like I'd tell it, not like a resume bullet.
+// Experience, newest first. Written like I'd tell it, not like a resume bullet.
 
 export interface Role {
   role: string;
@@ -30,7 +30,7 @@ export const experience: Role[] = [
     where: 'Remote',
     featured: true,
     points: [
-      'Owned one AI system end-to-end: a 567M-parameter Mixture-of-Experts transformer. I designed the architecture and drove it from empty repo to a 30,000-step training run. PyTorch, DeepSpeed ZeRO-2, 16 experts with top-2 routing, GQA, RoPE, a custom tokenizer.',
+      'Owned one AI system end-to-end: a 567M-parameter Mixture-of-Experts transformer, trained from scratch. The architecture is my design and every technical call was mine; I drove it from empty repo to a 30,000-step training run, reviewing and debugging every layer along the way. PyTorch, DeepSpeed ZeRO-2, 16 experts with top-2 routing, GQA, RoPE, a custom tokenizer.',
       'Served it with FastAPI on A100 infrastructure and built the adversarial eval pipelines that beat it up continuously.',
       'Wrote the whole journey up on X and LinkedIn as it happened, the wins and the crashes. The training thread crossed 7,800 impressions.',
     ],
@@ -39,13 +39,13 @@ export const experience: Role[] = [
   {
     role: 'Lab Coordinator',
     org: 'IoT Lab, KIIT',
-    dates: 'Sep 2024 – present',
+    dates: 'Sep 2024 – Aug 2026',
     where: 'KIIT, Bhubaneswar',
     points: [
-      'I keep a 30+ member lab running: demos, showcases, onboarding new recruits.',
-      'Organized a couple of CTFs and spend a lot of time mentoring juniors who remind me of me two years ago.',
+      'Kept a 30+ member lab running for two years: demos, showcases, onboarding new recruits.',
+      'Organized a couple of CTFs and mentored juniors who reminded me of me two years earlier. Tenure wrapped up in August 2026; the juniors run it now, which was always the point.',
     ],
-    receipt: '30+ members · 2+ CTFs organized',
+    receipt: '30+ members · 2+ CTFs organized · tenure complete',
   },
   {
     role: 'Cyber Security & AI/ML Intern',

@@ -1,5 +1,5 @@
 ---
-// Resume viewer — click any resume link, read it right here, download if you like.
+// Resume viewer, click any resume link, read it right here, download if you like.
 // Desktop gets the in-site panel; phones open the PDF natively (better there).
 ---
 
@@ -24,7 +24,7 @@
   </div>
 </div>
 
-<!-- hover preview — the actual first page floats up beside any resume link -->
+<!-- hover preview, the actual first page floats up beside any resume link -->
 <div id="resume-peek" transition:persist="resumepeek" aria-hidden="true">
   <img src="/resume-preview.webp" alt="" width="480" height="621" loading="lazy" />
   <p class="rp-hint"><span class="t-prompt">click</span> read here · <span class="t-prompt">↓</span> download inside</p>
@@ -65,7 +65,7 @@
   const peek = document.getElementById('resume-peek')!;
 
   function openView() {
-    // load the PDF only on first open — costs nothing until someone asks
+    // load the PDF only on first open, costs nothing until someone asks
     if (!frame.src) frame.src = '/resume.pdf#view=FitH';
     view.classList.remove('hidden');
     view.classList.add('flex');
@@ -98,7 +98,7 @@
     if (isResumeLink(e.target as HTMLElement)) peek.classList.remove('show');
   });
 
-  // any resume link on any page opens the viewer — unless it's the explicit
+  // any resume link on any page opens the viewer, unless it's the explicit
   // download button, a coarse-pointer device, or a modified click
   document.addEventListener('click', (e) => {
     const me = e as MouseEvent;

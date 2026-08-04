@@ -1,4 +1,4 @@
-// Terminal 2.0 — dependency-free command registry.
+// Terminal 2.0, dependency-free command registry.
 // One source of truth: reads the same content modules as the visual site.
 
 import { profile, statsByMode } from '../content/profile';
@@ -90,11 +90,11 @@ export const commands: Record<string, Command> = {
       if (f === 'wall.log') {
         setTimeout(() => (window.location.href = '/wall/'), 600);
         return [
-          { text: 'tail -f wall.log — live recommendations, real names.', cls: 't-warn' },
+          { text: 'tail -f wall.log, live recommendations, real names.', cls: 't-warn' },
           { text: 'opening the wall …', cls: 't-ok' },
         ];
       }
-      // hidden files — rewards for the curious
+      // hidden files, rewards for the curious
       if (f === '.goggins_playlist')
         return [
           { text: '# currently on loop', cls: 't-warn' },
@@ -216,7 +216,7 @@ export const commands: Record<string, Command> = {
         { text: '  aaron [--build | --break] [--coffee] target' },
         { text: '' },
         { text: 'DESCRIPTION', cls: 't-warn' },
-        { text: '  Trains language models from scratch (567M params, real run).', cls: 't-dim' },
+        { text: '  Designs LLM architectures and trains them from scratch (567M params, real run).', cls: 't-dim' },
         { text: '  Finds security holes in AI products before someone worse does.', cls: 't-dim' },
         { text: '  Documents failures in public. Answers email fast.', cls: 't-dim' },
         { text: '' },
@@ -234,7 +234,7 @@ export const commands: Record<string, Command> = {
     run: () =>
       aiEnabled()
         ? [
-            { text: 'hey! this shell has an AI brain wired in — ask it anything real.', cls: 't-warn' },
+            { text: 'hey! this shell has an AI brain wired in, ask it anything real.', cls: 't-warn' },
             { text: "try: ask what did aaron actually train? · ask why should i hire him?", cls: 't-dim' },
             { text: "the classics still work: 'whoami' · 'scan me' · 'ls -la'", cls: '' },
           ]
@@ -326,7 +326,7 @@ export const commands: Record<string, Command> = {
     desc: '',
     hidden: true,
     run: (args) => [
-      { text: `PING ${esc(args[0] ?? 'aaron')} — 64 bytes: icmp_seq=1 ttl=2005 time=fast`, cls: 't-dim' },
+      { text: `PING ${esc(args[0] ?? 'aaron')}, 64 bytes: icmp_seq=1 ttl=2005 time=fast`, cls: 't-dim' },
       { text: 'reply: awake. probably training something.', cls: 't-ok' },
     ],
   },
@@ -341,10 +341,10 @@ export const commands: Record<string, Command> = {
     desc: '',
     hidden: true,
     run: () => [
-      { text: '# IoT Lab, KIIT — the family', cls: 't-warn' },
+      { text: '# IoT Lab, KIIT, the family', cls: 't-warn' },
       { text: '30+ members · CTFs · showcase days · onboarding juniors', cls: 't-dim' },
       { text: 'they saw the failed demos before X saw the wins.', cls: 't-dim' },
-      { text: 'role: lab coordinator (the tee has my name on the back)', cls: 't-ok' },
+      { text: 'role: lab coordinator, sep 2024 – aug 2026 (the tee still has my name on the back)', cls: 't-ok' },
     ],
   },
 };
@@ -356,7 +356,7 @@ export function execute(input: string): Line[] | 'CLEAR' {
   if (!name) return [];
   const cmd = commands[name];
   if (!cmd) {
-    // be kind to people who talk to it like a person — most visitors will
+    // be kind to people who talk to it like a person, most visitors will
     const alias = naturalAlias(raw.toLowerCase());
     if (alias) {
       return [
@@ -406,12 +406,12 @@ export function complete(partial: string): string | null {
   return null;
 }
 
-// ── shared UI wiring — used by the overlay (every page) and the contact embed ──
+// ── shared UI wiring, used by the overlay (every page) and the contact embed ──
 export function wireTerminal(outId: string, inId: string): void {
   const out = document.getElementById(outId);
   const input = document.getElementById(inId) as HTMLInputElement | null;
   if (!out || !input) return;
-  if (input.dataset.wired) return; // overlay persists across page turns — wire once
+  if (input.dataset.wired) return; // overlay persists across page turns, wire once
   input.dataset.wired = '1';
   const hist: string[] = [];
   let hi = -1;
@@ -464,10 +464,10 @@ export function wireTerminal(outId: string, inId: string): void {
           ans
             ? [
                 ...ans.split('\n').map((line) => ({ text: line, cls: '' })),
-                { text: '— gemini, reading aaron’s receipts · verify anything at /work/', cls: 't-dim' },
+                { text: '- gemini, reading aaron’s receipts · verify anything at /work/', cls: 't-dim' },
               ]
             : [
-                { text: 'the AI brain timed out — deterministic me takes over:', cls: 't-dim' },
+                { text: 'the AI brain timed out, deterministic me takes over:', cls: 't-dim' },
                 ...(execute('whoami') as Line[]),
               ]
         );

@@ -1,12 +1,13 @@
 ---
-// Projects — flagship dossier + cards that open into a reading panel + arsenal.
+// Projects, flagship dossier + cards that open into a reading panel + arsenal.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
 import { projects, lab } from '../content/projects';
 import { arsenal } from '../content/writing';
 import { findSkill } from '../content/skills';
 
-const flagship = projects.find((p) => p.flagship)!;
+const flagship = projects.find((p) => p.id === 'vantallm')!;
+const argus = projects.find((p) => p.id === 'argus')!;
 const rest = projects.filter((p) => !p.flagship);
 
 // which arsenal / stack labels get a plain-words popover
@@ -24,9 +25,24 @@ const ARCH = `  ┌────────────────────�
   │ train: DDP / DeepSpeed ZeRO-2·3 · bf16     │
   │ serve: FastAPI · SSE · persona routing     │
   └────────────────────────────────────────────┘`;
+
+const ARGUS_ARCH = `  ┌─────────────────────────────────────────────┐
+  │ ARGUS · two gates for AI agents             │
+  ├─────────────────────────────────────────────┤
+  │ V1 · release gate (local-first)             │
+  │  repo/config/skills → 27 canonical rules    │
+  │  → live probes (opt-in) → mcp-probe         │
+  │  → R = (S_base × C_env) × P_conf            │
+  │  → report.json / report.md → PASS | BLOCK   │
+  ├─────────────────────────────────────────────┤
+  │ V2 · runtime gateway                        │
+  │  agent → [request policy → approval 428     │
+  │  → upstream → redact/block → audit chain]   │
+  │  → model · /healthz · /metrics              │
+  └─────────────────────────────────────────────┘`;
 ---
 
-<Base title="Projects · Aaron Chakraborty" description="VantaLLM: a 567M-param MoE LLM trained from scratch. Argus: AI-agent risk evaluation. ReconForge, Search Arena, and more.">
+<Base title="Projects · Aaron Chakraborty" description="VantaLLM: a 567M-param MoE LLM, my architecture, trained from scratch. Argus: a two-layer AI-agent security platform. ReconForge, Search Arena, and more.">
   <main class="pt-24 md:pt-14">
     <section class="mx-auto max-w-6xl px-5 py-24">
       <p class="label-mono reveal mb-3"><span class="idx">// 03</span> <span data-swap data-build="· things i built" data-break="· attack & defense tooling"></span></p>
@@ -38,7 +54,8 @@ const ARCH = `  ┌────────────────────�
         tip: any tech chip with a <span class="text-accent">?</span> explains itself in plain words. cards open, click one.
       </p>
 
-      <!-- flagship dossier -->
+      <!-- the two flagships. BUILD leads with VantaLLM; BREAK leads with Argus. -->
+      <div class="flex flex-col gap-10" id="flagships">
       <article id="vantallm" class="reveal grid grid-cols-1 gap-10 border border-line bg-ink p-7 md:p-12 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <div class="flex flex-wrap items-center gap-3">
@@ -104,7 +121,62 @@ const ARCH = `  ┌────────────────────�
         </div>
       </article>
 
-      <!-- supporting cards — click one, it opens into a reading panel -->
+      <!-- second flagship: Argus, the security counterpart -->
+      <article id="argus" class="reveal grid grid-cols-1 gap-10 border border-line bg-ink p-7 md:p-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div class="order-2 flex flex-col gap-6 self-center lg:order-1">
+          <pre class="pane-body overflow-x-auto rounded-md border border-line bg-ink-2 font-mono text-[0.66rem] leading-snug text-paper-dim sm:text-[0.73rem]" aria-label="Argus architecture diagram">{ARGUS_ARCH}</pre>
+        </div>
+        <div class="order-1 lg:order-2">
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 class="font-mono text-2xl">{argus.name}</h2>
+            <span class="rounded-sm border border-line px-2 py-0.5 font-mono text-[0.65rem] tracking-wider text-ok uppercase">public</span>
+            <span class="font-mono text-[0.65rem] tracking-wider text-accent uppercase">flagship</span>
+          </div>
+          <p class="mt-5 leading-relaxed text-paper-dim">
+            <span class="m-build">{argus.oneliner.build}</span>
+            <span class="m-break">{argus.oneliner.break}</span>
+          </p>
+          <ul class="m-build mt-6 space-y-3 text-[0.94rem] leading-relaxed text-paper-dim">
+            {argus.points.build.map((p) => (
+              <li class="flex gap-2.5">
+                <span class="mt-[0.6rem] h-px w-3 shrink-0 bg-accent" aria-hidden="true" />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+          <ul class="m-break mt-6 space-y-3 text-[0.94rem] leading-relaxed text-paper-dim">
+            {argus.points.break.map((p) => (
+              <li class="flex gap-2.5">
+                <span class="mt-[0.6rem] h-px w-3 shrink-0 bg-accent" aria-hidden="true" />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="mt-7 flex flex-wrap gap-2">
+            {argus.stack.map((s) =>
+              skillId(s) ? (
+                <button class="skill-chip px-2 py-1 text-[0.68rem]" data-skill={skillId(s)} aria-expanded="false">{s}</button>
+              ) : (
+                <span class="rounded-sm bg-ink-3 px-2 py-1 font-mono text-[0.68rem] text-paper-dim">{s}</span>
+              )
+            )}
+          </div>
+          <div class="mt-7 flex flex-wrap gap-2" data-proofs>
+            {argus.proofs.map((pr) => (
+              <button class="proof-chip" aria-expanded="false" data-detail={pr.detail} data-href={pr.href ?? ''}>
+                {pr.label}
+              </button>
+            ))}
+          </div>
+          <div class="proof-detail mt-3 hidden" data-proof-out></div>
+          <p class="mt-7 font-mono text-[0.75rem] text-paper-dim">
+            → <a class="link" href={argus.links[0].href} target="_blank" rel="noopener">{argus.links[0].label}</a>
+          </p>
+        </div>
+      </article>
+      </div>
+
+      <!-- supporting cards, click one, it opens into a reading panel -->
       <div class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
         {
           rest.map((p) => (
@@ -152,7 +224,7 @@ const ARCH = `  ┌────────────────────�
       </div>
     </section>
 
-    <!-- the dossier panel — projects open here, centre stage -->
+    <!-- the dossier panel, projects open here, centre stage -->
     <div id="dossier" role="dialog" aria-modal="true" aria-label="Project details">
       <div class="dossier-card">
         {
@@ -232,7 +304,7 @@ const ARCH = `  ┌────────────────────�
           No skill bars, no percentages. If it's listed here, I've shipped something with it.
         </p>
         <p class="reveal mb-14 max-w-md font-mono text-[0.72rem] text-paper-dim opacity-70">
-          (in terminal-speak this section is <span class="text-accent">man aaron</span> — my manual page.
+          (in terminal-speak this section is <span class="text-accent">man aaron</span>, my manual page.
           hover anything with a <span class="text-accent">?</span> and it explains itself in plain words.)
         </p>
 
@@ -266,8 +338,8 @@ const ARCH = `  ┌────────────────────�
 </Base>
 
 <style>
-  /* BREAK mode: attack tooling leads */
-  html[data-mode='break'] [data-card='argus'] { order: -2; }
+  /* BREAK mode: the security flagship leads, attack tooling first among the cards */
+  html[data-mode='break'] #argus { order: -1; }
   html[data-mode='break'] [data-card='reconforge'] { order: -1; }
 </style>
 
@@ -315,7 +387,7 @@ const ARCH = `  ┌────────────────────�
       document.addEventListener('astro:before-swap', close);
     }
 
-    // ── proof chip expansion — one open at a time per group ──
+    // ── proof chip expansion, one open at a time per group ──
     document.querySelectorAll('[data-proofs]').forEach((wrap) => {
       if ((wrap as HTMLElement).dataset.wired) return;
       (wrap as HTMLElement).dataset.wired = '1';

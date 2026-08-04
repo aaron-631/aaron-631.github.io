@@ -1,8 +1,8 @@
 ---
-// The wall — live, named recommendations, ranked by how well they're written.
+// The wall, live, named recommendations, ranked by how well they're written.
 // Firebase loads lazily (only when the wall nears the viewport), entries
 // render via textContent (no injection surface), and the AI ranker is an
-// optional enhancement — the page is fully functional without it.
+// optional enhancement, the page is fully functional without it.
 import Base from '../layouts/Base.astro';
 import ChapterNav from '../components/ChapterNav.astro';
 import { profile } from '../content/profile';
@@ -10,22 +10,32 @@ import { profile } from '../content/profile';
 
 <Base
   title="The wall · Aaron Chakraborty"
-  description="Recommendations from people who've worked with Aaron — live, named, unedited. Add your line."
+  description="Recommendations from people who've worked with Aaron, live, named, unedited. Add your line."
 >
   <main class="pt-24 md:pt-14">
     <!-- the wall -->
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <p class="label-mono reveal mb-3"><span class="idx">// 05</span> · in their words</p>
-      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">In their words.</h1>
+      <p class="label-mono reveal mb-3"><span class="idx">// 05</span> <span data-swap data-build="· in their words" data-break="· external audit"></span></p>
+      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">
+        <span class="m-build">In their words.</span>
+        <span class="m-break">Independent verification.</span>
+      </h1>
       <p class="reveal mb-4 max-w-xl leading-relaxed text-paper-dim">
-        Everything else on this site is me talking about me. This page is the opposite:
-        people I've worked with — lab juniors, teammates, mentors — in their own words,
-        under their own names. Nothing here is curated or reordered by hand.
+        <span class="m-build">
+          Everything else on this site is me talking about me. This page is the opposite:
+          people I've worked with, lab juniors, teammates, mentors, in their own words,
+          under their own names. Nothing here is curated or reordered by hand.
+        </span>
+        <span class="m-break">
+          Never trust a single source, least of all the target himself. These are
+          third-party observations from people who watched me work, signed with real
+          names. Cross-reference at will.
+        </span>
       </p>
       <p class="reveal mb-14 font-mono text-[0.72rem] text-paper-dim">
         <span class="t-ok">●</span> live · new entries appear the moment they're written
         <span class="mx-2 text-line">|</span>
-        <span data-wall-count>—</span> on the wall
+        <span data-wall-count>-</span> on the wall
       </p>
 
       <!-- skeleton while firestore wakes up -->
@@ -42,11 +52,11 @@ import { profile } from '../content/profile';
         }
       </div>
 
-      <!-- empty state — honest, inviting -->
+      <!-- empty state, honest, inviting -->
       <div data-wall-empty class="hidden border border-dashed border-line p-10 text-center">
         <p class="h-serif text-2xl text-paper">The wall is fresh paint.</p>
         <p class="mx-auto mt-3 max-w-md text-[0.9rem] leading-relaxed text-paper-dim">
-          If we've worked together — in the lab, on a CTF team, during an internship —
+          If we've worked together, in the lab, on a CTF team, during an internship -
           your line goes first. First names on fresh walls get remembered.
         </p>
         <a href="#add" class="mt-5 inline-block font-mono text-[0.78rem] text-accent">$ write the first line ↓</a>
@@ -67,12 +77,12 @@ import { profile } from '../content/profile';
             <h2 class="h-serif reveal text-3xl sm:text-4xl">Worked with me?<br />Say it here.</h2>
             <p class="reveal mt-6 max-w-md leading-relaxed text-paper-dim">
               Sign in with Google so the wall stays what it claims to be: real people,
-              real names. Your name comes straight from your account — I can't edit
+              real names. Your name comes straight from your account, I can't edit
               what you write, and I don't reorder the wall. An AI reads each entry
               and ranks the sharpest writing to the top.
             </p>
             <p class="reveal mt-4 max-w-md text-[0.85rem] leading-relaxed text-paper-dim">
-              Rather tell me something privately — honest feedback, criticism, an idea?
+              Rather tell me something privately, honest feedback, criticism, an idea?
               Flip the switch to <span class="font-mono text-accent">private</span> and it
               skips the wall and comes only to me.
             </p>
@@ -104,7 +114,7 @@ import { profile } from '../content/profile';
                   <p data-wall-signin-err class="mt-3 hidden font-mono text-[0.7rem] text-crit"></p>
                 </div>
 
-                <!-- state 2: signed in — the form -->
+                <!-- state 2: signed in, the form -->
                 <form data-wall-form class="hidden" novalidate>
                   <label class="label-mono block" for="wall-role">how do you know me? <span class="opacity-60">(optional)</span></label>
                   <input
@@ -125,7 +135,7 @@ import { profile } from '../content/profile';
                     <span data-wall-chars>0 / 600</span>
                     <label class="flex cursor-pointer items-center gap-2">
                       <input type="checkbox" data-wall-private class="accent-current" />
-                      <span>private — only aaron sees it</span>
+                      <span>private, only aaron sees it</span>
                     </label>
                   </div>
                   <button
@@ -203,7 +213,7 @@ import { profile } from '../content/profile';
     const empty = $('[data-wall-empty]');
     const count = $('[data-wall-count]');
 
-    // ── render — DOM API + textContent only: visitor text is never HTML ──
+    // ── render, DOM API + textContent only: visitor text is never HTML ──
     const seen = new Set<string>();
     let firstPaint = true;
 
@@ -315,7 +325,7 @@ import { profile } from '../content/profile';
       try {
         showForm(await signIn());
       } catch {
-        signinErr.textContent = 'sign-in failed — popup blocked, or this domain isn’t authorised yet. try again?';
+        signinErr.textContent = 'sign-in failed, popup blocked, or this domain isn’t authorised yet. try again?';
         signinErr.classList.remove('hidden');
       }
     });
@@ -341,7 +351,7 @@ import { profile } from '../content/profile';
           msg.classList.add('t-ok');
           msg.textContent =
             kind === 'rec'
-              ? '✓ on the wall — it just appeared above. thank you.'
+              ? '✓ on the wall, it just appeared above. thank you.'
               : '✓ delivered privately. only aaron reads these. thank you.';
           textInput.value = '';
           chars.textContent = '0 / 600';
@@ -352,7 +362,7 @@ import { profile } from '../content/profile';
       } catch {
         msg.classList.remove('hidden');
         msg.classList.add('t-crit');
-        msg.textContent = 'couldn’t write to the wall — likely the database rules aren’t live yet. tell aaron.';
+        msg.textContent = 'couldn’t write to the wall, likely the database rules aren’t live yet. tell aaron.';
       } finally {
         submitBtn.disabled = false;
         submitLabel.textContent = privBox.checked ? '▶ send privately to aaron' : '▶ put it on the wall';

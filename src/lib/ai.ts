@@ -1,10 +1,10 @@
-// The AI brain — optional, and deliberately not embedded in this static site.
+// The AI brain, optional, and deliberately not embedded in this static site.
 //
 // A Gemini API key shipped in client JS is public the moment anyone opens
 // devtools, so all AI calls go through a tiny proxy (see ai-worker/) that
 // holds the key server-side. Deploy it, paste its URL below, and every AI
 // feature lights up. Leave it empty and the site quietly falls back to
-// deterministic behaviour — nothing breaks, nothing slows down.
+// deterministic behaviour, nothing breaks, nothing slows down.
 
 export const AI_ENDPOINT = 'https://aaron-ai.aaron631.workers.dev';
 
@@ -25,7 +25,7 @@ async function post<T>(path: string, body: unknown, timeoutMs: number): Promise<
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
-    return null; // offline, blocked, or slow — the caller has a fallback
+    return null; // offline, blocked, or slow, the caller has a fallback
   }
 }
 

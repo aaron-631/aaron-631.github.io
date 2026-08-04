@@ -1,5 +1,5 @@
 ---
-// Base layout — SEO, fonts, mode engine bootstrap, nav + footer + terminal overlay.
+// Base layout, SEO, fonts, mode engine bootstrap, nav + footer + terminal overlay.
 // Every page shares this shell; only the landing plays the intro beat.
 // ClientRouter gives the "turning the page" feel between chapters.
 import '@fontsource/ibm-plex-mono/400.css';
@@ -76,7 +76,7 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
     <ClientRouter />
 
     <!-- mode bootstrap: apply persisted mode before first paint (no flash).
-         Re-applied after every page swap too — the router replaces <html> attrs. -->
+         Re-applied after every page swap too, the router replaces <html> attrs. -->
     <script is:inline>
       (function () {
         function applyMode() {
@@ -131,7 +131,7 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
           intro?.remove();
         }
 
-        // scroll reveal — IntersectionObserver, once per element,
+        // scroll reveal, IntersectionObserver, once per element,
         // staggered slightly within each visible batch so sections breathe in
         const io = new IntersectionObserver(
           (entries) => {
@@ -151,7 +151,7 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
         );
         document.querySelectorAll('.reveal:not(.in)').forEach((el) => io.observe(el));
 
-        // live IST clocks — anything carrying [data-ist]
+        // live IST clocks, anything carrying [data-ist]
         const clocks = document.querySelectorAll('[data-ist]');
         const tick = () => {
           const t = new Date().toLocaleTimeString('en-IN', {
@@ -164,7 +164,7 @@ const canonical = new URL(Astro.url.pathname, 'https://aaron-631.github.io').hre
         };
         if (clocks.length) tick();
 
-        // reading progress hairline — the "how far into the chapter am i" cue
+        // reading progress hairline, the "how far into the chapter am i" cue
         const bar = document.getElementById('read-progress');
         if (bar) {
           const onScroll = () => {
