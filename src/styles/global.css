@@ -318,6 +318,10 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 
 #skill-pop {
   position: absolute;
+  /* pinned to the origin until placed — its static position would otherwise
+     sit after the footer and stretch short pages with phantom scroll space */
+  top: 0;
+  left: 0;
   z-index: 90; /* above the dossier panel — chips live inside it too */
   width: min(21rem, calc(100vw - 2rem));
   background: var(--color-ink-2);
@@ -399,11 +403,105 @@ a, button, .t-prompt, .label-mono .idx, .proof-chip {
 }
 .nudge { animation: nudge-pulse 1.6s ease-in-out 3; }
 
-/* ── page turns — chapters slide like turning a page ── */
-@keyframes page-out { to { opacity: 0; transform: translateX(-2.5%); } }
-@keyframes page-in { from { opacity: 0; transform: translateX(2.5%); } }
-::view-transition-old(root) { animation: page-out 0.22s ease-in both; }
-::view-transition-new(root) { animation: page-in 0.28s ease-out both; }
+/* ── page turns — the outgoing chapter lifts and turns like a real leaf,
+   the next one settles flat. Transform + opacity only: stays on the
+   compositor, never janks scrolling. ── */
+@keyframes page-leaf-out {
+  0%   { opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0); filter: brightness(1); }
+  100% { opacity: 0; transform: perspective(1200px) rotateY(-14deg) translateX(-4.5%); filter: brightness(0.72); }
+}
+@keyframes page-leaf-in {
+  0%   { opacity: 0; transform: perspective(1200px) rotateY(9deg) translateX(4%); filter: brightness(0.9); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0); filter: brightness(1); }
+}
+::view-transition-old(root) {
+  transform-origin: left center; /* the spine of the book */
+  animation: page-leaf-out 0.28s cubic-bezier(0.45, 0, 0.75, 0.4) both;
+}
+::view-transition-new(root) {
+  transform-origin: right center;
+  animation: page-leaf-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+/* the room behind the turning page stays ink, never white */
+::view-transition { background: var(--color-ink); }
+
+/* ── the wall — recommendations, set like pull-quotes in a magazine ── */
+.wall-feat {
+  position: relative;
+  border: 1px solid var(--color-line);
+  background: var(--color-ink);
+  padding: 3rem 2rem 2.2rem;
+}
+.wall-feat::before {
+  content: '“';
+  position: absolute;
+  top: -0.35em;
+  left: 0.35rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 5.5rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.85;
+}
+.wall-feat .wall-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+}
+.wall-card {
+  border: 1px solid var(--color-line);
+  background: var(--color-ink);
+  padding: 1.6rem 1.5rem 1.4rem;
+  transition: border-color 0.25s ease;
+}
+.wall-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--color-line)); }
+.wall-card .wall-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--color-paper);
+}
+.wall-who {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-paper-dim);
+}
+.wall-who::before {
+  content: '';
+  width: 1.4rem;
+  height: 1px;
+  background: var(--accent);
+  transform: translateY(-0.22em);
+}
+.wall-who .wall-name { color: var(--color-paper); letter-spacing: 0.04em; }
+.wall-new { animation: wall-arrive 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes wall-arrive {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+/* loading shimmer — three quiet lines, no spinner */
+.wall-skel {
+  height: 0.8rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-ink-3) 25%, var(--color-line) 50%, var(--color-ink-3) 75%);
+  background-size: 200% 100%;
+  animation: wall-shimmer 1.4s ease infinite;
+}
+@keyframes wall-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .wall-new { animation: none; }
+  .wall-skel { animation: none; }
+}
 
 /* ── command chips under terminals — buttons for the no-keyboard crowd ── */
 .cmd-chip {

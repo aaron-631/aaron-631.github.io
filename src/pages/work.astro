@@ -1,6 +1,7 @@
 ---
 // Work — experience with receipts, plus the disclosure case study.
 import Base from '../layouts/Base.astro';
+import ChapterNav from '../components/ChapterNav.astro';
 import { experience } from '../content/experience';
 import { disclosure } from '../content/projects';
 ---
@@ -94,14 +95,6 @@ import { disclosure } from '../content/projects';
       </div>
     </section>
 
-    <!-- next chapter -->
-    <section class="border-t border-line">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
-        <p class="font-mono text-[0.78rem] text-paper-dim">next chapter</p>
-        <a href="/projects/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
-          The systems →
-        </a>
-      </div>
-    </section>
+    <ChapterNav />
   </main>
 </Base>

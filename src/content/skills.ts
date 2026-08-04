@@ -145,8 +145,16 @@ export const skills: Skill[] = [
     name: 'Firebase',
     match: ['firebase'],
     what: "Google's backend-in-a-box: database, login, hosting, all managed for you so a small team can ship fast.",
-    used: "Search Arena's real-time leaderboard. Then I attacked my own leaderboard, got in, and locked the rules down.",
+    used: "Search Arena's real-time leaderboard (which I attacked myself, then locked down), my-planner's live sync, and the recommendations wall on this site.",
     href: '/projects/#search-arena',
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini API',
+    match: ['gemini'],
+    what: "Google's LLM, callable from code. The interesting part is structured output: you hand it a schema and it must answer in valid typed JSON.",
+    used: 'my-planner turns "gym at 7 then deep work" into schema-validated calendar events, and this site uses it to rank the recommendations wall.',
+    href: '/projects/#my-planner',
   },
   {
     id: 'typescript',

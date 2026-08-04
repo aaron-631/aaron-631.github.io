@@ -1,0 +1,362 @@
+---
+// The wall — live, named recommendations, ranked by how well they're written.
+// Firebase loads lazily (only when the wall nears the viewport), entries
+// render via textContent (no injection surface), and the AI ranker is an
+// optional enhancement — the page is fully functional without it.
+import Base from '../layouts/Base.astro';
+import ChapterNav from '../components/ChapterNav.astro';
+import { profile } from '../content/profile';
+---
+
+<Base
+  title="The wall · Aaron Chakraborty"
+  description="Recommendations from people who've worked with Aaron — live, named, unedited. Add your line."
+>
+  <main class="pt-24 md:pt-14">
+    <!-- the wall -->
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <p class="label-mono reveal mb-3"><span class="idx">// 05</span> · in their words</p>
+      <h1 class="h-serif reveal mb-4 text-4xl sm:text-5xl">In their words.</h1>
+      <p class="reveal mb-4 max-w-xl leading-relaxed text-paper-dim">
+        Everything else on this site is me talking about me. This page is the opposite:
+        people I've worked with — lab juniors, teammates, mentors — in their own words,
+        under their own names. Nothing here is curated or reordered by hand.
+      </p>
+      <p class="reveal mb-14 font-mono text-[0.72rem] text-paper-dim">
+        <span class="t-ok">●</span> live · new entries appear the moment they're written
+        <span class="mx-2 text-line">|</span>
+        <span data-wall-count>—</span> on the wall
+      </p>
+
+      <!-- skeleton while firestore wakes up -->
+      <div data-wall-skeleton class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {
+          [0, 1].map(() => (
+            <div class="wall-card">
+              <div class="wall-skel w-full" />
+              <div class="wall-skel mt-3 w-4/5" />
+              <div class="wall-skel mt-3 w-2/5" />
+              <div class="wall-skel mt-6 w-1/3" />
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- empty state — honest, inviting -->
+      <div data-wall-empty class="hidden border border-dashed border-line p-10 text-center">
+        <p class="h-serif text-2xl text-paper">The wall is fresh paint.</p>
+        <p class="mx-auto mt-3 max-w-md text-[0.9rem] leading-relaxed text-paper-dim">
+          If we've worked together — in the lab, on a CTF team, during an internship —
+          your line goes first. First names on fresh walls get remembered.
+        </p>
+        <a href="#add" class="mt-5 inline-block font-mono text-[0.78rem] text-accent">$ write the first line ↓</a>
+      </div>
+
+      <!-- the best one, set large -->
+      <div data-wall-featured class="hidden"></div>
+      <!-- everyone else -->
+      <div data-wall-grid class="mt-6 grid grid-cols-1 items-start gap-6 md:grid-cols-2"></div>
+    </section>
+
+    <!-- add your line -->
+    <section id="add" class="border-t border-line bg-ink-2/30">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p class="label-mono reveal mb-3"><span class="idx">// 05.5</span> · add your line</p>
+            <h2 class="h-serif reveal text-3xl sm:text-4xl">Worked with me?<br />Say it here.</h2>
+            <p class="reveal mt-6 max-w-md leading-relaxed text-paper-dim">
+              Sign in with Google so the wall stays what it claims to be: real people,
+              real names. Your name comes straight from your account — I can't edit
+              what you write, and I don't reorder the wall. An AI reads each entry
+              and ranks the sharpest writing to the top.
+            </p>
+            <p class="reveal mt-4 max-w-md text-[0.85rem] leading-relaxed text-paper-dim">
+              Rather tell me something privately — honest feedback, criticism, an idea?
+              Flip the switch to <span class="font-mono text-accent">private</span> and it
+              skips the wall and comes only to me.
+            </p>
+          </div>
+
+          <div class="reveal self-center">
+            <div class="pane">
+              <div class="pane-bar">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="ml-2">wall · new entry</span>
+                <span class="ml-auto hidden items-center gap-2 font-mono text-[0.66rem]" data-wall-userbar>
+                  <img data-wall-avatar class="h-4 w-4 rounded-full" alt="" />
+                  <span data-wall-username class="text-paper"></span>
+                </span>
+              </div>
+              <div class="p-5">
+                <!-- state 1: signed out -->
+                <div data-wall-signedout>
+                  <p class="font-mono text-[0.78rem] text-paper-dim">
+                    <span class="t-prompt">$ </span>wall append --author you
+                  </p>
+                  <p class="mt-2 font-mono text-[0.72rem] text-paper-dim">error: identity required. the wall takes names, not handles.</p>
+                  <button
+                    data-wall-signin
+                    class="mt-5 w-full rounded-sm bg-accent px-4 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85"
+                  >
+                    continue with google
+                  </button>
+                  <p data-wall-signin-err class="mt-3 hidden font-mono text-[0.7rem] text-crit"></p>
+                </div>
+
+                <!-- state 2: signed in — the form -->
+                <form data-wall-form class="hidden" novalidate>
+                  <label class="label-mono block" for="wall-role">how do you know me? <span class="opacity-60">(optional)</span></label>
+                  <input
+                    id="wall-role"
+                    class="mt-1.5 w-full border border-line bg-ink px-3 py-2 font-mono text-[0.8rem] text-paper outline-none transition-colors placeholder:text-paper-dim/40 focus:border-accent"
+                    placeholder="junior at IoT Lab · CTF teammate · mentor at …"
+                    maxlength="80"
+                    autocomplete="off"
+                  />
+                  <label class="label-mono mt-4 block" for="wall-text">your words</label>
+                  <textarea
+                    id="wall-text"
+                    rows="5"
+                    class="mt-1.5 w-full resize-none border border-line bg-ink px-3 py-2 text-[0.9rem] leading-relaxed text-paper outline-none transition-colors placeholder:text-paper-dim/40 focus:border-accent"
+                    placeholder="Specific beats sweet. What did we build, break, or survive together?"
+                    maxlength="600"></textarea>
+                  <div class="mt-1.5 flex items-center justify-between font-mono text-[0.68rem] text-paper-dim">
+                    <span data-wall-chars>0 / 600</span>
+                    <label class="flex cursor-pointer items-center gap-2">
+                      <input type="checkbox" data-wall-private class="accent-current" />
+                      <span>private — only aaron sees it</span>
+                    </label>
+                  </div>
+                  <button
+                    type="submit"
+                    data-wall-submit
+                    class="mt-4 w-full rounded-sm bg-accent px-4 py-2.5 font-mono text-[0.8rem] font-medium text-ink transition-opacity hover:opacity-85 disabled:opacity-40"
+                  >
+                    <span data-wall-submit-label>▶ put it on the wall</span>
+                  </button>
+                  <p data-wall-msg class="mt-3 hidden font-mono text-[0.72rem]"></p>
+                </form>
+              </div>
+            </div>
+            <p class="mt-3 font-mono text-[0.66rem] text-paper-dim opacity-70">
+              stored: your name, what you write, when. nothing else. no emails, no tracking.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- collaborate -->
+    <section class="border-t border-line">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="label-mono reveal mb-3"><span class="idx">// 05.9</span> · collaborate</p>
+        <h2 class="h-serif reveal mb-4 text-3xl sm:text-4xl">Or let's make something<br />worth a wall entry.</h2>
+        <p class="reveal mb-12 max-w-lg leading-relaxed text-paper-dim">
+          The best lines up there came from working together, not from asking nicely.
+          Doors that are open right now:
+        </p>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <a
+            href={`mailto:${profile.email}?subject=AI%20security%20research%20collab`}
+            class="reveal group border border-line bg-ink p-6 transition-colors hover:border-accent/60"
+          >
+            <p class="label-mono">research</p>
+            <p class="mt-2 font-mono text-[0.9rem] text-paper transition-colors group-hover:text-accent">ai security · llm evals</p>
+            <p class="mt-2 text-[0.8rem] leading-relaxed text-paper-dim">Adversarial evals, agent risk, disclosure work. Argus and VantaLLM are open problems.</p>
+          </a>
+          <a
+            href={`mailto:${profile.email}?subject=CTF%20team`}
+            class="reveal group border border-line bg-ink p-6 transition-colors hover:border-accent/60"
+          >
+            <p class="label-mono">compete</p>
+            <p class="mt-2 font-mono text-[0.9rem] text-paper transition-colors group-hover:text-accent">ctf teammates</p>
+            <p class="mt-2 text-[0.8rem] leading-relaxed text-paper-dim">AIR 45 at Pentathon playing mostly solo. With a real team, that number drops.</p>
+          </a>
+          <a
+            href={`mailto:${profile.email}?subject=Let%27s%20build%20something`}
+            class="reveal group border border-line bg-ink p-6 transition-colors hover:border-accent/60"
+          >
+            <p class="label-mono">build</p>
+            <p class="mt-2 font-mono text-[0.9rem] text-paper transition-colors group-hover:text-accent">side projects</p>
+            <p class="mt-2 text-[0.8rem] leading-relaxed text-paper-dim">Have something half-built and stuck? I like other people's hard problems.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <ChapterNav />
+  </main>
+</Base>
+
+<script>
+  import { subscribeWall, signIn, currentUser, submitEntry, type WallEntry, type WallUser } from '../lib/wall';
+
+  document.addEventListener('astro:page-load', () => {
+    const grid = document.querySelector<HTMLElement>('[data-wall-grid]');
+    if (!grid || grid.dataset.wired) return;
+    grid.dataset.wired = '1';
+
+    const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+    const featured = $('[data-wall-featured]');
+    const skeleton = $('[data-wall-skeleton]');
+    const empty = $('[data-wall-empty]');
+    const count = $('[data-wall-count]');
+
+    // ── render — DOM API + textContent only: visitor text is never HTML ──
+    const seen = new Set<string>();
+    let firstPaint = true;
+
+    function entryNode(e: WallEntry, feat: boolean): HTMLElement {
+      const card = document.createElement('figure');
+      card.className = feat ? 'wall-feat reveal in' : 'wall-card';
+      if (!firstPaint && !seen.has(e.id)) card.classList.add('wall-new');
+      const q = document.createElement('blockquote');
+      q.className = 'wall-text';
+      q.textContent = e.text;
+      const who = document.createElement('figcaption');
+      who.className = 'wall-who';
+      const name = document.createElement('span');
+      name.className = 'wall-name';
+      name.textContent = e.name;
+      who.appendChild(name);
+      if (e.role) {
+        const role = document.createElement('span');
+        role.textContent = '· ' + e.role;
+        who.appendChild(role);
+      }
+      card.append(q, who);
+      return card;
+    }
+
+    function render(entries: WallEntry[]) {
+      skeleton.classList.add('hidden');
+      count.textContent = String(entries.length);
+      empty.classList.toggle('hidden', entries.length > 0);
+      featured.classList.toggle('hidden', entries.length === 0);
+      featured.innerHTML = '';
+      grid.innerHTML = '';
+      if (entries.length > 0) featured.appendChild(entryNode(entries[0], true));
+      for (const e of entries.slice(1)) grid.appendChild(entryNode(e, false));
+      entries.forEach((e) => seen.add(e.id));
+      firstPaint = false;
+    }
+
+    // firebase only wakes when the wall is actually near the viewport
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      subscribeWall(render);
+    };
+    const io = new IntersectionObserver(
+      (es) => {
+        if (es.some((x) => x.isIntersecting)) {
+          io.disconnect();
+          start();
+        }
+      },
+      { rootMargin: '400px' }
+    );
+    io.observe(skeleton);
+    // deep-linking straight to #add should also boot it
+    if (location.hash === '#add') start();
+
+    // ── the form ──
+    const signedOut = $('[data-wall-signedout]');
+    const form = $<HTMLFormElement>('[data-wall-form]');
+    const signinBtn = $('[data-wall-signin]');
+    const signinErr = $('[data-wall-signin-err]');
+    const userbar = $('[data-wall-userbar]');
+    const avatar = $<HTMLImageElement>('[data-wall-avatar]');
+    const username = $('[data-wall-username]');
+    const roleInput = $<HTMLInputElement>('#wall-role');
+    const textInput = $<HTMLTextAreaElement>('#wall-text');
+    const chars = $('[data-wall-chars]');
+    const privBox = $<HTMLInputElement>('[data-wall-private]');
+    const submitBtn = $<HTMLButtonElement>('[data-wall-submit]');
+    const submitLabel = $('[data-wall-submit-label]');
+    const msg = $('[data-wall-msg]');
+
+    let user: WallUser | null = null;
+
+    function showForm(u: WallUser) {
+      user = u;
+      signedOut.classList.add('hidden');
+      form.classList.remove('hidden');
+      userbar.classList.remove('hidden');
+      userbar.classList.add('flex');
+      username.textContent = u.name;
+      if (u.photo) {
+        avatar.src = u.photo;
+        avatar.referrerPolicy = 'no-referrer';
+      } else avatar.remove();
+    }
+
+    // restore an existing session quietly once firebase is up (no popup)
+    const restore = () => currentUser().then((u) => u && showForm(u));
+    if (started) restore();
+    else {
+      const io2 = new IntersectionObserver(
+        (es) => {
+          if (es.some((x) => x.isIntersecting)) {
+            io2.disconnect();
+            start();
+            restore();
+          }
+        },
+        { rootMargin: '300px' }
+      );
+      io2.observe(signedOut);
+    }
+
+    signinBtn.addEventListener('click', async () => {
+      signinErr.classList.add('hidden');
+      try {
+        showForm(await signIn());
+      } catch {
+        signinErr.textContent = 'sign-in failed — popup blocked, or this domain isn’t authorised yet. try again?';
+        signinErr.classList.remove('hidden');
+      }
+    });
+
+    textInput.addEventListener('input', () => {
+      chars.textContent = `${textInput.value.length} / 600`;
+    });
+    privBox.addEventListener('change', () => {
+      submitLabel.textContent = privBox.checked ? '▶ send privately to aaron' : '▶ put it on the wall';
+    });
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      if (!user) return;
+      msg.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitLabel.textContent = 'writing…';
+      try {
+        const kind = privBox.checked ? 'feedback' : 'rec';
+        const res = await submitEntry(user, kind, roleInput.value, textInput.value);
+        msg.classList.remove('hidden', 't-crit', 't-ok');
+        if (res.ok) {
+          msg.classList.add('t-ok');
+          msg.textContent =
+            kind === 'rec'
+              ? '✓ on the wall — it just appeared above. thank you.'
+              : '✓ delivered privately. only aaron reads these. thank you.';
+          textInput.value = '';
+          chars.textContent = '0 / 600';
+        } else {
+          msg.classList.add('t-crit');
+          msg.textContent = res.reason ?? 'something went wrong.';
+        }
+      } catch {
+        msg.classList.remove('hidden');
+        msg.classList.add('t-crit');
+        msg.textContent = 'couldn’t write to the wall — likely the database rules aren’t live yet. tell aaron.';
+      } finally {
+        submitBtn.disabled = false;
+        submitLabel.textContent = privBox.checked ? '▶ send privately to aaron' : '▶ put it on the wall';
+      }
+    });
+  });
+</script>

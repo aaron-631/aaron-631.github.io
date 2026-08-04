@@ -2,6 +2,7 @@
 // About — the person. Story, the lab family, the journey history.
 // One chapter, room to breathe.
 import Base from '../layouts/Base.astro';
+import ChapterNav from '../components/ChapterNav.astro';
 import { profile } from '../content/profile';
 import { now } from '../content/writing';
 import { journey } from '../content/achievements';
@@ -164,14 +165,6 @@ const toolkit = headline.map((id) => skills.find((s) => s.id === id)!).filter(Bo
       </div>
     </section>
 
-    <!-- next chapter -->
-    <section class="border-t border-line">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
-        <p class="font-mono text-[0.78rem] text-paper-dim">next chapter</p>
-        <a href="/work/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
-          Claims &amp; receipts →
-        </a>
-      </div>
-    </section>
+    <ChapterNav />
   </main>
 </Base>

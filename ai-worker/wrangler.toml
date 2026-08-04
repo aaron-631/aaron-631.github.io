@@ -1,0 +1,7 @@
+name = "aaron-ai"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+# The Gemini key is a secret, never a var:
+#   npx wrangler secret put GEMINI_API_KEY
+# For local dev, put it in ai-worker/.dev.vars (gitignored).

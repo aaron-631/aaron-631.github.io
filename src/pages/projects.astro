@@ -1,6 +1,7 @@
 ---
 // Projects — flagship dossier + cards that open into a reading panel + arsenal.
 import Base from '../layouts/Base.astro';
+import ChapterNav from '../components/ChapterNav.astro';
 import { projects, lab } from '../content/projects';
 import { arsenal } from '../content/writing';
 import { findSkill } from '../content/skills';
@@ -104,7 +105,7 @@ const ARCH = `  ┌────────────────────�
       </article>
 
       <!-- supporting cards — click one, it opens into a reading panel -->
-      <div class="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
         {
           rest.map((p) => (
             <article
@@ -260,15 +261,7 @@ const ARCH = `  ┌────────────────────�
       </div>
     </section>
 
-    <!-- next chapter -->
-    <section class="border-t border-line">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
-        <p class="font-mono text-[0.78rem] text-paper-dim">next chapter</p>
-        <a href="/writing/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
-          From the trenches →
-        </a>
-      </div>
-    </section>
+    <ChapterNav />
   </main>
 </Base>
 

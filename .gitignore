@@ -10,6 +10,9 @@ node_modules/
 .DS_Store
 *.Zone.Identifier
 
+# secrets — the Gemini key lives here for local worker dev, never in git
+ai-worker/.dev.vars
+
 # never ship personal source material
 Resources/
 

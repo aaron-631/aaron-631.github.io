@@ -79,24 +79,46 @@ export const projects: Project[] = [
     status: 'public',
     oneliner: {
       build:
-        'A modular async platform that evaluates AI-agent configurations before deployment. Typed contracts, deterministic rules, reproducible reports.',
+        'A two-layer security platform for AI agents. V1 is a local-first release gate: it audits an agent repo — tools, permissions, secrets, MCP servers, network config — before anything ships. V2 is a runtime gateway that sits between the agent and its model, enforcing deterministic policies on every request and response.',
       break:
-        'Pre-deployment risk evaluation for LLM endpoints: prompt-injection, jailbreak and data-extraction attack families, scored before anything ships.',
+        'The full attack lifecycle, productised: versioned prompt-injection, jailbreak and data-extraction probes against live endpoints, read-only recon of real MCP servers, and a runtime gateway that blocks the attacks V1 predicted. Built by someone who breaks these systems by hand first.',
     },
-    stack: ['Python', 'asyncio', 'Pydantic', 'AES-256-GCM', 'Docker', 'YAML'],
+    stack: [
+      'Python 3.11 · asyncio',
+      'Pydantic',
+      'MCP · stdio + streamable HTTP',
+      'Docker · Compose',
+      'Prometheus metrics',
+      'AES-256-GCM',
+    ],
     points: {
       build: [
-        '15 deterministic rules over MCP schemas, tool permissions, workflows, secrets, and network config.',
-        'Token-bucket rate limiting with 429 backpressure across concurrent eval streams; AES-256-GCM vaulting for sensitive artifacts.',
+        '27 canonical rules with explicit capability contracts — AST analysis for Python, structured parsing for JSON/YAML/TOML, text rules for the rest. A structured rule is never silently run against the wrong file type.',
+        'mcp-probe inspects live MCP servers read-only: initialize + paginated tools/list, zero tool calls. It has scanned the official filesystem server and the configs of Claude Code, Codex CLI, and Gemini CLI.',
+        'Quality gate on every push: 53 tests, Black, Flake8, mypy, and schema checks — all green. Reports are reproducible JSON + Markdown artifacts a CI pipeline can gate on.',
       ],
       break: [
-        'Probabilistic risk model R = S_base × C_env × P_conf. One data-driven metric to drive go/no-go decisions.',
-        'The bug class I found by hand in production (see the disclosure below) is the one Argus now catches automatically.',
+        'The V2 gateway blocks prompt injection with a 403 before the request ever reaches the model, holds dangerous tool calls (delete*) outright, and forces human approval (HTTP 428) on business-impacting ones like send_external_email.',
+        'Responses get inspected too: credential-looking output is stopped with a 502, sensitive fields are redacted, and every decision lands in a hash-chained audit log that tampering would break.',
+        'Real-world verification run: pointed at the official pinned MCP filesystem server — 14 tools discovered, 0 tool calls made, 2 HIGH findings, verdict BLOCK. Documented end-to-end in the repo.',
       ],
     },
     proofs: [
-      { label: 'source', detail: 'Full codebase, tests, and CI public on GitHub.', href: 'https://github.com/aaron-631/PROJECT-ARGUS' },
-      { label: 'risk model', detail: 'R = (S_base × C_env) × P_conf, clamped to documented bounds; reports label canonical vs semantic methodology.' },
+      { label: 'source', detail: 'Full codebase, tests, CI, and the WORKFLOW.md architecture walkthrough — public on GitHub.', href: 'https://github.com/aaron-631/PROJECT-ARGUS' },
+      {
+        label: 'risk model',
+        detail:
+          'R = (S_base × C_env) × P_conf, clamped to documented bounds. Deployment profiles make context explicit: banking_agent c_env=1.0, human-in-loop 0.5, public FAQ 0.1. A semantic judge can only nudge confidence — it can never erase a canonical failure.',
+      },
+      {
+        label: 'quality gate',
+        detail: '53 tests passing plus Black, Flake8, mypy, and schema-generation checks — enforced in GitHub Actions on every push.',
+      },
+      {
+        label: 'live MCP run',
+        detail:
+          'Official @modelcontextprotocol filesystem server, version-pinned: 14 tools enumerated across 1 page with 0 tool calls, 2 HIGH findings, exit verdict BLOCK. The whole run is recorded in WORKFLOW.md.',
+      },
     ],
     links: [{ label: 'github.com/aaron-631/PROJECT-ARGUS', href: 'https://github.com/aaron-631/PROJECT-ARGUS' }],
   },
@@ -149,6 +171,38 @@ export const projects: Project[] = [
       { label: 'search-arena.vercel.app', href: 'https://search-arena.vercel.app' },
       { label: 'source', href: 'https://github.com/aaron-631/search-arena' },
     ],
+  },
+  {
+    id: 'my-planner',
+    name: 'my-planner',
+    status: 'private',
+    oneliner: {
+      build:
+        'A weekly planner I actually live in: drag-and-drop scheduling on a half-hour grid, synced in real time through Firestore, with Google and Outlook calendars flowing in and Gemini turning plain English into placed events.',
+      break:
+        'Built the way a security person builds a personal tool: Google sign-in as federated identity, calendar scopes kept read-only, and the Gemini key is BYOK — it lives in your browser’s localStorage and never touches a server I run.',
+    },
+    stack: ['React 19', 'Firebase Auth · Firestore', 'Gemini 2.5 Flash', 'Google Calendar API', 'Microsoft Graph'],
+    points: {
+      build: [
+        'Say "gym at 7 pm then deep work till midnight" and Gemini 2.5 Flash returns schema-validated JSON — typed events with start, duration, and category — that lands straight on the grid. Structured output, not string parsing.',
+        'Every edit syncs live through Firestore onSnapshot, so the planner is the same on every device, and a share link lets anyone view a week read-only.',
+        'Pulls existing events from both Google Calendar and Microsoft Outlook (Graph API) into one board, deduped against what you already planned.',
+      ],
+      break: [
+        'Bring-your-own-key by design: the Gemini API key is stored client-side only. No proxy server, no logging, nothing for an attacker to steal from me.',
+        'OAuth scopes are deliberately minimal — calendar read, profile, nothing more. The same least-privilege habit Argus enforces on other people’s agents.',
+      ],
+    },
+    proofs: [
+      {
+        label: 'structured output',
+        detail:
+          'Gemini responses are constrained by a responseSchema (typed ARRAY of OBJECTs: label, startHour, duration, type, targetDays) — malformed events cannot reach the grid.',
+      },
+      { label: 'real-time sync', detail: 'Firestore onSnapshot listeners keep every open device consistent; optimistic writes keep the UI instant.' },
+    ],
+    links: [{ label: 'private · demo on request', href: 'mailto:aaronchakraborty631@gmail.com?subject=my-planner%20demo' }],
   },
 ];
 

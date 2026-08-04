@@ -2,6 +2,7 @@
 // Contact — the actual ways to reach me, unmissable, first.
 // The Argus scan and the terminal come after; they're the dessert.
 import Base from '../layouts/Base.astro';
+import ChapterNav from '../components/ChapterNav.astro';
 import { profile } from '../content/profile';
 
 const ways = [
@@ -55,7 +56,7 @@ const ways = [
   <main class="pt-24 md:pt-14">
     <!-- reach me — first thing, no hunting -->
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <p class="label-mono reveal mb-3"><span class="idx">// 05</span> · contact</p>
+      <p class="label-mono reveal mb-3"><span class="idx">// 06</span> · contact</p>
       <h1 class="h-serif reveal text-4xl sm:text-5xl">Let's talk.</h1>
       <p class="reveal mt-6 max-w-lg leading-relaxed text-paper-dim">
         Placement season 2026-27. If you're hiring for AI/ML engineering, security engineering,
@@ -86,7 +87,7 @@ const ways = [
       <div class="mx-auto max-w-6xl px-5 py-24">
         <div class="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p class="label-mono reveal mb-3"><span class="idx">// 05.5</span> · the scan</p>
+            <p class="label-mono reveal mb-3"><span class="idx">// 06.5</span> · the scan</p>
             <h2 class="h-serif reveal text-3xl sm:text-4xl">Still deciding?<br />Run the scan.</h2>
             <p class="reveal mt-6 max-w-md leading-relaxed text-paper-dim">
               Argus is my real tool for evaluating AI agents before deployment.
@@ -123,7 +124,7 @@ const ways = [
     <!-- the terminal, embedded — the thing that survived every redesign -->
     <section class="border-t border-line">
       <div class="mx-auto max-w-6xl px-5 py-24">
-        <p class="label-mono reveal mb-3"><span class="idx">// 05.9</span> · terminal</p>
+        <p class="label-mono reveal mb-3"><span class="idx">// 06.9</span> · terminal</p>
         <h2 class="h-serif reveal mb-4 text-3xl sm:text-4xl">Prefer the command line?<br />Same here.</h2>
         <p class="reveal mb-10 max-w-md text-[0.95rem] leading-relaxed text-paper-dim">
           This shell has been on my site since v1. It's the one thing I refused to remove.
@@ -161,6 +162,8 @@ const ways = [
         </div>
       </div>
     </section>
+
+    <ChapterNav />
   </main>
 </Base>
 

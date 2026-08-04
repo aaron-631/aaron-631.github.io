@@ -5,44 +5,7 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Receipt from '../components/Receipt.astro';
 import { statsByMode } from '../content/profile';
-
-const chapters = [
-  {
-    href: '/about/',
-    idx: '01',
-    title: 'The honest version',
-    hook: 'SSB rank 83, a lab full of people I call family, and why I picked the hard road.',
-    cmd: 'cat about.md',
-  },
-  {
-    href: '/work/',
-    idx: '02',
-    title: 'Claims & receipts',
-    hook: 'DBS, SwiftSafe, 20+ VAPTs, and one real bug in production. Every claim carries proof.',
-    cmd: 'cat work.log',
-  },
-  {
-    href: '/projects/',
-    idx: '03',
-    title: 'The systems',
-    hook: 'VantaLLM, Argus, ReconForge. Built end-to-end, tested until boring.',
-    cmd: 'ls projects/',
-  },
-  {
-    href: '/writing/',
-    idx: '04',
-    title: 'From the trenches',
-    hook: 'I post the crashes along with the wins. The OOM errors nobody warns you about.',
-    cmd: 'tail -f trenches.md',
-  },
-  {
-    href: '/contact/',
-    idx: '05',
-    title: 'Run the scan',
-    hook: 'Argus evaluates AI agents before deployment. This copy runs on me. Try it.',
-    cmd: 'scan me',
-  },
-];
+import { chapters } from '../content/chapters';
 ---
 
 <Base intro>

@@ -6,6 +6,7 @@ import { experience } from '../content/experience';
 import { projects, lab, disclosure } from '../content/projects';
 import { journey } from '../content/achievements';
 import { getMode, setMode, type Mode } from './mode';
+import { aiEnabled, aiAsk } from '../lib/ai';
 
 type Line = { text: string; cls?: string };
 
@@ -25,7 +26,7 @@ function projectDoc(id: string): Line[] | null {
   ];
 }
 
-const FILES = [...projects.map((p) => `projects/${p.id}.md`), 'disclosures/yatra-xss.md', 'resume.pdf'];
+const FILES = [...projects.map((p) => `projects/${p.id}.md`), 'disclosures/yatra-xss.md', 'wall.log', 'resume.pdf'];
 // only visible to ls -la. the console hint points here.
 const HIDDEN_FILES = ['.goggins_playlist', '.ssb_diary', '.coffee_counter', '.plan'];
 
@@ -85,6 +86,13 @@ export const commands: Record<string, Command> = {
       if (f === 'resume.pdf') {
         window.open(profile.links.resume, '_blank');
         return [{ text: 'cat: resume.pdf is binary · opening in viewer instead.', cls: 't-dim' }];
+      }
+      if (f === 'wall.log') {
+        setTimeout(() => (window.location.href = '/wall/'), 600);
+        return [
+          { text: 'tail -f wall.log — live recommendations, real names.', cls: 't-warn' },
+          { text: 'opening the wall …', cls: 't-ok' },
+        ];
       }
       // hidden files — rewards for the curious
       if (f === '.goggins_playlist')
@@ -223,12 +231,31 @@ export const commands: Record<string, Command> = {
   hello: {
     desc: '',
     hidden: true,
-    run: () => [
-      { text: "hey! you're talking to a small shell i wrote, not an AI.", cls: 't-warn' },
-      { text: "it understands plain words though. try asking:", cls: 't-dim' },
-      { text: "  'who are you'  ·  'show me projects'  ·  'skills'  ·  'scan me'", cls: '' },
-      { text: 'or tap one of the suggestion pills below the input.', cls: 't-dim' },
-    ],
+    run: () =>
+      aiEnabled()
+        ? [
+            { text: 'hey! this shell has an AI brain wired in — ask it anything real.', cls: 't-warn' },
+            { text: "try: ask what did aaron actually train? · ask why should i hire him?", cls: 't-dim' },
+            { text: "the classics still work: 'whoami' · 'scan me' · 'ls -la'", cls: '' },
+          ]
+        : [
+            { text: "hey! you're talking to a small shell i wrote, not an AI.", cls: 't-warn' },
+            { text: 'it understands plain words though. try asking:', cls: 't-dim' },
+            { text: "  'who are you'  ·  'show me projects'  ·  'skills'  ·  'scan me'", cls: '' },
+            { text: 'or tap one of the suggestion pills below the input.', cls: 't-dim' },
+          ],
+  },
+  ask: {
+    desc: 'ask the AI anything about aaron',
+    run: (args) =>
+      aiEnabled()
+        ? args.length
+          ? [] // actually answered asynchronously in wireTerminal
+          : [{ text: 'usage: ask <your question> · e.g. ask what has aaron actually shipped?', cls: 't-dim' }]
+        : [
+            { text: 'the AI brain is offline in this build.', cls: 't-dim' },
+            { text: "the shell still knows plenty: try 'whoami', 'work', 'history', 'scan me'.", cls: '' },
+          ],
   },
   clear: { desc: 'clear the screen', run: () => 'CLEAR' },
 
@@ -357,6 +384,7 @@ function naturalAlias(q: string): string | null {
   if (/scan|evaluate|recruit/.test(q)) return 'scan me';
   if (/stat|number|proof/.test(q)) return 'stats';
   if (/story|journey|history|life/.test(q)) return 'history';
+  if (/recommend|testimonial|review|wall|what.*people.*say/.test(q)) return 'cat wall.log';
   if (/secret|easter|hidden|egg/.test(q)) return 'ls -la';
   if (/joke|fun/.test(q)) return 'goggins';
   return null;
@@ -414,10 +442,42 @@ export function wireTerminal(outId: string, inId: string): void {
       hi = -1;
     }
     print([{ text: `${promptStr()} ${v}`, cls: 't-prompt' }]);
+    input!.value = '';
+
+    // ── the AI path: `ask …`, or any plain-words question the pattern
+    //    matcher can't place. async, with a visible thinking line. ──
+    const raw = v.trim();
+    const first = (raw.split(/\s+/)[0] ?? '').toLowerCase();
+    const isAsk = first === 'ask' && raw.length > 4;
+    const isFreeform =
+      aiEnabled() && raw.length > 2 && !commands[first] && !naturalAlias(raw.toLowerCase());
+    if (aiEnabled() && (isAsk || isFreeform)) {
+      const question = isAsk ? raw.slice(4) : raw;
+      const p = document.createElement('p');
+      p.className = 't-dim';
+      p.textContent = 'thinking …';
+      out!.appendChild(p);
+      out!.scrollTop = out!.scrollHeight;
+      aiAsk(question).then((ans) => {
+        p.remove();
+        print(
+          ans
+            ? [
+                ...ans.split('\n').map((line) => ({ text: line, cls: '' })),
+                { text: '— gemini, reading aaron’s receipts · verify anything at /work/', cls: 't-dim' },
+              ]
+            : [
+                { text: 'the AI brain timed out — deterministic me takes over:', cls: 't-dim' },
+                ...(execute('whoami') as Line[]),
+              ]
+        );
+      });
+      return;
+    }
+
     const res = execute(v);
     if (res === 'CLEAR') out!.innerHTML = '';
     else print(res);
-    input!.value = '';
   }
 
   // command chips near this terminal inject straight into it

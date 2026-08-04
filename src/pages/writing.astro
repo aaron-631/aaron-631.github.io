@@ -1,6 +1,7 @@
 ---
 // Writing — the posts, straight from X/LinkedIn.
 import Base from '../layouts/Base.astro';
+import ChapterNav from '../components/ChapterNav.astro';
 import { writing } from '../content/writing';
 import { profile } from '../content/profile';
 ---
@@ -35,14 +36,6 @@ import { profile } from '../content/profile';
       </p>
     </section>
 
-    <!-- next chapter -->
-    <section class="border-t border-line">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-14">
-        <p class="font-mono text-[0.78rem] text-paper-dim">last chapter</p>
-        <a href="/contact/" class="h-serif text-2xl text-paper transition-colors hover:text-accent sm:text-3xl">
-          Run the scan →
-        </a>
-      </div>
-    </section>
+    <ChapterNav />
   </main>
 </Base>

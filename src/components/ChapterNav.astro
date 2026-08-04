@@ -1,0 +1,65 @@
+---
+// Prev/next chapter rail — the book's page corners. Reads the spine from
+// chapters.ts so the order lives in exactly one place.
+import { neighbors, chapters } from '../content/chapters';
+
+const { prev, next } = neighbors(Astro.url.pathname);
+const here = chapters.find((c) => {
+  const p = Astro.url.pathname;
+  return c.href === p || c.href === p + '/';
+});
+---
+
+<section class="border-t border-line">
+  <div class="mx-auto grid max-w-6xl grid-cols-2 items-center gap-4 px-5 py-14">
+    {
+      prev ? (
+        <a href={prev.href} class="group justify-self-start text-left">
+          <p class="font-mono text-[0.78rem] text-paper-dim">
+            <span class="inline-block transition-transform group-hover:-translate-x-1">←</span> previous chapter · {prev.idx}
+          </p>
+          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">{prev.title}</p>
+        </a>
+      ) : (
+        <a href="/" class="group justify-self-start text-left">
+          <p class="font-mono text-[0.78rem] text-paper-dim">
+            <span class="inline-block transition-transform group-hover:-translate-x-1">←</span> cover
+          </p>
+          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">Start of the story</p>
+        </a>
+      )
+    }
+    {
+      next ? (
+        <a href={next.href} class="group justify-self-end text-right">
+          <p class="font-mono text-[0.78rem] text-paper-dim">
+            next chapter · {next.idx} <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
+          </p>
+          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">{next.title}</p>
+        </a>
+      ) : (
+        <a href="/" class="group justify-self-end text-right">
+          <p class="font-mono text-[0.78rem] text-paper-dim">
+            back to the cover <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
+          </p>
+          <p class="h-serif mt-1 text-2xl text-paper transition-colors group-hover:text-accent sm:text-3xl">Read it again</p>
+        </a>
+      )
+    }
+  </div>
+  {
+    here && (
+      <div class="mx-auto max-w-6xl px-5 pb-8">
+        <div class="flex items-center gap-1.5" aria-label="Chapter progress">
+          {chapters.map((c) => (
+            <a
+              href={c.href}
+              title={`${c.idx} · ${c.title}`}
+              class={`h-[3px] flex-1 rounded-full transition-colors ${c.href === here.href ? 'bg-accent' : 'bg-line hover:bg-accent/50'}`}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+</section>

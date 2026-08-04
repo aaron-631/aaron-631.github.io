@@ -65,6 +65,10 @@
     pop.setAttribute('aria-hidden', 'true');
     current?.setAttribute('aria-expanded', 'false');
     current = null;
+    // park it back at the origin — a stale `top` from a long page would
+    // otherwise stretch the next (shorter) page with empty scroll space
+    pop.style.top = '0px';
+    pop.style.left = '0px';
   }
 
   function scheduleHide() {
