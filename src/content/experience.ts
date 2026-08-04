@@ -30,7 +30,7 @@ export const experience: Role[] = [
     where: 'Remote',
     featured: true,
     points: [
-      'Owned one AI system end-to-end: a 567M-parameter Mixture-of-Experts transformer, trained from scratch. The architecture is my design and every technical call was mine; I drove it from empty repo to a 30,000-step training run, reviewing and debugging every layer along the way. PyTorch, DeepSpeed ZeRO-2, 16 experts with top-2 routing, GQA, RoPE, a custom tokenizer.',
+      'Owned one AI system end-to-end: a 567M-parameter Mixture-of-Experts transformer, trained from scratch. My architecture, my technical calls, empty repo to a 30,000-step training run. PyTorch, DeepSpeed ZeRO-2, 16 experts with top-2 routing, GQA, RoPE, a custom tokenizer.',
       'Served it with FastAPI on A100 infrastructure and built the adversarial eval pipelines that beat it up continuously.',
       'Wrote the whole journey up on X and LinkedIn as it happened, the wins and the crashes. The training thread crossed 7,800 impressions.',
     ],
@@ -43,7 +43,7 @@ export const experience: Role[] = [
     where: 'KIIT, Bhubaneswar',
     points: [
       'Kept a 30+ member lab running for two years: demos, showcases, onboarding new recruits.',
-      'Organized a couple of CTFs and mentored juniors who reminded me of me two years earlier. Tenure wrapped up in August 2026; the juniors run it now, which was always the point.',
+      'Organized a couple of CTFs and mentored juniors who reminded me of me two years earlier. Handed it over in August 2026. The juniors run it now, which was the whole point.',
     ],
     receipt: '30+ members · 2+ CTFs organized · tenure complete',
   },

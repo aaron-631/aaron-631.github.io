@@ -17,11 +17,11 @@ export const profile = {
   hero: {
     build: {
       headline: 'I build AI systems.',
-      sub: 'A 567M-parameter MoE transformer, trained from scratch on an A100. The architecture is mine, the technical calls are mine, and I debugged every layer down to the tensor shapes. Not a fine-tune, not a wrapper: random weights to a real model.',
+      sub: 'A 567M-parameter MoE transformer, trained from scratch on an A100. My architecture, my calls, my bugs. I can explain every layer because I had to debug every layer.',
     },
     break: {
       headline: 'Then I break them.',
-      sub: "Prompt injection, jailbreaks, data extraction. I found an XSS in a production AI chatbot, reported it quietly, and the company fixed it. The systems I build, I build knowing someone like me is coming for them.",
+      sub: 'Prompt injection, jailbreaks, data extraction. I found an XSS in a production AI chatbot, reported it quietly, and the company fixed it. Everyone won.',
     },
   },
   // the identity line under the nav, re-lensed per mode
@@ -36,7 +36,7 @@ export const profile = {
   ],
   // The human bit. This is the part recruiters actually remember.
   about: [
-    "There's no grand origin story here. Somewhere in second year I looked around, saw how easy it was to coast through college, and realised that scared me more than failing ever did. So I picked the two things that intimidated me most: training AI models from nothing, and security, breaking the things people assume are safe.",
+    "There's no grand origin story here. Somewhere in second year I looked around, saw how easy it was to coast through college, and realised that scared me more than failing ever did. So I went at the two things that intimidated me the most: AI and LLMs in general, and security, breaking the things people assume are safe.",
     'Before tech I actually wanted the Indian Army. Cleared the Service Selection Board, All India Rank 83. Five days with people whose entire job is figuring out who you really are. I ended up not joining, but those five days rewired how I work. Show up, do the reps, no excuses.',
     "Everything else is pretty simple: coffee, David Goggins podcasts, and posting whatever I'm building or breaking on X. Including the failures. Especially the failures, honestly, because the OOM crashes and NCCL hangs taught me more than anything that worked first try.",
   ],
