@@ -31,13 +31,36 @@ async function post<T>(path: string, body: unknown, timeoutMs: number): Promise<
 
 export interface AiScore {
   ok: boolean; // false → the text failed moderation
-  score: number; // 0–100 quality ranking for the wall
+  score: number; // 0 to 100 quality ranking for the wall
   note?: string;
 }
 
 /** Ask Gemini to moderate + rank a wall entry. Null → use the local heuristic. */
 export function aiScore(name: string, role: string, text: string): Promise<AiScore | null> {
   return post<AiScore>('/score', { name, role, text }, 4000);
+}
+
+export interface WallWriteResult {
+  ok: boolean;
+  reason?: string; // 'unconfigured' | 'auth' | 'moderation' | 'rate' | 'short' | 'long' | 'name'
+  note?: string;
+  score?: number;
+}
+
+/**
+ * Submit an entry through the worker, which verifies the ID token, scores the
+ * text server-side and writes it with a service account. This is what makes the
+ * ranking trustworthy: a score decided in the browser can simply be edited.
+ * Null means the worker was unreachable, so the caller writes directly instead.
+ */
+export function aiSubmitWall(
+  idToken: string,
+  kind: 'rec' | 'feedback',
+  role: string,
+  text: string
+): Promise<WallWriteResult | null> {
+  // Longer than /score: this call also does a token exchange and a write.
+  return post<WallWriteResult>('/wall', { idToken, kind, role, text }, 10000);
 }
 
 /** Grounded Q&A about Aaron for the terminal's `ask` command. */

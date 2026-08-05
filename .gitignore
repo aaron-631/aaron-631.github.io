@@ -18,3 +18,4 @@ Resources/
 
 # raw personal photos (compressed copies ship from public/photos/)
 images/
+ai-worker/.wrangler/

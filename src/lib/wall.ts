@@ -5,7 +5,7 @@
 // (every Firebase web app ships it); security lives in the Firestore rules -
 // see FIREBASE_SETUP.md at the repo root.
 
-import { aiScore } from './ai';
+import { aiScore, aiSubmitWall } from './ai';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDZmBzzGck4G52LPt-Vgy2SLuJqJZzXvQA',
@@ -98,7 +98,7 @@ export async function currentUser(): Promise<WallUser | null> {
   });
 }
 
-/* Deterministic quality heuristic (0–100), the fallback ranker, and the
+/* Deterministic quality heuristic (0 to 100), the fallback ranker, and the
    floor while the AI verdict is unavailable. Rewards specific, composed
    writing; penalises drive-by one-liners and shouting. */
 export function heuristicScore(text: string): number {
@@ -136,12 +136,32 @@ export async function submitEntry(
   if (body.length < 20) return { ok: false, reason: 'a little more, please, 20 characters minimum.' };
   if (body.length > 600) return { ok: false, reason: 'keep it under 600 characters, the wall rewards sharp writing.' };
 
-  // AI moderation + ranking when the brain is online; heuristic otherwise
-  let score = heuristicScore(body);
+  // Preferred path: the worker verifies who we are, decides the score itself
+  // and writes with a service account. Nothing here can influence the ranking,
+  // which is the entire point, a score chosen in the browser is editable.
+  const current = (await auth()).currentUser;
+  if (current) {
+    try {
+      const idToken = await current.getIdToken();
+      const res = await aiSubmitWall(idToken, kind, role.trim(), body);
+      if (res?.ok) return { ok: true };
+      // A real verdict from the worker, moderation or validation. Respect it.
+      if (res && res.reason !== 'unconfigured') {
+        return { ok: false, reason: res.note || 'that one did not pass moderation.' };
+      }
+    } catch {
+      // fall through to the direct write below
+    }
+  }
+
+  // Fallback: the worker is down or not configured yet. Write directly, but
+  // the rules cap a client-written score at 50, so this path can never
+  // outrank a genuinely scored entry.
+  let score = Math.min(50, heuristicScore(body));
   const ai = await aiScore(user.name, role, body);
   if (ai) {
-    if (!ai.ok) return { ok: false, reason: ai.note || 'that one didn’t pass moderation.' };
-    score = Math.max(5, Math.min(100, Math.round(ai.score)));
+    if (!ai.ok) return { ok: false, reason: ai.note || 'that one did not pass moderation.' };
+    score = Math.max(0, Math.min(50, Math.round(ai.score)));
   }
 
   const [d, fs] = await Promise.all([db(), import('firebase/firestore')]);

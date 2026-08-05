@@ -1,14 +1,34 @@
 // aaron-ai, the tiny brain behind the portfolio's AI features.
 // A Cloudflare Worker so the Gemini API key never ships to the browser.
 //
-//   POST /score  { name, role, text }  -> { ok, score, note }   (wall ranking + moderation)
-//   POST /ask    { question }          -> { answer }            (terminal `ask` command)
+//   POST /score  { name, role, text }              -> { ok, score, note }   (ranking preview)
+//   POST /wall   { idToken, kind, role, text }     -> { ok, reason }        (authoritative write)
+//   POST /ask    { question }                      -> { answer }            (terminal `ask`)
 //
-// Deploy:  npx wrangler deploy        (key:  npx wrangler secret put GEMINI_API_KEY)
+// Why /wall exists: the wall's ranking score used to be computed in the browser
+// and written straight to Firestore, so anyone with devtools could post
+// score: 100 and pin themselves to the top of the wall forever. Firestore rules
+// cannot verify a signature, so the only real fix is to let something the
+// visitor cannot impersonate do the write. This endpoint verifies the caller's
+// Firebase ID token, scores the text itself, and writes with a service account.
+// Rules additionally cap any direct client write at 50, which keeps the
+// offline fallback path honest.
+//
+// Deploy:  npx wrangler deploy
+//   keys:  npx wrangler secret put GEMINI_API_KEY
+//          npx wrangler secret put FIREBASE_SERVICE_ACCOUNT   (the whole JSON)
 // Local:   npx wrangler dev           (reads ai-worker/.dev.vars)
 
 const MODEL = 'gemini-2.5-flash';
 const API = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+const PROJECT_ID = 'my-planner-66a3e';
+const FIRESTORE_ROOT = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+const JWKS_URL = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
+
+// Mirrors the Firestore rules exactly. Both layers must agree or a submission
+// that passes here gets rejected at the database and the user sees a lie.
+const LIMITS = { name: [2, 60], role: [0, 80], text: [20, 600] };
 
 const ALLOWED_ORIGINS = [
   'https://aaron-631.github.io',
@@ -18,10 +38,10 @@ const ALLOWED_ORIGINS = [
 
 // Compact ground truth for /ask, the model may ONLY use this.
 const FACTS = `
-Aaron Chakraborty, AI/ML Security Engineer. B.Tech CSE, KIIT Bhubaneswar (2023–2027), CGPA 9.42.
+Aaron Chakraborty, AI/ML Security Engineer. B.Tech CSE, KIIT Bhubaneswar (2023 to 2027), CGPA 9.42.
 Motto: builds AI systems, then breaks them.
-Experience: Technology Apprentice, DBS Tech India SEED programme (Jun 2026–present, flagship national apprenticeship).
-AI/ML Research Intern at SwiftSafe (Mar–Jun 2026): built VantaLLM, a 567,068,416-parameter Mixture-of-Experts
+Experience: Technology Apprentice, DBS Tech India SEED programme (Jun 2026 to present, flagship national apprenticeship).
+AI/ML Research Intern at SwiftSafe (Mar to Jun 2026): built VantaLLM, a 567,068,416-parameter Mixture-of-Experts
 transformer trained from scratch (random weights to a real model, not a fine-tune). The architecture is his own
 design; he made every technical call, reviewed the code, and debugged every layer himself.
 30,000 training steps on a single 20GB A100; PyTorch, DeepSpeed ZeRO-2/3, 16 experts top-2 routing, GQA, RoPE,
@@ -54,7 +74,11 @@ function cors(origin) {
 // 20 requests per IP per 5 minutes is far more than any human visitor needs.
 const RL_WINDOW_MS = 5 * 60 * 1000;
 const RL_MAX = 20;
+// Writing to the wall is far more costly than reading, so it gets its own
+// much tighter budget. Nobody legitimately posts five testimonials at once.
+const RL_WRITE_MAX = 5;
 const rlHits = new Map(); // ip -> [timestamps]
+const rlWrites = new Map(); // ip -> [timestamps]
 
 function rateLimited(ip) {
   const now = Date.now();
@@ -66,6 +90,19 @@ function rateLimited(ip) {
   hits.push(now);
   rlHits.set(ip, hits);
   if (rlHits.size > 5000) rlHits.clear(); // memory backstop
+  return false;
+}
+
+function writeLimited(ip) {
+  const now = Date.now();
+  const hits = (rlWrites.get(ip) ?? []).filter((t) => now - t < RL_WINDOW_MS);
+  if (hits.length >= RL_WRITE_MAX) {
+    rlWrites.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  rlWrites.set(ip, hits);
+  if (rlWrites.size > 5000) rlWrites.clear();
   return false;
 }
 
@@ -125,6 +162,180 @@ Typical genuine entries land 45-85. Reserve 90+ for exceptional, vivid, specific
   };
 }
 
+// ── Firebase ID token verification ──────────────────────────────────────
+// The whole point of this endpoint is that the caller cannot lie about who
+// they are, so the RS256 signature is actually verified against Google's
+// public keys. Decoding the payload without checking the signature would be
+// worse than no auth at all, because it would look secure.
+
+const b64urlToBytes = (s) => {
+  const pad = s.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(pad + '='.repeat((4 - (pad.length % 4)) % 4));
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+};
+
+let jwksCache = { at: 0, keys: null };
+
+async function jwks() {
+  // Google rotates these daily, an hour of caching is safe and saves a
+  // round trip on every submission.
+  if (jwksCache.keys && Date.now() - jwksCache.at < 60 * 60 * 1000) return jwksCache.keys;
+  const res = await fetch(JWKS_URL);
+  if (!res.ok) throw new Error('jwks fetch failed');
+  const keys = await res.json();
+  jwksCache = { at: Date.now(), keys };
+  return keys;
+}
+
+// Exported so token.test.js exercises this exact function rather than a copy
+// that can drift away from it.
+export async function verifyIdToken(token, keySetOverride) {
+  if (typeof token !== 'string' || token.split('.').length !== 3) return null;
+  const [h, p, s] = token.split('.');
+
+  let header;
+  let payload;
+  try {
+    header = JSON.parse(new TextDecoder().decode(b64urlToBytes(h)));
+    payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(p)));
+  } catch {
+    return null;
+  }
+  if (header.alg !== 'RS256' || !header.kid) return null;
+
+  const set = keySetOverride ?? (await jwks());
+  const jwk = set[header.kid];
+  if (!jwk) return null;
+
+  const key = await crypto.subtle.importKey(
+    'jwk',
+    { kty: 'RSA', n: jwk.n, e: jwk.e, alg: 'RS256', ext: true },
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+  const ok = await crypto.subtle.verify(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    b64urlToBytes(s),
+    new TextEncoder().encode(`${h}.${p}`)
+  );
+  if (!ok) return null;
+
+  // Signature is genuine, now the claims must match this project and be live.
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.aud !== PROJECT_ID) return null;
+  if (payload.iss !== `https://securetoken.google.com/${PROJECT_ID}`) return null;
+  if (!payload.sub || typeof payload.sub !== 'string') return null;
+  if (typeof payload.exp !== 'number' || payload.exp <= now) return null;
+  if (typeof payload.iat !== 'number' || payload.iat > now + 300) return null;
+
+  return { uid: payload.sub, name: payload.name ?? '', email: payload.email ?? '' };
+}
+
+// ── Google service account access token ─────────────────────────────────
+// Signs its own JWT assertion and exchanges it for an access token, because
+// the Node admin SDK does not run on Workers.
+
+const pemToBytes = (pem) => {
+  const body = pem.replace(/-----[A-Z ]+-----/g, '').replace(/\s+/g, '');
+  return Uint8Array.from(atob(body), (c) => c.charCodeAt(0));
+};
+
+const b64url = (bytes) => {
+  let bin = '';
+  const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  for (const b of arr) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+let tokenCache = { at: 0, token: null };
+
+async function accessToken(env) {
+  if (tokenCache.token && Date.now() - tokenCache.at < 45 * 60 * 1000) return tokenCache.token;
+
+  const sa = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+  const now = Math.floor(Date.now() / 1000);
+  const claim = {
+    iss: sa.client_email,
+    scope: 'https://www.googleapis.com/auth/datastore',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+  const enc = new TextEncoder();
+  const unsigned = `${b64url(enc.encode(JSON.stringify({ alg: 'RS256', typ: 'JWT' })))}.${b64url(enc.encode(JSON.stringify(claim)))}`;
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    pemToBytes(sa.private_key),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, enc.encode(unsigned));
+  const assertion = `${unsigned}.${b64url(sig)}`;
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
+    }),
+  });
+  if (!res.ok) throw new Error(`token exchange ${res.status}`);
+  const data = await res.json();
+  tokenCache = { at: Date.now(), token: data.access_token };
+  return data.access_token;
+}
+
+// ── authoritative wall write ────────────────────────────────────────────
+
+async function wall(env, body) {
+  if (!env.FIREBASE_SERVICE_ACCOUNT) {
+    // Not configured yet. Say so plainly so the client falls back to its
+    // own capped write instead of silently losing the entry.
+    return { ok: false, reason: 'unconfigured', note: 'the wall writer is not set up yet.' };
+  }
+
+  const user = await verifyIdToken(body.idToken);
+  if (!user) return { ok: false, reason: 'auth', note: 'please sign in again.' };
+
+  const kind = body.kind === 'feedback' ? 'feedback' : 'rec';
+  const text = typeof body.text === 'string' ? body.text.trim() : '';
+  const role = typeof body.role === 'string' ? body.role.trim().slice(0, LIMITS.role[1]) : '';
+  // The display name comes from the verified token, never from the request
+  // body, so it cannot be spoofed.
+  const name = String(user.name || 'Anonymous').slice(0, LIMITS.name[1]);
+
+  if (text.length < LIMITS.text[0]) return { ok: false, reason: 'short', note: 'a little more, please, 20 characters minimum.' };
+  if (text.length > LIMITS.text[1]) return { ok: false, reason: 'long', note: 'keep it under 600 characters, the wall rewards sharp writing.' };
+  if (name.length < LIMITS.name[0]) return { ok: false, reason: 'name', note: 'your account has no usable display name.' };
+
+  const verdict = await score(env, { name, role, text });
+  if (!verdict.ok) return { ok: false, reason: 'moderation', note: verdict.note || 'that one did not pass moderation.' };
+
+  const token = await accessToken(env);
+  const res = await fetch(`${FIRESTORE_ROOT}/wall`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fields: {
+        kind: { stringValue: kind },
+        uid: { stringValue: user.uid },
+        name: { stringValue: name },
+        role: { stringValue: role },
+        text: { stringValue: text },
+        score: { integerValue: String(verdict.score) },
+        ts: { timestampValue: new Date().toISOString() },
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`firestore write ${res.status}`);
+  return { ok: true, score: verdict.score };
+}
+
 async function ask(env, body) {
   const { question = '' } = body;
   if (typeof question !== 'string' || question.length < 2 || question.length > 500) {
@@ -166,9 +377,13 @@ export default {
     }
 
     const url = new URL(req.url);
+    if (url.pathname === '/wall' && writeLimited(ip)) {
+      return new Response('{"ok":false,"reason":"rate","note":"slow down, try again in a few minutes."}', { status: 429, headers });
+    }
     try {
       const body = await req.json();
       if (url.pathname === '/score') return new Response(JSON.stringify(await score(env, body)), { headers });
+      if (url.pathname === '/wall') return new Response(JSON.stringify(await wall(env, body)), { headers });
       if (url.pathname === '/ask') return new Response(JSON.stringify(await ask(env, body)), { headers });
       return new Response('{"error":"not found"}', { status: 404, headers });
     } catch (e) {
